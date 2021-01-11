@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+<script>
+    (function () {
+        if ('') {
+            if (prompt('请输入文章密码') !== '') {
+                alert('密码错误！');
+                if (history.length === 1) {
+                    location.replace("http://stuxiaozhang.github.io"); // 这里替换成你的首页
+                } else {
+                    history.back();
+                }
+            }
+        }
+    })();
+</script>
+  <link rel="apple-touch-icon" sizes="180x180" href="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/avatar-removebg-preview.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/avatar-removebg-preview.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/avatar-removebg-preview.png">
+  <link rel="mask-icon" href="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/avatar-removebg-preview.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"stuxiaozhang.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"tru","show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null,"activeClass":"valine"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="此篇文章是吴恩达《深度学习》课程的笔记，主要源自于黄思腾大佬的博客  神经网络和深度学习神经网络基础 实现一个神经网络时，如果需要遍历整个训练集，并不需要直接使用 for 循环。 神经网络的计算过程中，通常有一个正向过程（forward pass）或者叫正向传播步骤（forward propagation step），接着会有一个反向过程（backward pass）或者叫反向传播步骤（back">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《深度学习》课程笔记1_神经网络和深度学习">
+<meta property="og:url" content="http://stuxiaozhang.github.io/2020/11/08/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B01/index.html">
+<meta property="og:site_name" content="小张同学的小天地">
+<meta property="og:description" content="此篇文章是吴恩达《深度学习》课程的笔记，主要源自于黄思腾大佬的博客  神经网络和深度学习神经网络基础 实现一个神经网络时，如果需要遍历整个训练集，并不需要直接使用 for 循环。 神经网络的计算过程中，通常有一个正向过程（forward pass）或者叫正向传播步骤（forward propagation step），接着会有一个反向过程（backward pass）或者叫反向传播步骤（back">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201109154334967.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201113092437430.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201113080326996.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201114113032833.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201115084405346.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115102234900.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115110144415.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115112715694.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/A3AB54BACCBBD3A9346DCD5378E9A876.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115205800365.png">
+<meta property="og:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115203736131.png">
+<meta property="article:published_time" content="2020-11-08T04:57:53.000Z">
+<meta property="article:modified_time" content="2021-01-02T09:23:48.980Z">
+<meta property="article:author" content="小张同学">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201109154334967.png">
+
+<link rel="canonical" href="http://stuxiaozhang.github.io/2020/11/08/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B01/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《深度学习》课程笔记1_神经网络和深度学习 | 小张同学的小天地</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">小张同学的小天地</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">天道酬勤</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-fw fa-calendar"></i>动态</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://stuxiaozhang.github.io/2020/11/08/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/codedog.jpg">
+      <meta itemprop="name" content="小张同学">
+      <meta itemprop="description" content="不要停止奔跑 不要回顾来路">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小张同学的小天地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《深度学习》课程笔记1_神经网络和深度学习
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-08 12:57:53" itemprop="dateCreated datePublished" datetime="2020-11-08T12:57:53+08:00">2020-11-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/11/08/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B01/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/11/08/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B01/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>此篇文章是吴恩达《深度学习》课程的笔记，主要源自于黄思腾大佬的博客</p>
+</blockquote>
+<h1 id="神经网络和深度学习"><a href="#神经网络和深度学习" class="headerlink" title="神经网络和深度学习"></a>神经网络和深度学习</h1><h2 id="神经网络基础"><a href="#神经网络基础" class="headerlink" title="神经网络基础"></a>神经网络基础</h2><ul>
+<li>实现一个神经网络时，如果需要遍历整个训练集，并不需要直接使用 for 循环。</li>
+<li>神经网络的计算过程中，通常有一个正向过程（forward pass）或者叫<strong>正向传播步骤（forward propagation step）</strong>，接着会有一个反向过程（backward pass）或者叫<strong>反向传播步骤（backward propagation step）</strong>。</li>
+</ul>
+<h3 id="Logistic-回归"><a href="#Logistic-回归" class="headerlink" title="Logistic 回归"></a>Logistic 回归</h3><p><strong>逻辑回归( Logistic Regression)：</strong>是一种用于解决<strong>监督学习（Supervised Learning）</strong>问题的学习算法。</p>
+<p>进行逻辑回归的目的是使训练数据的标签值与预测出来的值之间的误差最小化。</p>
+<p>Logistic 回归是一个用于<strong>二分类</strong>的算法，给定一些输入，输出结果是离散值。</p>
+<p>Logistic 回归中使用的参数如下：</p>
+<ul>
+<li>输入的特征向量：$x∈R^nx$，其中 $n^x$ 是特征数量；</li>
+<li>用于训练的标签：$y∈0,1$</li>
+<li>权重：$w∈R^nx$</li>
+<li>偏置：$ b∈R$</li>
+<li>输出：$\hat{y} = \sigma(w^Tx+b)$</li>
+<li>Sigmoid 函数：</li>
+</ul>
+<p>$$<br>s = \sigma(w^Tx+b) = \sigma(z) = \frac{1}{1+e^{-z}}<br>$$</p>
+<p>为将 $wTx+b$ 约束在 [0, 1] 间，引入 Sigmoid 函数。从下图可看出，Sigmoid 函数的值域为 [0, 1]。</p>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201109154334967.png" alt="image-20201109154334967" style="zoom:67%;" />
+
+
+
+<h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p><strong>损失函数（loss function）</strong>用于衡量<u>单个样本</u>预测结果 $\hat{y}^{(i)}$ 与真实值 $y^{(i)}$ 之间的误差。</p>
+<p>最简单的损失函数定义方式为<u>平方差损失函数</u>：<br>$$<br>L(\hat{y},y) = \frac{1}{2}(\hat{y}-y)^2<br>$$<br>但 Logistic 回归中我们并不倾向于使用这样的损失函数，因为之后讨论的优化问题会变成非凸的，最后会得到很多个局部最优解，梯度下降法可能找不到全局最优值。</p>
+<p>一般使用<u>交叉熵损失函数</u>：<br>$$<br>L(\hat{y},y) = -(y\log\hat{y})-(1-y)\log(1-\hat{y})<br>$$<br>损失函数是在单个训练样本中定义的，它衡量了在<strong>单个</strong>训练样本上的表现。</p>
+<p>而<strong>代价函数（cost function，或者称作成本函数）</strong>衡量的是在<strong>全体</strong>训练样本上的表现，即衡量参数 w 和 b 的效果。<br>$$<br>J(w,b) = \frac{1}{m}\sum_{i=1}^mL(\hat{y}^{(i)},y^{(i)})<br>$$</p>
+<div class="note warning">
+            <p>损失函数：针对单个训练样本。</p><p>代价函数：针对全体训练样本，是参数的总代价。</p>
+          </div>
+
+
+
+
+
+<h3 id="梯度下降法（Gradient-Descent）"><a href="#梯度下降法（Gradient-Descent）" class="headerlink" title="梯度下降法（Gradient Descent）"></a>梯度下降法（Gradient Descent）</h3><p>函数的<strong>梯度（gradient）</strong>指出了函数的最陡增长方向。即是说，按梯度的方向走，函数增长得就越快。那么按梯度的负方向走，函数值自然就降低得最快了。</p>
+<p>模型的训练目标即是寻找合适的 w 与 b 以最小化代价函数值。简单起见我们先假设 w 与 b 都是一维实数，那么可以得到如下的 J 关于 w 与 b 的图：</p>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201113092437430.png" alt="image-20201113092437430" style="zoom:67%;" />
+
+<p>可以看到，成本函数 J 是一个<strong>凸函数</strong>，与非凸函数的区别在于其不含有多个局部最低点；选择这样的代价函数就保证了无论我们初始化模型参数如何，都能够寻找到合适的最优解。</p>
+<p>参数 w 的更新公式为：<br>$$<br>w := w - \alpha\frac{dJ(w, b)}{dw}<br>$$<br>其中 α 表示学习速率，即每次更新的 w 的步伐长度。$\frac{dJ(w, b)}{dw}$ 是函数 $dJ(w,b)$ 对 w 求偏导。</p>
+<p>当 w 大于最优解 w′ 时，导数大于 0，那么 w 就会向更小的方向更新。反之当 w 小于最优解 w′ 时，导数小于 0，那么 w 就会向更大的方向更新。迭代直到收敛。</p>
+<p>在成本函数 J(w, b) 中还存在参数 b，因此也有：</p>
+<p>$$<br>b := b - \alpha\frac{dJ(w, b)}{db}<br>$$</p>
+<h3 id="计算图（Computation-Graph）"><a href="#计算图（Computation-Graph）" class="headerlink" title="计算图（Computation Graph）"></a>计算图（Computation Graph）</h3><p>神经网络中的计算即是由多个计算网络输出的前向传播与计算梯度的后向传播构成。所谓的<strong>反向传播（Back Propagation）</strong>即是当我们需要计算最终值相对于某个特征变量的导数时，我们需要利用计算图中上一步的结点定义。计算图解释了为什么我们用这种方式组织这些计算过程。</p>
+<h3 id="Logistic-回归中的梯度下降法"><a href="#Logistic-回归中的梯度下降法" class="headerlink" title="Logistic 回归中的梯度下降法"></a>Logistic 回归中的梯度下降法</h3><p>假设输入的特征向量维度为 2，即输入参数共有 x1, w1, x2, w2, b 这五个。可以推导出如下的计算图：</p>
+<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201113080326996.png" alt="image-20201113080326996"></p>
+<p>考虑单个样例，已知：<br>$$<br>L(a,y)=-(y\log a + (1-y)\log (1-a))<br>$$</p>
+<p>$$<br>a=\sigma(z) = \frac{1}{1+e^{-z}}<br>$$</p>
+<p>$$<br>z=w_1x_1+w_2x_2 + b<br>$$</p>
+<blockquote>
+<p>注：对sigmoid求导：<br>$$<br>dz=\frac{a}{1-a}<br>$$</p>
+</blockquote>
+<hr>
+<p>首先反向求出 L 对于 a 的导数：<br>$$<br>da=\frac{dL(a,y)}{da}=-\frac{y}{a}+\frac{1-y}{1-a}<br>$$<br>然后继续反向求出 L 对于 z 的导数：<br>$$<br>dz=\frac{dL}{dz}=\frac{dL(a,y)}{dz}=\frac{dL}{da}\frac{da}{dz}=a−y<br>$$<br>依此类推求出最终的损失函数相较于原始参数的导数之后，根据如下公式进行参数更新：<br>$$<br>w_1:=w_1-\alpha dw_1<br>$$</p>
+<p>$$<br>w_2:=w_2-\alpha dw_2<br>$$</p>
+<p>$$<br>b:=b-\alpha db<br>$$</p>
+<hr>
+<p>接下来我们需要将对于单个用例的损失函数扩展到整个训练集的代价函数：<br>$$<br>J(w,b)=\frac{1}{m}\sum^m_{i=1}L(a^{(i)},y^{(i)})<br>$$</p>
+<p>$$<br>a^{(i)}=\hat{y}^{(i)}=\sigma(z^{(i)})=\sigma(w^Tx^{(i)}+b)<br>$$</p>
+<p>我们可以对于某个权重参数 w1，其导数计算为：<br>$$<br>dw_1=\frac{\partial J(w,b)}{\partial{w_1}}=\frac{1}{m}\sum^m_{i=1}\frac{\partial L(a^{(i)},y^{(i)})}{\partial{w_1}}<br>$$<br>完整的 Logistic 回归中某次训练的伪代码流程如下，这里仅假设特征向量的维度为 2：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">J=<span class="number">0</span>; dw1=<span class="number">0</span>; dw2=<span class="number">0</span>; db=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i = <span class="number">1</span> to m</span><br><span class="line">    z(i) = wx(i)+b;</span><br><span class="line">    a(i) = sigmoid(z(i));</span><br><span class="line">    J += -[y(i)log(a(i))+(<span class="number">1</span>-y(i)）log(<span class="number">1</span>-a(i));</span><br><span class="line">    dz(i) = a(i)-y(i);</span><br><span class="line">    dw1 += x1(i)dz(i);</span><br><span class="line">    dw2 += x2(i)dz(i);</span><br><span class="line">    db += dz(i);</span><br><span class="line"></span><br><span class="line">J/= m;</span><br><span class="line">dw1/= m;</span><br><span class="line">dw2/= m;</span><br><span class="line">db/= m;</span><br><span class="line">w=w-alpha*dw</span><br><span class="line">b=b-alpha*db</span><br></pre></td></tr></table></figure>
+<p>上述过程在计算时有一个缺点：你需要编写两个 for 循环。第一个 for 循环遍历 m 个样本，而第二个 for 循环遍历所有特征。如果有大量特征，在代码中显式使用 for 循环会使算法很低效。<strong>向量化</strong>可以用于解决显式使用 for 循环的问题。</p>
+<h3 id="向量化"><a href="#向量化" class="headerlink" title="向量化"></a>向量化</h3><p>在 Logistic 回归中，需要计算<br>$$<br>z=w^Tx+b<br>$$<br>如果是非向量化的循环方式操作，代码可能如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">z = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n_x):</span><br><span class="line">	z[i] += w[i] * x[i];</span><br><span class="line">z += b</span><br></pre></td></tr></table></figure>
+
+
+<p>而如果是向量化的操作，代码则会简洁很多，并带来近百倍的性能提升（并行指令）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">z = np.dot(w, x) + b</span><br></pre></td></tr></table></figure>
+
+
+<p>不用显式 for 循环，实现 Logistic 回归的梯度下降一次迭代（对应之前伪代码的 for 循环部分。这里公式和 NumPy 的代码混杂，注意分辨）：<br>$$<br>Z=w^TX+b=np.dot(w.T, x) + b<br>$$</p>
+<p>$$<br>A=\sigma(Z)<br>$$</p>
+<p>$$<br>dZ=A-Y<br>$$</p>
+<p>$$<br>dw=\frac{1}{m}XdZ^T<br>$$</p>
+<p>$$<br>db=\frac{1}{m}np.sum(dZ)<br>$$</p>
+<p>$$<br>w:=w-\sigma dw<br>$$</p>
+<p>$$<br>b:=b-\sigma db<br>$$</p>
+<p>正向和反向传播尽管如此，多次迭代的梯度下降依然需要 for 循环。</p>
+<h3 id="广播（broadcasting）"><a href="#广播（broadcasting）" class="headerlink" title="广播（broadcasting）"></a>广播（broadcasting）</h3><p>Numpy 的 Universal functions 中要求输入的数组 shape 是一致的。当数组的 shape 不相等的时候，则会使用广播机制，调整数组使得 shape 一样，满足规则，则可以运算，否则就出错。</p>
+<p>四条规则：</p>
+<ol>
+<li>让所有输入数组都向其中 shape 最长的数组看齐，shape 中不足的部分都通过在前面加 1 补齐；</li>
+<li>输出数组的 shape 是输入数组 shape 的各个轴上的最大值；</li>
+<li>如果输入数组的某个轴和输出数组的对应轴的长度相同或者其长度为 1 时，这个数组能够用来计算，否则出错；</li>
+<li>当输入数组的某个轴的长度为 1 时，沿着此轴运算时都用此轴上的第一组值。</li>
+</ol>
+<h3 id="NumPy-使用技巧"><a href="#NumPy-使用技巧" class="headerlink" title="NumPy 使用技巧"></a>NumPy 使用技巧</h3><p>转置对秩为 1 的数组无效。因此，应该避免使用秩为 1 的数组，用 n * 1 的矩阵代替。例如，用<code>np.random.randn(5,1)</code> 代替 <code>np.random.randn(5)</code> 。</p>
+<p>如果得到了一个秩为 1 的数组，可以使用 <code>reshape</code> 进行转换。</p>
+<h2 id="浅层神经网络"><a href="#浅层神经网络" class="headerlink" title="浅层神经网络"></a>浅层神经网络</h2><h3 id="神经网络表示"><a href="#神经网络表示" class="headerlink" title="神经网络表示"></a>神经网络表示</h3><p>竖向堆叠起来的输入特征被称作神经网络的<strong>输入层（the input layer）</strong>。</p>
+<p>神经网络的<strong>隐藏层（a hidden layer）</strong>。“隐藏”的含义是<strong>在训练集中</strong>，这些中间节点的真正数值是无法看到的。</p>
+<p><strong>输出层（the output layer）</strong>负责输出预测值。</p>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201114113032833.png" alt="image-20201114113032833" style="zoom: 67%;" />
+
+<p>如图是一个<strong>双层神经网络</strong>，也称作<strong>单隐层神经网络（a single hidden layer neural network）</strong>。当我们计算网络的层数时，通常不考虑输入层，因此图中隐藏层是第一层，输出层是第二层，而输入层为第零层。</p>
+<p>约定俗成的符号表示是：</p>
+<ul>
+<li>上标“[ ]”括号中的数字表示<u>神经网络中的第几层</u>，a代表着<strong>激活（Activation）</strong>，指的是不同层次的神经网络传递给后续层次的值。</li>
+<li>输入层的激活值为 $a[0]$ ；</li>
+<li>同样，隐藏层也会产生一些激活值，记作 $a^{[1]}$ 隐藏层的第一个单元（或者说节点）就记作 $a_1^{[1]}$ ,输出层同理。</li>
+<li>另外，隐藏层和输出层都是带有参数 W 和 b 的。它们都使用上标 [1] 来表示是和第一个隐藏层有关，或者上标 [2] 来表示是和输出层有关。</li>
+</ul>
+<h3 id="计算神经网络的输出"><a href="#计算神经网络的输出" class="headerlink" title="计算神经网络的输出"></a>计算神经网络的输出</h3><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201115084405346.png" alt="image-20201115084405346" style="zoom:50%;" />
+
+<p>实际上，神经网络只不过将 Logistic 回归的计算步骤重复很多次。对于隐藏层的第一个节点，<br>$$<br>z _1^{[1]} = (W _1^{[1]})^TX+b _1^{[1]}<br>$$</p>
+<p>$$<br>a _1^{[1]} = \sigma(z _1^{[1]})<br>$$</p>
+<p>我们可以类推得到，对于第一个隐藏层有下列公式：<br>$$<br>z^{[1]} = (W^{[1]})^Ta^{[0]}+b^{[1]}<br>$$</p>
+<p>$$<br>a^{[1]} = \sigma(z^{[1]})<br>$$</p>
+<p>其中，$a[0]$ 可以是一个列向量，也可以将多个列向量堆叠起来得到矩阵。如果是后者的话，得到的 $z[1]$ 和 $a[1]$ 也是一个矩阵。</p>
+<p>同理，对于输出层有：<br>$$<br>z^{[2]} = (W^{[2]})^Ta^{[1]}+b^{[2]}<br>$$</p>
+<p>$$<br>\hat{y} = a^{[2]} = \sigma(z^{[2]})<br>$$</p>
+<p>值得注意的是<strong>层与层之间参数矩阵的规格大小</strong>。</p>
+<ul>
+<li>输入层和隐藏层之间：$(W^{[1]})^T$ 的 shape 为 <code>(4,3)</code> ，前面的 4 是隐藏层神经元的个数，后面的 3 是输入层神经元的个数；$b^{[1]}$ 的 shape 为 <code>(4,1)</code> ，和隐藏层的神经元个数相同。</li>
+<li>隐藏层和输出层之间：$(W^{[2]})^T$ 的 shape 为 <code>(1,4)</code> ，前面的 1 是输出层神经元的个数，后面的 4 是隐藏层神经元的个数；$b^{[2]}$ 的 shape 为 <code>(1,1)</code> ，和输出层的神经元个数相同。</li>
+</ul>
+<h3 id="激活函数"><a href="#激活函数" class="headerlink" title="激活函数"></a>激活函数</h3><p>有一个问题是神经网络的隐藏层和输出单元用什么激活函数。之前我们都是选用 sigmoid 函数，但有时其他函数的效果会好得多。</p>
+<p>可供选用的激活函数有：</p>
+<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115102234900.png" alt="image-20201115102234900"></p>
+<h4 id="tanh-函数（the-hyperbolic-tangent-function，双曲正切函数）"><a href="#tanh-函数（the-hyperbolic-tangent-function，双曲正切函数）" class="headerlink" title="tanh 函数（the hyperbolic tangent function，双曲正切函数）"></a>tanh 函数（the hyperbolic tangent function，双曲正切函数）</h4><p>$$<br>a = \frac{e^z - e^{-z}}{e^z + e^{-z}}<br>$$</p>
+<p>效果几乎总比 sigmoid 函数好（除开<strong>二元分类的输出层</strong>，因为我们希望输出的结果介于 0 到 1 之间），因为函数输出介于 -1 和 1 之间，激活函数的平均值就更接近 0，有类似数据中心化的效果。</p>
+<p>然而，tanh 函数存在和 sigmoid 函数一样的缺点：当 z 趋紧无穷大（或无穷小），导数的梯度（即函数的斜率）就趋紧于 0，这使得梯度算法的速度大大减缓。</p>
+<h4 id="ReLU-函数（the-rectified-linear-unit，修正线性单元）"><a href="#ReLU-函数（the-rectified-linear-unit，修正线性单元）" class="headerlink" title="ReLU 函数（the rectified linear unit，修正线性单元）"></a>ReLU 函数（the rectified linear unit，修正线性单元）</h4><p>$$<br>a=max(0,z)<br>$$</p>
+<p>当 z &gt; 0 时，梯度始终为 1，从而提高神经网络基于梯度算法的运算速度，收敛速度远大于 sigmoid 和 tanh。然而当 z &lt; 0 时，梯度一直为 0，但是实际的运用中，该缺陷的影响不是很大。</p>
+<h4 id="Leaky-ReLU（带泄漏的-ReLU）："><a href="#Leaky-ReLU（带泄漏的-ReLU）：" class="headerlink" title="Leaky ReLU（带泄漏的 ReLU）："></a>Leaky ReLU（带泄漏的 ReLU）：</h4><p>$$<br>a=max(0.01z,z)<br>$$</p>
+<p>当 z &gt; 0 时，梯度始终为 1，从而提高神经网络基于梯度算法的运算速度，收敛速度远大于 sigmoid 和 tanh。然而当 z &lt; 0 时，梯度一直为 0，但是实际的运用中，该缺陷的影响不是很大。</p>
+<blockquote>
+<p>经验：在选择激活函数的时候，如果是二分类问题，输出层选 sigmoid 函数，其他层都选 ReLU 函数。如果在不知道该选什么的时候就选择 ReLU，当然也没有固定答案，要依据实际问题在交叉验证集合中进行验证分析。当然，我们可以在不同层选用不同的激活函数。</p>
+</blockquote>
+<h4 id="使用-ReLU-激活函数的优点？-为什么ReLU要好过sigmoid和tanh？"><a href="#使用-ReLU-激活函数的优点？-为什么ReLU要好过sigmoid和tanh？" class="headerlink" title="使用 ReLU 激活函数的优点？/ 为什么ReLU要好过sigmoid和tanh？"></a>使用 ReLU 激活函数的优点？/ 为什么ReLU要好过sigmoid和tanh？</h4><ol>
+<li>采用 sigmoid 等函数，算激活函数时（指数运算），计算量大，反向传播求误差梯度时，求导涉及除法和指数运算，计算量相对大，而采用 ReLU 激活函数，整个过程的计算量节省很多。</li>
+<li>对于深层网络，sigmoid 函数反向传播时，很容易就会出现梯度消失的情况（在 sigmoid 接近饱和区时，变换太缓慢，导数趋于0，这种情况会造成信息丢失），这种现象称为饱和，从而无法完成深层网络的训练，为什么会无法完成训练呢，因为神经网络更新w的时候就是依靠导数来更新的，如果导数接近0，那 w 更新之后还是原来的 w了。而 ReLU 就不会有饱和倾向，不会有特别小的梯度出现。</li>
+</ol>
+<blockquote>
+<p>需注意， ReLU 进入负半区的时候，梯度为 0，神经元此时不会训练，产生所谓的稀疏性。主要问题有两个：</p>
+<ol>
+<li>0点附近不可微。所以通常在0点只求右导数</li>
+<li>它会“谋杀”一些神经元。就是说在 BP 的过程中很快会让一些神经元的导数永远是0，于是这些神经元等于被抛弃了，也就是被谋杀了。这提高了速度和精度，但是也有些武断，于是为了解决这个问题，引入了Leaky ReLU。Leaky ReLu 不会产生这个问题。</li>
+</ol>
+</blockquote>
+<h3 id="使用非线性激活函数的原因"><a href="#使用非线性激活函数的原因" class="headerlink" title="使用非线性激活函数的原因"></a>使用非线性激活函数的原因</h3><ol>
+<li><p>使用线性激活函数和不使用激活函数、直接使用 Logistic 回归没有区别，那么无论神经网络有多少层，输出都是输入的线性组合，与<strong>没有隐藏层</strong>效果相当，就成了最原始的感知器了。</p>
+</li>
+<li><p>使用非线性激活函数 ，以便使网络更加强大，增加它的能力，使它可以学习复杂的事物，复杂的表单数据，以及表示输入输出之间非线性的复杂的任意函数映射。使用非线性激活函数，能够从输入输出之间生成非线性映射。</p>
+</li>
+</ol>
+<h3 id="激活函数的导数"><a href="#激活函数的导数" class="headerlink" title="激活函数的导数"></a>激活函数的导数</h3><ul>
+<li>sigmoid 函数：</li>
+</ul>
+<p>$$<br>g(z) = \frac{1}{1+e^{-z}}<br>$$</p>
+<p>$$<br>g\prime(z)=\frac{dg(z)}{dz} = \frac{1}{1+e^{-z}}(1-\frac{1}{1+e^{-z}})=g(z)(1-g(z))<br>$$</p>
+<ul>
+<li>tanh 函数：</li>
+</ul>
+<p>$$<br>g(z) = tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}<br>$$</p>
+<p>$$<br>g\prime(z)=\frac{dg(z)}{dz} = 1-(tanh(z))^2=1-(g(z))^2<br>$$</p>
+<ul>
+<li>ReLU 函数：</li>
+</ul>
+<p>$$<br>g(z)=max(0,z)<br>$$</p>
+<p>$$<br>\frac{d}{d z} g(z)=\left{\begin{array}{ll}<br>0 &amp; \text { if } z&lt;0 \<br>1 &amp; \text { if } z&gt;0 \<br>\text { undefined } &amp; \text { if } z=0<br>\end{array}\right.<br>$$</p>
+<h2 id="神经网络的梯度下降法"><a href="#神经网络的梯度下降法" class="headerlink" title="神经网络的梯度下降法"></a>神经网络的梯度下降法</h2><h3 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h3><p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115110144415.png" alt="image-20201115110144415"></p>
+<p>$$<br>z^{[1]}={(w^{[1]})}^Tx+b^{[1]}<br>$$</p>
+<p>$$<br>a^{[1]}=g^{[1]}(z^{[1]})<br>$$</p>
+<p>$$<br>z^{[2]}={(w^{[2]})}^Ta^{[1]}+b^{[2]},(x=a^{[1]})<br>$$</p>
+<p>$$<br>a^{[2]}=g^{[2]}(z^{[2]})=\sigma(z^{[2]})<br>$$</p>
+<p>$$<br>\mathcal{L}\left(a^{[2]}, y\right)=-\left(y \log a^{[2]}+(1-y) \log \left(1-a^{[2]}\right)\right)<br>$$</p>
+<p>在训练过程中，经过前向传播后得到的最终结果跟训练样本的真实值总是存在一定误差，这个误差便是损失函数。想要减小这个误差，当前应用最广的一个算法便是梯度下降，于是用损失函数，从后往前，依次求各个参数的偏导，这就是所谓的<strong>反向传播（Back Propagation）</strong>，一般简称这种算法为BP算法。</p>
+<h3 id="反向传播"><a href="#反向传播" class="headerlink" title="反向传播"></a>反向传播</h3><p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115112715694.png" alt="image-20201115112715694"></p>
+<p>已知 sigmoid 函数的导数为：<br>$$<br>a^{[2]^{\prime}}=\operatorname{sigmoid}\left(z^{[2]}\right)^{\prime}=\frac{\partial a^{[2]}}{\partial z^{[2]}}=a^{[2]}\left(1-a^{[2]}\right)<br>$$</p>
+<p>由复合函数求导中的链式法则，反向传播过程中：<br>$$<br>d a^{[2]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{[2]}} =-\frac{y}{a^{[2]}} + \frac{1-y}{1-a^{[2]}},(对交叉熵损失函数求导)<br>$$</p>
+<p>$$<br>d z^{[2]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{[2]}} \cdot \frac{\partial \alpha^{[2]}}{\partial z^{[2]}}=a^{[2]}-y<br>$$</p>
+<p>$$<br>d w^{[2]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{[2]}} \cdot \frac{\partial a^{[2]}}{\partial z^{[2]}} \cdot \frac{\partial z^{[2]}}{\partial w^{[2]}}=d z^{[2]}=a^{[2]}-y<br>$$</p>
+<p>$$<br>d b^{[2]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{[2]}} \cdot \frac{\partial a^{[2]}}{\partial z^{[2]}} \cdot \frac{\partial z^{[2]}}{\partial b^{[2]}}=d z^{[2]}=a^{[2]}-y<br>$$</p>
+<p>$$<br>d a^{[1]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{[2]}} \cdot \frac{\partial a^{[2]}}{\partial z^{[2]}} \cdot \frac{\partial z^{[2]}}{\partial a^{[1]}}=d z^{[2]} \cdot w^{[2]}<br>$$</p>
+<p>$$<br>d z^{[1]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{(2]}} \cdot \frac{\partial \alpha^{[2]}}{\partial z^{[2]}} \cdot \frac{\partial z^{[2]}}{\partial a^{[1]}} \cdot \frac{\partial a^{[1]}}{\partial z^{[1]}}=d z^{[2]} \cdot w^{[2]} \times g^{[1]^{\prime}}\left(z^{[1]}\right)<br>$$</p>
+<p>$$<br>d w^{[1]}=\frac{\partial \mathcal{L}\left(\alpha^{[2]}, y\right)}{\partial a^{[2]}} \cdot \frac{\partial a^{[2]}}{\partial z^{(2]}} \cdot \frac{\partial z^{[2]}}{\partial a^{[1]}} \cdot \frac{\partial a^{[1]}}{\partial z^{[1]}} \cdot \frac{\partial z^{[1]}}{\partial w^{[1]}}=d z^{[1]} \cdot{X^{T}}<br>$$</p>
+<p>$$<br>d b^{[1]}=\frac{\partial \mathcal{L}\left(a^{[2]}, y\right)}{\partial a^{[2]}} \cdot \frac{\partial a^{[2]}}{\partial z^{[2]}} \cdot \frac{\partial z^{[2]}}{\partial a^{[1]}} \cdot \frac{\partial a^{[1]}}{\partial z^{[1]}} \cdot \frac{\partial z^{[1]}}{\partial b^{[1]}}=d z^{[1]}<br>$$</p>
+<p>这便是反向传播的整个推导过程，在具体的算法实现过程中，使用梯度下降的方法，将各个参数进行向量化、取平均值，不断进行更新。</p>
+<h3 id="随机初始化"><a href="#随机初始化" class="headerlink" title="随机初始化"></a>随机初始化</h3><p>如果在初始时将两个隐藏神经元的参数设置为相同的大小，那么两个隐藏神经元对输出单元的影响也是相同的，通过反向梯度下降去进行计算的时候，会得到同样的梯度大小，所以在经过多次迭代后，两个隐藏层单位仍然是对称的。无论设置多少个隐藏单元，其最终的影响都是相同的，那么多个隐藏神经元就没有了意义。</p>
+<p>在初始化的时候，<strong>W 参数要进行随机初始化，不可以设置为 0</strong>。而 b 因为不存在对称性的问题，可以设置为 0。</p>
+<p>以 2 个输入，2 个隐藏神经元为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">W = np.random.rand(<span class="number">2</span>,<span class="number">2</span>)* <span class="number">0.01</span></span><br><span class="line">b = np.zeros((<span class="number">2</span>,<span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+<p>这里将 W 的值乘以 0.01（或者其他的常数值）的原因是为了使得权重 W 初始化为较小的值，<u>这是因为使用 sigmoid 函数或者 tanh 函数作为激活函数时，W 比较小，则 Z=WX+b 所得的值趋近于 0，梯度较大，能够提高算法的更新速度。</u>而如果 W 设置的太大的话，得到的梯度较小，训练过程因此会变得很慢。</p>
+<p>ReLU 和 Leaky ReLU 作为激活函数时不存在这种问题，因为在大于 0 的时候，梯度均为 1。</p>
+<h2 id="深层神经网络"><a href="#深层神经网络" class="headerlink" title="深层神经网络"></a>深层神经网络</h2><h3 id="深层网络中的前向和反向传播"><a href="#深层网络中的前向和反向传播" class="headerlink" title="深层网络中的前向和反向传播"></a>深层网络中的前向和反向传播</h3><h4 id="前向传播-1"><a href="#前向传播-1" class="headerlink" title="前向传播"></a>前向传播</h4><p>推导整个前向传播的过程可得：</p>
+<p><strong>输入：</strong> $a^{[l-1]}$</p>
+<p><strong>输出：</strong> $a^{[l]}$， $cache(z^{[l]})$</p>
+<p><strong>公式：</strong><br>$$<br>Z^{[l]}=W^{[l]}\cdot a^{[l-1]}+b^{[l]}<br>$$</p>
+<p>$$<br>a^{[l]}=g^{[l]}(Z^{[l]})<br>$$</p>
+<h4 id="反向传播-1"><a href="#反向传播-1" class="headerlink" title="反向传播"></a>反向传播</h4><p><strong>输入</strong>：$da^{[l]}$</p>
+<p><strong>输出</strong>：$da^{[l−1]}$，$dW[l]$，$db^{[l]}$</p>
+<p><strong>公式：</strong><br>$$<br>dZ^{[l]}=da^{[l]}*g^{[l]}{‘}(Z^{[l]})<br>$$</p>
+<p>$$<br>dW^{[l]}=dZ^{[l]}\cdot a^{[l-1]}<br>$$</p>
+<p>$$<br>db^{[l]}=dZ^{[l]}<br>$$</p>
+<p>$$<br>da^{[l-1]}=W^{[l]T}\cdot dZ^{[l]}<br>$$</p>
+<ul>
+<li>总结：</li>
+</ul>
+<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/A3AB54BACCBBD3A9346DCD5378E9A876.png" alt="A3AB54BACCBBD3A9346DCD5378E9A876"></p>
+<h3 id="搭建深层神经网络块"><a href="#搭建深层神经网络块" class="headerlink" title="搭建深层神经网络块"></a>搭建深层神经网络块</h3><p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115205800365.png" alt="image-20201115205800365"></p>
+<p>神经网络的一步训练（一个梯度下降循环），包含了从 $a[0]$（即 x）经过一系列正向传播计算得到 $\hat y$（即 $a[l]$）。然后再计算 $da[l]$，开始实现反向传播，用<strong>链式法则</strong>得到所有的导数项，W 和 b 也会在每一层被更新。</p>
+<p>在代码实现时，可以将正向传播过程中计算出来的 z 值缓存下来，待到反向传播计算时使用。</p>
+<h3 id="矩阵的维度"><a href="#矩阵的维度" class="headerlink" title="矩阵的维度"></a>矩阵的维度</h3><p>$$<br>W^{[l]}: (n^{[l]}, n^{[l-1]})<br>$$</p>
+<p>$$<br>b^{[l]}: (n^{[l]}, 1)<br>$$</p>
+<p>$$<br>dW^{[l]}: (n^{[l]}, n^{[l-1]})<br>$$</p>
+<p>$$<br>db^{[l]}: (n^{[l]}, 1)<br>$$</p>
+<p>对于 Z、a，向量化之前有：<br>$$<br>Z^{[l]}, a^{[l]}: (n^{[l]}, 1)<br>$$<br>而在向量化之后，则有：<br>$$<br>Z^{[l]}, A^{[l]}: (n^{[l]}, m)<br>$$<br>在计算反向传播时，dZ、dA 的维度和 Z、A 是一样的。</p>
+<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/image-20201115203736131.png" alt="image-20201115203736131"></p>
+<h3 id="使用深层表示的原因"><a href="#使用深层表示的原因" class="headerlink" title="使用深层表示的原因"></a>使用深层表示的原因</h3><p>对于人脸识别，神经网络的第一层从原始图片中提取人脸的轮廓和边缘，每个神经元学习到不同边缘的信息；网络的第二层将第一层学得的边缘信息组合起来，形成人脸的一些局部的特征，例如眼睛、嘴巴等；后面的几层逐步将上一层的特征组合起来，形成人脸的模样。随着神经网络层数的增加，特征也从原来的边缘逐步扩展为人脸的整体，由整体到局部，由简单到复杂。层数越多，那么模型学习的效果也就越精确。</p>
+<p>同样的，对于语音识别，第一层神经网络可以学习到语言发音的一些音调，后面更深层次的网络可以检测到基本的音素，再到单词信息，逐渐加深可以学到短语、句子。</p>
+<p>通过例子可以看到，随着神经网络的深度加深，模型能学习到更加复杂的问题，功能也更加强大。</p>
+<h3 id="参数和超参数"><a href="#参数和超参数" class="headerlink" title="参数和超参数"></a>参数和超参数</h3><p><strong>参数</strong>即是我们在过程中想要模型学习到的信息（<strong>模型自己能计算出来的</strong>），例如 W[l]W[l]，b[l]b[l]。而<strong>超参数（hyper parameters）</strong>即为控制参数的输出值的一些网络信息（<strong>需要人经验判断</strong>）。超参数的改变会导致最终得到的参数 $W^{[l]}$，$b^{[l]}$ 的改变。</p>
+<p>典型的超参数有：</p>
+<ul>
+<li>学习速率：α</li>
+<li>迭代次数：N</li>
+<li>隐藏层的层数：L</li>
+<li>每一层的神经元个数：$n^{[1]}$，$n^{[2]}$，…</li>
+<li>激活函数 g(z) 的选择</li>
+</ul>
+<p>当开发新应用时，预先很难准确知道超参数的最优值应该是什么。因此，通常需要尝试很多不同的值。应用深度学习领域是一个很大程度基于经验的过程。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>小张同学
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://stuxiaozhang.github.io/2020/11/08/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B01/" title="《深度学习》课程笔记1_神经网络和深度学习">http://stuxiaozhang.github.io/2020/11/08/《深度学习》课程笔记1/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/08/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" rel="prev" title="《深度学习》课程笔记1_神经网络和深度学习">
+      <i class="fa fa-chevron-left"></i> 《深度学习》课程笔记1_神经网络和深度学习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="Django学习笔记">
+      Django学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%92%8C%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.</span> <span class="nav-text">神经网络和深度学习</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.</span> <span class="nav-text">神经网络基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Logistic-%E5%9B%9E%E5%BD%92"><span class="nav-number">1.1.1.</span> <span class="nav-text">Logistic 回归</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">1.1.2.</span> <span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%EF%BC%88Gradient-Descent%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">梯度下降法（Gradient Descent）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%9B%BE%EF%BC%88Computation-Graph%EF%BC%89"><span class="nav-number">1.1.4.</span> <span class="nav-text">计算图（Computation Graph）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Logistic-%E5%9B%9E%E5%BD%92%E4%B8%AD%E7%9A%84%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-number">1.1.5.</span> <span class="nav-text">Logistic 回归中的梯度下降法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%91%E9%87%8F%E5%8C%96"><span class="nav-number">1.1.6.</span> <span class="nav-text">向量化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%BF%E6%92%AD%EF%BC%88broadcasting%EF%BC%89"><span class="nav-number">1.1.7.</span> <span class="nav-text">广播（broadcasting）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NumPy-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="nav-number">1.1.8.</span> <span class="nav-text">NumPy 使用技巧</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%85%E5%B1%82%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">1.2.</span> <span class="nav-text">浅层神经网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.2.1.</span> <span class="nav-text">神经网络表示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E8%BE%93%E5%87%BA"><span class="nav-number">1.2.2.</span> <span class="nav-text">计算神经网络的输出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.3.</span> <span class="nav-text">激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#tanh-%E5%87%BD%E6%95%B0%EF%BC%88the-hyperbolic-tangent-function%EF%BC%8C%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-number">1.2.3.1.</span> <span class="nav-text">tanh 函数（the hyperbolic tangent function，双曲正切函数）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ReLU-%E5%87%BD%E6%95%B0%EF%BC%88the-rectified-linear-unit%EF%BC%8C%E4%BF%AE%E6%AD%A3%E7%BA%BF%E6%80%A7%E5%8D%95%E5%85%83%EF%BC%89"><span class="nav-number">1.2.3.2.</span> <span class="nav-text">ReLU 函数（the rectified linear unit，修正线性单元）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Leaky-ReLU%EF%BC%88%E5%B8%A6%E6%B3%84%E6%BC%8F%E7%9A%84-ReLU%EF%BC%89%EF%BC%9A"><span class="nav-number">1.2.3.3.</span> <span class="nav-text">Leaky ReLU（带泄漏的 ReLU）：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-ReLU-%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E4%BC%98%E7%82%B9%EF%BC%9F-%E4%B8%BA%E4%BB%80%E4%B9%88ReLU%E8%A6%81%E5%A5%BD%E8%BF%87sigmoid%E5%92%8Ctanh%EF%BC%9F"><span class="nav-number">1.2.3.4.</span> <span class="nav-text">使用 ReLU 激活函数的优点？&#x2F; 为什么ReLU要好过sigmoid和tanh？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.2.4.</span> <span class="nav-text">使用非线性激活函数的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E5%AF%BC%E6%95%B0"><span class="nav-number">1.2.5.</span> <span class="nav-text">激活函数的导数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-number">1.3.</span> <span class="nav-text">神经网络的梯度下降法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="nav-number">1.3.1.</span> <span class="nav-text">前向传播</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="nav-number">1.3.2.</span> <span class="nav-text">反向传播</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.3.3.</span> <span class="nav-text">随机初始化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%B1%82%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">1.4.</span> <span class="nav-text">深层神经网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B1%E5%B1%82%E7%BD%91%E7%BB%9C%E4%B8%AD%E7%9A%84%E5%89%8D%E5%90%91%E5%92%8C%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD"><span class="nav-number">1.4.1.</span> <span class="nav-text">深层网络中的前向和反向传播</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD-1"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">前向传播</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD-1"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">反向传播</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E6%B7%B1%E5%B1%82%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9D%97"><span class="nav-number">1.4.2.</span> <span class="nav-text">搭建深层神经网络块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9F%A9%E9%98%B5%E7%9A%84%E7%BB%B4%E5%BA%A6"><span class="nav-number">1.4.3.</span> <span class="nav-text">矩阵的维度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%B7%B1%E5%B1%82%E8%A1%A8%E7%A4%BA%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">1.4.4.</span> <span class="nav-text">使用深层表示的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E5%92%8C%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-number">1.4.5.</span> <span class="nav-text">参数和超参数</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="小张同学"
+      src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/codedog.jpg">
+  <p class="site-author-name" itemprop="name">小张同学</p>
+  <div class="site-description" itemprop="description">不要停止奔跑 不要回顾来路</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=709634432" title="QQ → tencent:&#x2F;&#x2F;AddContact&#x2F;?fromId&#x3D;50&amp;fromSubId&#x3D;1&amp;subcmd&#x3D;all&amp;uin&#x3D;709634432" rel="noopener" target="_blank"><i class="fa fa-fw fa-fab fa-qq"></i>QQ</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yourname@gmail.com" title="E-Mail → mailto:yourname@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小张同学</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : '81O1jSOqY3veRxOg71BDYfri-gzGzoHsz',
+      appKey     : 'CgnvRL262D07ied40NiXm2VL',
+      placeholder: "快来评论鸭~",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
