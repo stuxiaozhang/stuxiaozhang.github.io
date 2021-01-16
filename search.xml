@@ -377,90 +377,6 @@ J(\theta) = \frac{1}{m} \cdot (-y^Tlog(h) - (1-y)^Tlog(1-h))
       </tags>
   </entry>
   <entry>
-    <title>二分查找</title>
-    <url>/2020/10/03/%E4%BA%8C%E5%88%86/</url>
-    <content><![CDATA[<h1 id="二分查找">二分查找</h1>
-<h2 id="思路">思路</h2>
-<p><strong>二分关键词：“最大值最小”，“最小值最大”，“平均值最大/最小”</strong></p>
-<blockquote>
-<p>一个题目，如果一个区间具有单调性质，那么一定可以二分，但是如果说这道题目没有单调性质，而是具有某种区间性质的话，我们同样可以使用二分.<strong>（二段性）</strong></p>
-<p>就是：<strong>如果有单调性，一定可以二分。</strong></p>
-<p>但是可以二分的题目，不一定有单调性。也就是说，没有单调性的题目也可以二分</p>
-<p>二段性：满足一段而不满足另一段，两段连上！</p>
-</blockquote>
-<ol type="1">
-<li>确定一个区间，使得目标一定在区间中。</li>
-<li>找一个性质，满足：
-<ol type="1">
-<li>性质具有二段性（答案是性质的边界）所有二分都成立</li>
-<li>答案是二段性的分界点</li>
-</ol></li>
-</ol>
-<ul>
-<li><strong>一定要好好分析 <code>check()</code> 函数</strong></li>
-</ul>
-<h2 id="整数二分">整数二分</h2>
-<h3 id="思路-1">思路</h3>
-<p>在一个范围内,查找一个数字,要求找到这个元素的起始位置和结束位置,请注意这个范围内的数字都是单调递增的,即具有单调性质.</p>
-<h3 id="code">code</h3>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">check</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;<span class="comment">/* ... */</span>&#125; <span class="comment">// 检查x是否满足某种性质</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 区间[l, r]被划分成[l, mid]和[mid + 1, r]时使用：</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bsearch_1</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> r)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (l &lt; r)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = l + r &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (check(mid)) r = mid;    <span class="comment">// check()判断mid是否满足性质</span></span><br><span class="line">        <span class="keyword">else</span> l = mid + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 区间[l, r]被划分成[l, mid - 1]和[mid, r]时使用：</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bsearch_2</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> r)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (l &lt; r)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = l + r + <span class="number">1</span> &gt;&gt; <span class="number">1</span>;  <span class="comment">// 一定要加1</span></span><br><span class="line">        <span class="keyword">if</span> (check(mid)) l = mid;</span><br><span class="line">        <span class="keyword">else</span> r = mid - <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="例题">例题</h3>
-<h4 id="acwing-789.-数的范围">1、<a href="https://www.acwing.com/problem/content/description/791/">Acwing 789. 数的范围</a></h4>
-<blockquote>
-<p>模板题</p>
-</blockquote>
-<h5 id="思路-2">思路</h5>
-<p>需要写两个二分，一个需要找到 &gt;=x 的第一个数，另一个需要找到 &lt;=x 的最后一个数</p>
-<ol type="1">
-<li><p><strong>查找大于等于x的第一个位置</strong></p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> l = <span class="number">0</span>, r = n - <span class="number">1</span>;</span><br><span class="line"><span class="keyword">while</span>(l &lt; r)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> mid = l + r &gt;&gt; <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">if</span> (q[mid] &gt;= x) r = mid;</span><br><span class="line">	<span class="keyword">else</span> l = mid + <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><p><strong>查找小于等于x的第一个位置（查找大于等于x的最后一个位置）</strong></p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> l = <span class="number">0</span>, r = n - <span class="number">1</span>;</span><br><span class="line"><span class="keyword">while</span>(l &lt; r)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> mid = l + r + <span class="number">1</span> &gt;&gt; <span class="number">1</span>;  <span class="comment">// 一定要加1！</span></span><br><span class="line">	<span class="keyword">if</span> (q[mid] &lt;= x) l = mid;</span><br><span class="line">	<span class="keyword">else</span> r = mid - <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><p>为什么这里一定要 <strong>加 1</strong> 呢？</p>
-<p>答：因为如果按照上一个二分的写法，循环判断条件还是l &lt; r,当只有两个元素比如“2 2”时，l指向第一个元素，r指向第二个元素，mid指向第一个元素即 mid = l，q[mid] &lt;= x，l = mid还是指向第一个元素，指针不移动了，陷入死循环了，此刻l + 1 == r，未能退出循环。</p></li>
-<li><p>为什么查找大于等于x的第一个位置不会死循环？</p>
-<p>因为这时就算只有两个元素，l + 1 = r，mid = l，q[mid] &lt; x 时 l 是会+1的，不小于 x 时r = mid也会缩小区间。而查找小于等于x的第一个位置之所以会死循环是因为编程语言里面除以2的下取整性，试想下如果l + 1 = r时， mid = r 呢，q[mid] &lt;= x，l = mid = r，区间缩小；否则r = mid - 1 = l 区间缩小，l都会与r相遇。就不会死循环。</p></li>
-<li><p>那如何做到上取整呢？</p>
-<p>只需要取mid时在l + r后面再加1即可，这里l和r都是闭区间，所以当a[mid] &gt; x时，r = mid - 1.</p></li>
-</ul></li>
-</ol>
-<h5 id="code-1">code</h5>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> N = <span class="number">100010</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> q[N];</span><br><span class="line"><span class="keyword">int</span> n, m;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; n &gt;&gt; m;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n ; i ++ ) <span class="built_in">cin</span> &gt;&gt; q[i];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(m -- )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> x;</span><br><span class="line">        <span class="built_in">cin</span> &gt;&gt; x;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> l = <span class="number">0</span>, r = n - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 找左端点，即: 大于等于x的第一个位置</span></span><br><span class="line">        <span class="keyword">while</span>(l &lt; r)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> mid = (l + r) &gt;&gt; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (q[mid] &gt;= x) r = mid;</span><br><span class="line">            <span class="keyword">else</span> l = mid + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (q[l] != x) <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;-1 -1&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; l &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">            r = n - <span class="number">1</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 找右端点，即: 小于等于x的第一个位置</span></span><br><span class="line">            <span class="keyword">while</span>(l &lt; r)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">int</span> mid = l + r + <span class="number">1</span>&gt;&gt; <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">if</span> (q[mid] &lt;= x) l = mid;</span><br><span class="line">                <span class="keyword">else</span> r = mid - <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; r &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="浮点数二分">浮点数二分</h2>
-<h3 id="思路-3">思路</h3>
-<ul>
-<li><p>将区间 <code>[l, r]</code> 划分成 <code>[l, mid]</code> 和 <code>[mid, r]</code></p></li>
-<li><p>当区间长度足够小时就停止。一般是多2位！</p>
-<blockquote>
-<p>比如题目要求小数点后六位，你就写 <code>while(r - l &gt; 1e-8)</code></p>
-</blockquote></li>
-</ul>
-<h3 id="code-2">code</h3>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">check</span><span class="params">(<span class="keyword">double</span> x)</span> </span>&#123;<span class="comment">/* ... */</span>&#125; <span class="comment">// 检查x是否满足某种性质</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">bsearch_3</span><span class="params">(<span class="keyword">double</span> l, <span class="keyword">double</span> r)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">double</span> eps = <span class="number">1e-6</span>;   <span class="comment">// eps 表示精度，取决于题目对精度的要求</span></span><br><span class="line">    <span class="keyword">while</span> ((r - l) &gt; eps)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> mid = (l + r) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (check(mid)) r = mid;</span><br><span class="line">        <span class="keyword">else</span> l = mid;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<h3 id="例题-1">例题</h3>
-<h4 id="acwing-790.-数的三次方根">1、<a href="https://www.acwing.com/problem/content/792/">AcWing 790. 数的三次方根</a></h4>
-<blockquote>
-<p>模板题</p>
-</blockquote>
-<h5 id="code-3">code</h5>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">double</span> x;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; x;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">double</span> l = <span class="number">-10000</span>, r = <span class="number">10000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> ((r - l) &gt; <span class="number">1e-8</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> mid = (l + r) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (mid * mid * mid &gt;= x) r = mid;</span><br><span class="line">        <span class="keyword">else</span> l = mid;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%lf&quot;</span>, l);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="在stl中的二分查找">在stl中的二分查找</h2>
-<p><code>lower_bound( )</code> 和 <code>upper_bound( )</code>都是利用二分查找的方法在一个<u>排好序的数组中</u>进行查找的。</p>
-<p>在从小到大的排序数组中，</p>
-<p><strong>lower_bound( begin,end,num)</strong>：从数组的begin位置到end-1位置二分查找<strong>第一个<u>大于或等于</u>num的数字，找到返回该数字的地址</strong>，不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。</p>
-<p><strong>upper_bound( begin,end,num)</strong>：从数组的begin位置到end-1位置二分查找<strong>第一个<u>大于</u>num的数字，找到返回该数字的地址，</strong>不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。</p>
-<p>AC 67. 数字在排序数组中出现的次数</p>
-]]></content>
-      <categories>
-        <category>算法基础</category>
-        <category>基础算法</category>
-      </categories>
-      <tags>
-        <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>《经典卷积神经网络》</title>
     <url>/2020/12/15/%E3%80%8A%E7%BB%8F%E5%85%B8%E5%8D%B7%E7%A7%AF%E7%BD%91%E7%BB%9C%E3%80%8B/</url>
     <content><![CDATA[<h1 id="经典卷积神经网络">经典卷积神经网络</h1>
@@ -639,6 +555,129 @@ J(\theta) = \frac{1}{m} \cdot (-y^Tlog(h) - (1-y)^Tlog(1-h))
       </tags>
   </entry>
   <entry>
+    <title>二分查找</title>
+    <url>/2020/10/03/%E4%BA%8C%E5%88%86/</url>
+    <content><![CDATA[<h1 id="二分查找">二分查找</h1>
+<h2 id="思路">思路</h2>
+<p><strong>二分关键词：“最大值最小”，“最小值最大”，“平均值最大/最小”</strong></p>
+<blockquote>
+<p>一个题目，如果一个区间具有单调性质，那么一定可以二分，但是如果说这道题目没有单调性质，而是具有某种区间性质的话，我们同样可以使用二分.<strong>（二段性）</strong></p>
+<p>就是：<strong>如果有单调性，一定可以二分。</strong></p>
+<p>但是可以二分的题目，不一定有单调性。也就是说，没有单调性的题目也可以二分</p>
+<p>二段性：满足一段而不满足另一段，两段连上！</p>
+</blockquote>
+<ol type="1">
+<li>确定一个区间，使得目标一定在区间中。</li>
+<li>找一个性质，满足：
+<ol type="1">
+<li>性质具有二段性（答案是性质的边界）所有二分都成立</li>
+<li>答案是二段性的分界点</li>
+</ol></li>
+</ol>
+<ul>
+<li><strong>一定要好好分析 <code>check()</code> 函数</strong></li>
+</ul>
+<h2 id="整数二分">整数二分</h2>
+<h3 id="思路-1">思路</h3>
+<p>在一个范围内,查找一个数字,要求找到这个元素的起始位置和结束位置,请注意这个范围内的数字都是单调递增的,即具有单调性质.</p>
+<h3 id="code">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">check</span><span class="params">(<span class="keyword">int</span> x)</span> </span>&#123;<span class="comment">/* ... */</span>&#125; <span class="comment">// 检查x是否满足某种性质</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 区间[l, r]被划分成[l, mid]和[mid + 1, r]时使用：</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bsearch_1</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> r)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (l &lt; r)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = l + r &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (check(mid)) r = mid;    <span class="comment">// check()判断mid是否满足性质</span></span><br><span class="line">        <span class="keyword">else</span> l = mid + <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 区间[l, r]被划分成[l, mid - 1]和[mid, r]时使用：</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">bsearch_2</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> r)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (l &lt; r)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> mid = l + r + <span class="number">1</span> &gt;&gt; <span class="number">1</span>;  <span class="comment">// 一定要加1</span></span><br><span class="line">        <span class="keyword">if</span> (check(mid)) l = mid;</span><br><span class="line">        <span class="keyword">else</span> r = mid - <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="例题">例题</h3>
+<h4 id="acwing-789.-数的范围">1、<a href="https://www.acwing.com/problem/content/description/791/">Acwing 789. 数的范围</a></h4>
+<blockquote>
+<p>模板题</p>
+</blockquote>
+<h5 id="思路-2">思路</h5>
+<p>需要写两个二分，一个需要找到 &gt;=x 的第一个数，另一个需要找到 &lt;=x 的最后一个数</p>
+<ol type="1">
+<li><p><strong>查找大于等于x的第一个位置</strong></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> l = <span class="number">0</span>, r = n - <span class="number">1</span>;</span><br><span class="line"><span class="keyword">while</span>(l &lt; r)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> mid = l + r &gt;&gt; <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">if</span> (q[mid] &gt;= x) r = mid;</span><br><span class="line">	<span class="keyword">else</span> l = mid + <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>查找小于等于x的第一个位置（查找大于等于x的最后一个位置）</strong></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> l = <span class="number">0</span>, r = n - <span class="number">1</span>;</span><br><span class="line"><span class="keyword">while</span>(l &lt; r)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> mid = l + r + <span class="number">1</span> &gt;&gt; <span class="number">1</span>;  <span class="comment">// 一定要加1！</span></span><br><span class="line">	<span class="keyword">if</span> (q[mid] &lt;= x) l = mid;</span><br><span class="line">	<span class="keyword">else</span> r = mid - <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><p>为什么这里一定要 <strong>加 1</strong> 呢？</p>
+<p>答：因为如果按照上一个二分的写法，循环判断条件还是l &lt; r,当只有两个元素比如“2 2”时，l指向第一个元素，r指向第二个元素，mid指向第一个元素即 mid = l，q[mid] &lt;= x，l = mid还是指向第一个元素，指针不移动了，陷入死循环了，此刻l + 1 == r，未能退出循环。</p></li>
+<li><p>为什么查找大于等于x的第一个位置不会死循环？</p>
+<p>因为这时就算只有两个元素，l + 1 = r，mid = l，q[mid] &lt; x 时 l 是会+1的，不小于 x 时r = mid也会缩小区间。而查找小于等于x的第一个位置之所以会死循环是因为编程语言里面除以2的下取整性，试想下如果l + 1 = r时， mid = r 呢，q[mid] &lt;= x，l = mid = r，区间缩小；否则r = mid - 1 = l 区间缩小，l都会与r相遇。就不会死循环。</p></li>
+<li><p>那如何做到上取整呢？</p>
+<p>只需要取mid时在l + r后面再加1即可，这里l和r都是闭区间，所以当a[mid] &gt; x时，r = mid - 1.</p></li>
+</ul></li>
+</ol>
+<h5 id="code-1">code</h5>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> N = <span class="number">100010</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> q[N];</span><br><span class="line"><span class="keyword">int</span> n, m;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; n &gt;&gt; m;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n ; i ++ ) <span class="built_in">cin</span> &gt;&gt; q[i];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(m -- )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> x;</span><br><span class="line">        <span class="built_in">cin</span> &gt;&gt; x;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> l = <span class="number">0</span>, r = n - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 找左端点，即: 大于等于x的第一个位置</span></span><br><span class="line">        <span class="keyword">while</span>(l &lt; r)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">int</span> mid = (l + r) &gt;&gt; <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (q[mid] &gt;= x) r = mid;</span><br><span class="line">            <span class="keyword">else</span> l = mid + <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (q[l] != x) <span class="built_in">cout</span> &lt;&lt; <span class="string">&quot;-1 -1&quot;</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; l &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">            r = n - <span class="number">1</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 找右端点，即: 小于等于x的第一个位置</span></span><br><span class="line">            <span class="keyword">while</span>(l &lt; r)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">int</span> mid = l + r + <span class="number">1</span>&gt;&gt; <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">if</span> (q[mid] &lt;= x) l = mid;</span><br><span class="line">                <span class="keyword">else</span> r = mid - <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="built_in">cout</span> &lt;&lt; r &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="浮点数二分">浮点数二分</h2>
+<h3 id="思路-3">思路</h3>
+<ul>
+<li><p>将区间 <code>[l, r]</code> 划分成 <code>[l, mid]</code> 和 <code>[mid, r]</code></p></li>
+<li><p>当区间长度足够小时就停止。一般是多2位！</p>
+<blockquote>
+<p>比如题目要求小数点后六位，你就写 <code>while(r - l &gt; 1e-8)</code></p>
+</blockquote></li>
+</ul>
+<h3 id="code-2">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">check</span><span class="params">(<span class="keyword">double</span> x)</span> </span>&#123;<span class="comment">/* ... */</span>&#125; <span class="comment">// 检查x是否满足某种性质</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">double</span> <span class="title">bsearch_3</span><span class="params">(<span class="keyword">double</span> l, <span class="keyword">double</span> r)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">double</span> eps = <span class="number">1e-6</span>;   <span class="comment">// eps 表示精度，取决于题目对精度的要求</span></span><br><span class="line">    <span class="keyword">while</span> ((r - l) &gt; eps)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> mid = (l + r) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (check(mid)) r = mid;</span><br><span class="line">        <span class="keyword">else</span> l = mid;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> l;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="例题-1">例题</h3>
+<h4 id="acwing-790.-数的三次方根">1、<a href="https://www.acwing.com/problem/content/792/">AcWing 790. 数的三次方根</a></h4>
+<blockquote>
+<p>模板题</p>
+</blockquote>
+<h5 id="code-3">code</h5>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">double</span> x;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; x;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">double</span> l = <span class="number">-10000</span>, r = <span class="number">10000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> ((r - l) &gt; <span class="number">1e-8</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> mid = (l + r) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> (mid * mid * mid &gt;= x) r = mid;</span><br><span class="line">        <span class="keyword">else</span> l = mid;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%lf&quot;</span>, l);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="在stl中的二分查找">在stl中的二分查找</h2>
+<p><code>lower_bound( )</code> 和 <code>upper_bound( )</code>都是利用二分查找的方法在一个<u>排好序的数组中</u>进行查找的。</p>
+<p>在从小到大的排序数组中，</p>
+<p><strong>lower_bound( begin,end,num)</strong>：从数组的begin位置到end-1位置二分查找<strong>第一个<u>大于或等于</u>num的数字，找到返回该数字的地址</strong>，不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。</p>
+<p><strong>upper_bound( begin,end,num)</strong>：从数组的begin位置到end-1位置二分查找<strong>第一个<u>大于</u>num的数字，找到返回该数字的地址，</strong>不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。</p>
+<p>AC 67. 数字在排序数组中出现的次数</p>
+]]></content>
+      <categories>
+        <category>算法基础</category>
+        <category>基础算法</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>双指针</title>
+    <url>/2020/10/07/%E5%8F%8C%E6%8C%87%E9%92%88/</url>
+    <content><![CDATA[<h1 id="双指针算法">双指针算法</h1>
+<h2 id="思路">思路</h2>
+<p>在利用双指针算法解题时,考虑原问题如何用暴力算法解出,观察是否可构成单调性,若可以,就可采用双指针算法对暴力算法进行优化。</p>
+<p>常见问题分类： (1) 对于一个序列，用两个指针维护一段区间 (2) 对于两个序列，维护某种次序，比如归并排序中合并两个有序序列的操作</p>
+<h3 id="code">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>; i &lt; n; i ++ )</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">while</span>(j &lt; i &amp;&amp; check(i , j))</span><br><span class="line">        </span><br><span class="line">    <span class="comment">//每道题目的具体逻辑。。。</span></span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+<p>核心思想就是优化暴力枚举，两重循环。将 <span class="math inline">\(O(n^2)\)</span> 变为 <span class="math inline">\(O(n)\)</span> 。</p>
+<h2 id="例题">例题</h2>
+<h3 id="acwing-799.-最长连续不重复子序列">1、<a href="https://www.acwing.com/problem/content/801/">AcWing 799. 最长连续不重复子序列</a></h3>
+<h4 id="思路-1">思路</h4>
+<ol type="1">
+<li>遍历数组a中的每一个元素a[i], 对于每一个i，找到j使得双指针[j, i]维护的是以a[i]结尾的最长连续不重复子序列，长度为i - j + 1, 将这一长度与r的较大者更新给r。</li>
+<li>对于每一个i，如何确定j的位置：由于[j, i - 1]是前一步得到的最长连续不重复子序列，所以如果[j, i]中有重复元素，一定是a[i]，因此右移j直到a[i]不重复为止（由于[j, i - 1]已经是前一步的最优解，此时j只可能右移以剔除重复元素a[i]，不可能左移增加元素，因此，j具有“单调性”、本题可用双指针降低复杂度）。</li>
+<li>用<strong>数组s记录子序列a[j ~ i]中各元素出现次数</strong>，遍历过程中对于每一个i有3步操作：将a[i]出现次数s[a[i]]加1 -&gt; 若a[i]重复则右移j（s[a[j]]要先减1，再右移） -&gt; 确定j及更新当前长度i - j + 1给r。</li>
+</ol>
+<h4 id="注意细节">注意细节</h4>
+<p>当a[i]重复时，<strong>一定要先把a[j]次数减1，再右移j。</strong></p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/算法基础/基础算法/双指针/image-20201006172808285.png" alt="image-20201006172808285" /><figcaption>image-20201006172808285</figcaption>
+</figure>
+<h4 id="code-1">code</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> N = <span class="number">100010</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a[N];</span><br><span class="line"><span class="keyword">int</span> s[N];  <span class="comment">// 记录数组元素出现的次数</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; n;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i ++ ) <span class="built_in">cin</span> &gt;&gt; a[i];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>; i &lt; n; i ++ )</span><br><span class="line">    &#123;</span><br><span class="line">        s[a[i]] ++ ;</span><br><span class="line">        <span class="keyword">while</span>(s[a[i]] &gt; <span class="number">1</span>) </span><br><span class="line">        &#123;</span><br><span class="line">            s[a[j]] -- ;  <span class="comment">// 先减次数</span></span><br><span class="line">            j ++ ;  <span class="comment">// 再往后移指针</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        res = max(res, i - j + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; res &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="acwing-800.-数组元素的目标和">2、<a href="https://www.acwing.com/problem/content/description/802/">AcWing 800. 数组元素的目标和</a></h3>
+<h4 id="思路-2">思路</h4>
+<p>当 <code>a[i]+b[j]&gt;x</code> 时,随着i增加，j减少</p>
+<h4 id="code-2">code</h4>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> N = <span class="number">100010</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a[N], b[N];</span><br><span class="line"><span class="keyword">int</span> n, m, x;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; n &gt;&gt; m &gt;&gt; x;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; n; i ++ ) <span class="built_in">cin</span> &gt;&gt; a[i];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; m; i ++ ) <span class="built_in">cin</span> &gt;&gt; b[i];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, j = m - <span class="number">1</span>; i &lt; n; i ++ )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; a[i] + b[j] &gt; x) j -- ;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (a[i] + b[j] == x) </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;%d %d\n&quot;</span>, i, j);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>算法基础</category>
+        <category>基础算法</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>前缀和与差分</title>
     <url>/2020/10/05/%E5%89%8D%E7%BC%80%E5%92%8C%E4%B8%8E%E5%B7%AE%E5%88%86/</url>
     <content><![CDATA[<h1 id="前缀和">前缀和</h1>
@@ -720,87 +759,20 @@ S_{x,y} = S_{x-1,y} +  S_{x,y-1} - S_{x-1,y-1} + a_{x,y}
       </tags>
   </entry>
   <entry>
-    <title>双指针</title>
-    <url>/2020/10/07/%E5%8F%8C%E6%8C%87%E9%92%88/</url>
-    <content><![CDATA[<h1 id="双指针算法">双指针算法</h1>
-<h2 id="思路">思路</h2>
-<p>在利用双指针算法解题时,考虑原问题如何用暴力算法解出,观察是否可构成单调性,若可以,就可采用双指针算法对暴力算法进行优化。</p>
-<p>常见问题分类： (1) 对于一个序列，用两个指针维护一段区间 (2) 对于两个序列，维护某种次序，比如归并排序中合并两个有序序列的操作</p>
-<h3 id="code">code</h3>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>; i &lt; n; i ++ )</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">while</span>(j &lt; i &amp;&amp; check(i , j))</span><br><span class="line">        </span><br><span class="line">    <span class="comment">//每道题目的具体逻辑。。。</span></span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
-<p>核心思想就是优化暴力枚举，两重循环。将 <span class="math inline">\(O(n^2)\)</span> 变为 <span class="math inline">\(O(n)\)</span> 。</p>
-<h2 id="例题">例题</h2>
-<h3 id="acwing-799.-最长连续不重复子序列">1、<a href="https://www.acwing.com/problem/content/801/">AcWing 799. 最长连续不重复子序列</a></h3>
-<h4 id="思路-1">思路</h4>
-<ol type="1">
-<li>遍历数组a中的每一个元素a[i], 对于每一个i，找到j使得双指针[j, i]维护的是以a[i]结尾的最长连续不重复子序列，长度为i - j + 1, 将这一长度与r的较大者更新给r。</li>
-<li>对于每一个i，如何确定j的位置：由于[j, i - 1]是前一步得到的最长连续不重复子序列，所以如果[j, i]中有重复元素，一定是a[i]，因此右移j直到a[i]不重复为止（由于[j, i - 1]已经是前一步的最优解，此时j只可能右移以剔除重复元素a[i]，不可能左移增加元素，因此，j具有“单调性”、本题可用双指针降低复杂度）。</li>
-<li>用<strong>数组s记录子序列a[j ~ i]中各元素出现次数</strong>，遍历过程中对于每一个i有3步操作：将a[i]出现次数s[a[i]]加1 -&gt; 若a[i]重复则右移j（s[a[j]]要先减1，再右移） -&gt; 确定j及更新当前长度i - j + 1给r。</li>
-</ol>
-<h4 id="注意细节">注意细节</h4>
-<p>当a[i]重复时，<strong>一定要先把a[j]次数减1，再右移j。</strong></p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/算法基础/基础算法/双指针/image-20201006172808285.png" alt="image-20201006172808285" /><figcaption>image-20201006172808285</figcaption>
-</figure>
-<h4 id="code-1">code</h4>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> N = <span class="number">100010</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a[N];</span><br><span class="line"><span class="keyword">int</span> s[N];  <span class="comment">// 记录数组元素出现的次数</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; n;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i ++ ) <span class="built_in">cin</span> &gt;&gt; a[i];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> res = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>; i &lt; n; i ++ )</span><br><span class="line">    &#123;</span><br><span class="line">        s[a[i]] ++ ;</span><br><span class="line">        <span class="keyword">while</span>(s[a[i]] &gt; <span class="number">1</span>) </span><br><span class="line">        &#123;</span><br><span class="line">            s[a[j]] -- ;  <span class="comment">// 先减次数</span></span><br><span class="line">            j ++ ;  <span class="comment">// 再往后移指针</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        res = max(res, i - j + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">cout</span> &lt;&lt; res &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="acwing-800.-数组元素的目标和">2、<a href="https://www.acwing.com/problem/content/description/802/">AcWing 800. 数组元素的目标和</a></h3>
-<h4 id="思路-2">思路</h4>
-<p>当 <code>a[i]+b[j]&gt;x</code> 时,随着i增加，j减少</p>
-<h4 id="code-2">code</h4>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> N = <span class="number">100010</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a[N], b[N];</span><br><span class="line"><span class="keyword">int</span> n, m, x;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">cin</span> &gt;&gt; n &gt;&gt; m &gt;&gt; x;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; n; i ++ ) <span class="built_in">cin</span> &gt;&gt; a[i];</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; m; i ++ ) <span class="built_in">cin</span> &gt;&gt; b[i];</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>, j = m - <span class="number">1</span>; i &lt; n; i ++ )</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; a[i] + b[j] &gt; x) j -- ;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (a[i] + b[j] == x) </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;%d %d\n&quot;</span>, i, j);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>算法基础</category>
-        <category>基础算法</category>
-      </categories>
-      <tags>
-        <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>小张同学的2020年度总结</title>
     <url>/2020/12/31/%E5%B0%8F%E5%BC%A0%E2%80%98s2020%E5%B9%B4%E5%BA%A6%E6%80%BB%E7%BB%93/</url>
-    <content><![CDATA[<p>这里是来自小张同学的2020年度总结。</p>
-<p><em><a id="more"></a></em></p>
-<p>Emmm....感觉没啥可写的，又觉得有好多话想说。</p>
-<p>其实2020年对我而言是蛮重要的一年，是我的保研之路最后冲刺阶段。相较于其他人而言，我缺少了也许是最后一次大战命运的机会，第一次是高考，我已经错过了，而且现在想来十分后悔，当初的幼稚与不自律，让所有人都看不起我，走错了一步就改变了一生。第二次，也许就是最后一次，就是考研。既遗憾又稍有一点的开心，遗憾是因为我总有一点不甘心，总觉着我能凭借自己的努力去更好的地方，而又庆幸自己没有选择考研，因为不可控的因素实在是太多，我怕坚持不下来。</p>
-<p>也许是上天的惩罚，又也许是上天的赏赐，我最后还是去了东北大学。我以为我可以有其他的选择，可是我还是和其他人一样。我曾经在很丧的时候写过一篇很倔强的日记，希望得到结果的那一天可以扬眉吐气的发出来，结果还是没有那一天。那句”趁着年轻，我偏要勉强“，我还是没做到，想起来还蛮讽刺的。反思这三年，做的最对的就是为了自己的目标一直努力的前进着，做的最错的就是太封闭自我，丝毫不了解这个专业到底需要什么，也就是没有方向的努力，方向的偏离导致了很多时候都是事倍功半。</p>
-<p>看了今年写的日记，概括起来也是我这三年的总结：<strong>“你配不上自己的野心，也辜负了曾经的苦难。”</strong>。</p>
-<p>今年的关键字写在了日记的第一大页，<strong>“不服输”</strong>。今年的日记基本上都是关于小二的，诸如”为什么他行，我不行“之类的。直到后来我才发现，每当我觉得我快要追上他的时候，他总是会更加牛逼的出现在我面前，像是在对我说”放弃吧小辣鸡，你永远不如我“。其实我也是这么想的，每当我以为，你行我也行的时候，就发现，我还是差了十万八千里。后来我发现我不仅欠缺的太多，而且我总是在追赶他的步伐。在这个过程中，我像是杀红了眼，只顾着追赶，忘记了我的目标我的方向。再后来，慢慢的，我不知道是因为自己明知道自己追不上他了，还是累了懒惰了，我觉得这两种可能都有，我开始放弃了。最后，我彻底放弃了，一定也有前两种原因在里面，我告诉自己，每个人都有自己的目标和方向，你何必追逐别人呢，你为什么要走他的路呢。而且，你有思考过你的方向吗。终于停下了追赶他人的脚步，虽然每次看到他有更好的成绩我依旧不甘心，可是我也做不了什么，我也就不打算做什么了。看着自己一年的日记全都是不服输，真的是......一言难尽。</p>
-<p>说到今年的保研，就是另一个关键词，<strong>“不甘心”</strong>。今年的遗憾也蛮多的。院校真的看了很多，也换了很多。因为心气高，所以不敢相信，但我知道，那些真的也是我力不能及。最开始的王恺老师，到魏乐义老师，到后来的王巍老师，到最后的王鹏飞老师。尤其是王鹏飞老师，我是真的不甘心。王老师人是真的好，电话聊了那么多，真的感觉特别合得来，这是我非常喜欢的亦师亦友的感觉。可惜今年连尝试的机会都没有，不然也许都不会这么感觉遗憾。很难过错过了王鹏飞老师，都是命中注定，每个努力的瞬间，每个懒惰的瞬间，种种无数的叠加造成了今天的遗憾， 说后悔早已来不及。以后我会将王老师设立为自己的标杆，一切靠自己，如果我未来也想成为老师的话，他就是我的榜样。最后到了马老师，我跟马老师的接触并不多，但了解到他是一位为人不错的老师，看未来的日子了，来日方长，希望一切顺利吧。还记得和温可瑞学长的那通电话，整个电话的核心思想就是他告诉我：“<strong>做想清楚自己的底线，做好心理建设；然后就去拼吧！</strong>想清楚自己的底线，也就是最差结果会到什么程度，然后就没什么可怕的了，拼吧！不顾一切地拼就好了！“。我会受教，并用之于未来的路。感谢一路上所有帮助我的人，谢谢你们。</p>
-<p>写着写着想起了一些事。想起了我有多么渴望得奖，证明给别人看，我也行，最后也水到了比赛得的奖。想起了我对于WK强烈的意愿，结果因为没有能力也没有好好准备，搞砸了我人生的第一场面试，想起来都丢人。想起了我今年用过的乱七八糟的壁纸。想起来一个从未谋面只因为一封邮件，就给我打电话的学长讲述了他的很多感悟的那一通电话。想起来和王鹏飞老师打电话的那个下午。想起来得到结果的那一晚哭了一整夜。想起了我的家人丢了身份证银行卡，我惊慌失措不知道怎么办只能干着急。好多画面涌现出来......2020对我来说真的是糟糕的一年，烦心事很多，真的很丧。这糟糕的一年终于要结束了......GoodBye!</p>
-<p>写完这些话，伴随着一首温暖的不知名曲子，刚好是2021年了，词穷的我依然想不出什么美好的句子告别过去。刚好换了一首曲子，那就迎新吧：<strong>Tomorrow will be fine.</strong></p>
-<p>放几张对于我的2020有纪念性意义的照片吧。</p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/NK_0.jpg" /></p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/NK_4.jpg" /></p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/NK_1.jpg" /></p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/talk.png" /></p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/tower.jpg" /></p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/mont.jpg" /></p>
-<p><strong>置身于这样的环境去学习 和 在这样的环境下依旧能学进去习 都是能力的体现。</strong></p>
-<p><img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/mytheme/room.jpg" /></p>
-<hr />
-<p>希望明年加以改进的地方：</p>
-<ul>
-<li><p><strong>沉下心来。</strong>觉得自己在学习的时候很浮躁，而且学东西很浮很浅很表面，看了别人写的文章感觉就是有自己的思考在里面，而我是一味的照搬或者翻译，缺少思考在里面。希望以后能沉下来学东西。</p></li>
-<li><strong>学会思考。</strong>
-<ul>
-<li>做事之前三思，这件事做了会有什么影响，我应该做好哪些准备，做事的顺序，会出现什么样的结果，我该如何应对之类的...</li>
-<li>说话之前三思，这句话该不该说，会有什么后果。</li>
-</ul></li>
-<li><p><strong>提高情商。</strong>做一个情商高，但又不会是过于精明的让人不舒服的人。</p></li>
-</ul>
-<p>希望明年达成的目标：</p>
-<ul>
-<li>[ ] 毕业前决定好短期未来的路和方向。</li>
-<li>[ ] 毕业前瘦到110斤。</li>
-<li>[ ] 毕业前刷完300道算法题。</li>
-<li>[ ] 毕业设计拿优。</li>
-<li>[ ] 毕业前学完前端课程。</li>
-<li>[ ] 未完待续，及时补充...</li>
-</ul>
-]]></content>
+    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="9299eba24a62e29e11aeda09edc6ecd7878e00449d1d1908ba8c360e1ae0ffda">2c3eb40cbd03027ad9e37b5ead0a8959231b7b3a0d96c7c3ab00eba255a74d632abb134a9f72beb69fdf95b10d24d5d174b098a02d6529232a0ea1b54ca32b984449524f57cec3d9c580c17abddb5fb5f827c27aabfa70f44ebc662eb702654ef6a55db0b09c825f350f4b803478b8ba80c9d348aced06848039229a2a06af828ed3b3d3b9858d1423d9d544eb651e6625d76835cb308eb1802985c15e1d85709dd03433c79a0320048538430b5c78b8a802646d8a0ea486a5395f3f955075fc44d0c77333973942f3926c565983fbf91b240b46ab29caa507d844907a30c596d0f4ba4b3ec382c6ca786688b4bc9a5619355a9f0555ef5dc4a6591e8aadfbc097b008ebe832f3095844762253ba693cca4f2c95c7f1dd2f68975fbf748e179508213f3cf934c558e6615953fb113b722521e82da018e0963ebfc9c9c42f684d0608449f8dcb4f04bd067f823931423cd2817162795d3d4378641e9f6012329eddf086ffa4e337017463801a4306c034aef43bf35fb63ca1a21c9445c900e99486aaef494e09e238d85ca0154aa251da9a04ca32a0c97dc898f1d0e96f928204c350a567a6210776fd6dd91735f7ccc1558c768686aa4c74c332cca1b09c66a186a300aa6c3c387563cd03df8a274136ff309bddb9b8982742bf2c2bcfec8d0dc4612ffe809a59c5dcc416430eadec4a9b6f389bccb503fc5537422883929856b22f30d62add70a0e00bd5f004659a04c713db16fed14bce5517cb530b4156cb3e53f67467917f483921471a1ba9510cdc0b9e8316f5d35fc0d9f9926f52e8383b3ce55c2797b7e5f6c31e60d5444d8e2b9cc7bee777dd41a4624840c4178c285f4a59aa140b3857038b149f064a8f8361b60bdc4a2282af48678d8735e74bd5d20cc3238220091a9199f647ccd6047211e609ae0e176fbd4db08b2431aa0a8c852253bdf0b16aef83778df51f922a601fea65879a9b6b92cf99ad1e541c876da41feb3c8883c5fff52401f7ec19ede8bb406f4b51a78f7c80eeec1ca0d84271a8d0476fb1ef48038c90ddf98306af146ff3a3f7d8c4bebff4d62f9b600621876c9370575be866973f8943b9b2d5383db387373d8b1cbdc3555c02cad0db8c60b92cb694009484e7a6ac99e77c576024bca150384cbbd336a7089215e1e612dc83b6a80293d61e8dc5b92161cac727a3a99f9eaf52359740ee9481e8f6350255050047b9a5ec8a0e840ce635fe709e2d7f99b3c77128c0bc3d266589e3f219e0ec989a0cabfa7503651be29e4197bcff81dfd92f46d93bea1d1636f52ae8b8fba934d9bb8903bba20bfc1095b8100b07335fb8a940700c23cd80999b2bd39b1e19346e25f11d780025bb95568439f1874ad397242cff55c4f89640dade69a3c3778fcc4686a6bdcde23ef6dab15a5134303c69d8fec5c2a480a3162a8816f0bf46011dd5695fdd88eb8a0e54acfebf3a5043a4036e90f7c023d7917e3c1b1748d6b0210aa9c024b4ad212fccbb070b33eea1702fdf23724cc1954543489d2cc39a6525331006ac1463b2e364cbd7717ea70c7de99d2ee32a5de157e511ec5d04f4570fad403254f58c77062e5a1836dd43732241428f4a123debaf097f6d8b9b19f6d8e20771a25be7d4395d69cc80a68c345fdca89c8fb68660fdf187cf0c492f6eecf1ad6c8c61f39e8d92e6c8c1fd7973fa7c266fbc18e29a7bd68278247a874c3e15e168ff41e7d01a8eaca4a89b1a3dce868ffac1b622f6f0f385f7ef2b7c4626cd6623786f8b1dca0c80920e0be38a0727c24338abe5034321dbd2020904fdeed108ec218153a38f3764dfefda42837ac3da2cf9c6e8b2acc6a77e391282aa9c41d08f4e6664eb5bd5b7789f0f5346f4d19db02b5750f921b60e2155e815656f67930bdcf25e584f3ca78efab47bc7c547c005aef233b52944d419154dfaf5bdeecb109574552be7d4c0d7243dad295b99359b3534cb5c3dc278c21677d69158ef81d722715a05bb23b986a38b52b9ba8810b703620905082b53e7755ebfdb8314ec64e44c54a8c78e448ffafd6ae62c75f37ba3feacb05a0f4a7a617e62a1ea782cff506fe4e8f87762dff766989fc12fd08cadc9545ffd9ae49e3b74881492a72f3c90da2a663e1e72302b96693b257df6819852a6bd6e9af83d6dc0c5d03b720feb6d8caa7dc85206146604ed0130328da1f53900d8abac9146dd2488ae3901986dbff193b886685b8b232c0b32bc79aced64fc61979659dcc2f33784e5b876f3c05c32ccdc22904d7e8a53f29f73bb172064182534462b914f5a32bbd8fe0ea06ffc2b991c0b1fbba6c8180c159d545ad0d3714938c67d5bffe606c7ebd7db4108e17e6e0d4ad056ccf25e0602a57d1617d407eb86b2d097daa9dcb6e897a8723eb1d2efd2861a87318f8ee347749cef320295f72e28df36f2903f5af1a4775c7317e20e3cfd77ecd58465bdaaa42376526f0d36a4e6c14e5a519cbdafcdabeb68e8e3edb4f00254be2c03f3a1b3c02fdff57460ddbfa3272d84996819c41450acf116abe1cee55f8be331e97815382cf4754c7ba1cb1e79200f254d0ff3e4a6ddff55aaf52841df72db91b7341c4a5f0b28fc20201944b79d8cec0cbe107f5034c590b331c60b651e0eda63416573384fb45f724b5b105fed23902fe26936c84cb523d0a84625b06116b9fa0374719b7e6c7efb398ce7cd3f8b0f601cbb6b32364fb2193ff25ad23e11ade92b1285eea882785138b9951ccd5b63274ab949e8af9514e0d3740f00e2eb7c2659463f4eeb43306b4561a5b23b27c863811d99dc36d1b0d9c310f0d9defe4e51ed4f73133354f084994ec8c8db3e1ba45367e845b484bb29e1e9163891d4fe0830940d4836fedd6024f9f32468b6bbe1c7ab951ac922a1445e611f6fe83e0946df4aa734056dd164e70e868a53651048646fb86920af7eb6fbd31672e99862f2e9ff4129fe5d649b99a2d4e92c991a47f9f9cb9e07cbdaeee015a57a06ea172ad2e8c496c66e69c8ce9e10614d896dff4636f3d53ccf8022ff95386e8526b54ab34a4471c261502b0f03b5efc0c01d311b8c3e8a193181f387b9958a686509fbc4a17df804d3ae24294dedef8882561c2aead431e7b058bf27d4fcde0f3d309a305a0b5eb3531dc747d53223351f19e7d190b57f9195fad0e93efab93c9fd2c937234514751a25b954b7d314824a1c42ec95ddb18839c342236c76e1ffa701ad0155213f5a7f6727f1d710770cf6bcf4e3a4af6e29c1ad8402abeaadf179083caa4fd9cec249fa08e0ede705bf46ca2904164266274bab929cd7e3cc7955b5fe9bdfc257bf433702b182d4e7a99baa4e7529eded93519998aa6b7b8d4fef6b7404d42a3123fdbce6879f840e4a449f9bac2495fcd9190e5bfc63705d4313561d66d1cad612b04b5373a2a117c8b68b30c87cd0f7e9da38232baf8ef5527db6e42a9f92bc687b356251b0bc88b7ccba65170ef7a0e6af07667ca7e0da906404505c8bc500ea6e7a60ed405d98cd1b63368e2dcc2e4ddf79b0e5da3f4ae9610d46bb45a6ed122ceaaa141eee603a45e2b2fc38bfa3c78140b756f2eba8b1c077fd7fa11ebd477c77c3a89571a1a9d40dd8407462ced42439c767ab53fccd29509549d7bf99ec9f7d9fef911c402536bb76d16587111f2f9d219c3438f392db90d91a6e49170b46584dabe4e4f51cbcc2729591e5ca6148571a24f0a8e2107c2b3418de22578a268d0ab93fc00550eae664fced6dd529f77ea088dccd5704f3774dcea7fa1888360a28205ee408910b58d8d7c7e100d1156cf9b86ce4c0998d35d8b25e909c5f8cd1688968e3807ce1098feffec62f61f5ddf36429b843cdfedcd164e1a6b06b554df1717cf10a490ad910190bbed92b4a7303947255f3ff881abde181d2eb94f77e3a05f8702c9bddd5dcc5cbadc00f937e08b536db6ff6267a7d2e74964638585bd832700076062fda28aa30d2ef55074eb4f065c9361bf2aceaba5aba4885c87babe1296379d2f63eb618a0eb3acf6eef4bc73ec503eb047f2127e3bb8a93ebe966b4e449239747e5fde3b35cfe3bb46e22abe666f53ef69eda2a36cc3825e8c394defbfc609574cf7ed7548dd09d0541023f5da6935b4b5c18991a0bb557b3025e35d10889919bc9e0eafe8c995ed1967f6b9c03f4a9b6b0a008d2627de8ea808df39f2a8e51a06377c0752775d85913ae888bb04d8f04bc742713e088302f1de5eb697895f3ee338edc8144295c7526d0ec42c71c010c8245545b4dccc91b733be0ae42a55076e40efa3b1f3f6f8edbbd09ead043f4cfb5abb37c8e64062b9de657f73db973d65f723f812e188456322ad29091f2c470e1ff9091209d0ea46bb9d2719c10b65c3bb694415e378654a549364d66f4b3dddfd24a5c1e16ec3b91e829e49a5c8ce0b11b2bb23c5943fc644c6e87c9a52f319a7dc9a105fe7db6ecbd42ccfb812521d77e31c0cf9c6ac8d36fa559cffe106105d564cc05d3fe1af4abf7b2866594b6736d72f507e9859c005827ae7c08b2ebe5792f654f1ffdd0273050597276816075fe34a843f1ac8b0e68d8faf04d9e55ecf7f2778b0dcaa06186989c7a2f8ba2f633b8c4e991af9906b9bb582933d66c20984276439daf566ac4c3d9cb3d3322ef7d0f35997e8bf9563ae0a1208431c40abfaa8daf6fe3a88423ba71f15aef2510f316e3c1e8646547d0371724c586181982f85f7590cbb2977ba583111aa0d2880771b3e3371c2749aedda78694cb661ccb68aa2b4f904bf05d995aa471a2fee879897d6e9e3c02b1a6d20c315f20a9ef2f60232ba1a10b5b20faf6e421b68a267b225c3c2116971208e08b2dfd6b3e34084495730369a750c38d81a882517325780b6756df2630fe43abe0c75997481668f82bc6fb4782b82341746fed9e5b85dda7070f5d001c3689d883aa2ed1fd31281a4e52748dce70fb591e73d0c3cf3675a423ebeabd1a1b1f20517351571299c264e09c9d46cb4ae0c53c7ce127411cf6b397e34bff317b5db8c37ae0dc12af8d20f69829ecdba42a5dd47c4f077cc57edd84bafa8a736b3f2aac24abc39e4287a27f3088668931778a1cc04d6c1ba9949416b0304826bc54ae415914cce0873e6a0421dc02270081d9dde64b31f37a55f25e59ccdd46f4a93bde4e364b7196e207c53847f4da7dc2b84daccdabd9ae6a4485edaecbbe5c54be00c40509e339bf71f76c72f213892f200167bbc9305b685c6cd4cc58c1180142a3c39d743c39844e50e4dd028c9e4779a572e450ba3fdbc00eeb7b1716b686c9c691c9de6373a5c97ea8f630a821cef716f2e62a08dce69d0e126f5a5500a36bb1e6785da809e5ff7a086e054d125d8d408eaf43d38b762a55f2e5dd3a9d7ef3d20f22723661d7e0a5c9297490663680af8a7b3b7dc34b01460bc2dbb4b7ba3624b071713589fbabc9d8830474f71d64d367ce2548205b4494c465422b82e0fda6666b2c18f57bb4694dc8c5967f11c06142e4f13a89a6fc9f1190497ddcf47d56f6b7902dddf07a746615bea0835ac8df8dd74d52396de69151a0fb38fd0380e8d6fc04d715653674d5f3a28ca6bc5f550607526fed2ded8e4b9180e6e6906d8a058fe32ec49d21d04e10eb9d726f591d947c589ee96c32589d0744f762bfb56493fe79db8c606ff8be5e92cc72f251d3b9017ae26be83a5dc24b5a4986448178bc7b61a946595e38744ac896d09c98d328481ab4aef45912a6af5349bb2402afa84c1effd466e602c0e9622ad17c0e06e691894a93e6e46da96c8dcc334063ba0e9e1bb33f1c6bbc213b675760b6aa5ca97081e2e620764c4fd8ed4ec5d23ae6e519d1506de443d929b3de43301a75d5fd518b3fb0a6b56dcde143fa8d3ff067d690e226fe03c1ab8e93736fe58da5060bdaf581c77a8ab9e82f432b7476a45188e3f0354227cc21f97299c0ed148560f017553e41e3c401c436974d6ea59963539f88f1cb1be6218d16af13efa28eb614f3463d5388e415ad615b1e58f10a5fd093cfba08b02791085c28af72f5649974eac32d8fbc934e2bb8c16a7dd99438c462249e68f4713f165fb01e6c8efef5d414cd237c6a4ca33c64dc1acbaaeed4a6524f5c2211bb02d340b0d3fc5075b97e0eade76559ba3ed6a63b17162da9668356ca71b316aa05c829d8387715de6055944c6eebf3aba01af57a6de666b1fdb6830674889ff211d092f224f60166d2f9822c7d70ad14e91e9bc780884393f23a74ccd3b023ca548cf519030ffd558f198b672b74faab711c93cfacedd14694852791d964260572f7f66323de8a18560d572648f412a05a899f3bf38bc5eae49b949f6ab47fe288e7bee4d8587d821986af3923779ed752716e44d6b139c52ff1dd2055b40e6a5d0adebb7c937502307a9fca6ec32ed65e5e1ecc0f6609b69a772650650c9878d97d1d7e005ba3a7d3ae9338a123f809f1728ea17bfdcbffa73b027ceed0e4ee3b27fa6c2e3510183b4aab6dd096c0730c3e5de8bba5d74a5a9f489a8039b30163bdc682443b9589cd6e12040f519ccb7a40c71a02086efacff0016d78ba9bbb10b910ac14190f38a7fccfbe8f96c4eb5265bd4f55d356a264a98b11589d66fe3f688515c6a1050a2d6a4f63c250cd99df8bda592c7db8e950feb23ae330ef1748ee04bdef37a053afa0299fa48f4b343e121b6db94726aca79272bc46871a42260c20c69c3a97a68e93d5cbe2ce2a0e73faf0a0fd648ff2cd4d444d6b801eedec9ad7371cf2e88f73289e748c0d96b37f9f9ab807760746ddad907491a6f02afd6e1e7e6c3eab7b645138b9b0e1ad2395ce3bd75ec8370ebade620572fc7f82c992ebc4f2f2671fffc3ceae3210b75513c0be31dcb163ce725c70acc2569b5b67662e9846cf406f595e183c7b9066ce2f35d57196b87a25cdb559644361a63d704a173a03e4671f9357bd3236db88a37167988cddcb4b0e9e7395ac6bbc9262bcc34ff610ac64cd140bcc2e0d3a1b022a6d943e7b42f48fe4d44ba6e91973349183b55f919a1ca5774fa83ddaa962a55a799d71bebbc1e967e7b4d856b3223b81be868850b6eb66972679467130dc47cf8a726ca3c4c41c379a441b850e029984e0d646578121cfe2bf53dbed0a6085ae4e323ef4dfadc51930c8e5f7817a95f4ce9634e084d8055baa634d892b0798c62e0a2364d392af6428ea447ee97317d02fa384ecfaacd9063dc7c5579577930498111556625597fdf6cbf87cb9dee2019bce788d6986e51c8f52d47ac3fe35d71fc3ec365dfd2db55ff5c2bec073985295a78a4a9f2eba857c2d060573b8843c4cb739f35204d5d7d2011ebfdeb18e1c63a2f231748ce112a8820b4712d0f3bf684666f9d2996c777e43726e4674c4f765b6429c8cd3cbb8d3d49412f20c387af270cfe0c56b88f32b94e58550ca9f96f8b05dc154d40d05a9ffc5fcb42b88376a7b96bb7b84ef9998d74daef48560226d15399b77d6a8d55686f45bfd976376b61acf86e7703e20a42099beff8199d2e3e89d30ba5b69b0971b016505477345f1808a98df90aa6d0883bff29645049570e26d67949600fc20f32884452d4745e1e9783a579c576cf48fe8bdf4be7aba0e94061333782603cefcb022c8212a396d16b74645da075f6e40649156bcc7e710c538bb3cca84318c364939b55076d03579bd220f7981934de3236ecc8da1de355fb4161c508c1e8121af8c6b9aa476ca26c8f6de721922ca782d0f72b9b7e97aefa109bb93ff395a12146b73b9eb91bf976fede7dd975558e82ec64d94b3649aad519acfa95a184ff089900ecd1903fe3c8b0fb855e5be2feea9a401f6ed025da330fcafe88ce3a72d7a0437c1c262726663afd364a290fa9cd84c10e08d13a9788900ac8fd2711483535144f9a4807ef8b094e0c48d7d1da444207a4aa5e159671c437c27a0beb4f02d793977381a8fba12092ac5a709a8c5fa12597a8fc5449afe43c532100b812caa45a82075e5a2aa51171399c173a366d692c17513bc0a1322dbd3917a5803aea0b84f92c6f39c7952e1a3fa3bc5c1543c2c7ba17a3aaf28a802eef941368656e7b68ddd8b169a61a2e8b9c23d7b1d45d8604a962ae07c06d83f779bf87a3c89817352ff11f0b7e55e3e88b3e29fd954702dbfa1e4e89da9d06260863589a2e8927b9a919b412df0427a13c1103662a5cdfcf59b7280c565535dcefbaa6f8ff9f83a409f42f07725e5c3f41419c8b4db7d6f538d578db04ecb56446f8f220d95dd5b9ea7025a513bf47dee15ea217693145c288c2092f738d4dde04f41e0ab1fecf906dfcd3a665abf035b53e6b9f32eef9fc850be23fc6c6cc9af6f5a5ef21e51482475a977560f2dbead52a853955744f7817d27f408a80ab23fec63bbcff183c5afd745239d17c3dfaabd59e9de5dfb0e7b09ae8e3b3ae8c7719d82cbf406346d9c4cbb11a4458c19b4ff2517defffd671947d3ab619033c9028ada588292cedb80b129544823981f09c773c1bb1688dcdd7ea14f1e15206fd123b57fe233762b2808c6b372aaf47fb8e5f239fe5e30ed7ab963add4754c2fcf81bdf7bb7ee9cded8277904553b488b96d21cdb5eda1be4b9a89c5d3553f978836836e4f0a99cb5ac2243c8fcf875e53ee1c39b5884780187fd38216f2ec058b43f87b9b8fda40fe1df025037c9dc5a1fff617be49f5ad6ae503f819a8f236681ccd140204d7016efbad2c840c0da017d0124cb21b379647f34cffec0be7daae91785858e6049196b14f9f900ef4deb120d988c1f88116a7aef035af92f369706c2984c492f505d4823ccfebd4cd0ea7260148dcfddf938dfe42498ac209907c71638a342c370b34c39d2c17426b069dfa5fe427c16dff6752e1cff90bf998158df8a3244fc5194b9596504d6b17e9f551a619843b54a1efab546d946bb5ccec14069c71ed8a10b576f01b112fa32edefbae4cb661defe1410ccc32f548151e4970002872e8ad17bc566fe37c1a39841ceb6948e5555c4fac8a09f864858928cf5f6547b67884329a0ecd287c2842eef3d757103eb9ba6889684fff651be12696586692630d37420fd5743a5b23d18da7bf75a57b8e4aa1a80d85e7b72a4a41f06d8ec9498c430e66d3d4e5765497e82766c9389265d15781b9e145d918d4ac0327fc59a126ac1d66d171f6c8da505e185963f6ba689e54deb9c2ece7fb65b444042ffed99f241896773fbcfce81775b8deca7cbecbcf95e11de7820afd7486cedb87579135aa0333ed4edcff5aee5907499845cd7c3ad1836315fd8d2d5f1a88335121cd79f069cbbb2b67f6f85af7218ca04453be263ee7d29e9856ff7fcdd5c2302a2308d36b2e95117dbdfb5cdad1967a051ca5622faff52d35f53671dcdc1663b0fb862464d15c3b85d27cc2a811b2a040adb0b510cb3924c6da75acbe593bb8d3f41ff81953de53e6d86f5d86ac72bb60b47acc32f3a4cd2baaf2eb4acfae462814e38e94ac51d760531d33109b783a346bc02af98e169d4c5768aa43afe6f5b39bbf2e51372abb9789efa6e3749d0c69efd94955e40699b0d0129772e3568d88c20ec4889a2fd0bf0f98943aa3ad2e9607364e2a044b98055f300dbf17741b44b40a5f685dd8e87d6003d52f491fcccf6a64e48eab48d8142e6ac094064334c1cae47df295acdad8470bb37e5f2f6383930402704886a67ebbcafb403360201f60ddae895ca02bf86d1cc242b148b34a251664422c1776a874d5f5c7ba45b46ff401235a6c0ae67a90173ab2fc87b394367d7ddf96bde7b115ef68c59fb700d4b171679eaf8a9756b3da7bbe00ee5efa28aff6a978d4e5ba4bfe5077aa0a3616b3c0381da3afb81aad2cc1ffb3e1d266c4c71fbd68d94f1f4c03da3196901e4b0d188c084856b8e2aa577b141f50d84e90d0f2b64b6a9c540b4b5e645f61f886777f319c01e978e2190b4f818ef06521b31c6bb0418b754f5853ded61f284ca9d24d268cfcd6b5fd3a28978db5e63e4f873bc132ce666814d98fd72183e417770a26c0b1de46ca185495101a7edda43f72beab6dbf1033c302a34893c6a5eaf66ab3adb34f9fbe62dc5980d5b4ac108317b8fc951767725b2e770931016a28e0d66e6b37f60621f3e4a02f6b26d576da075edffe69441575a0a27ec0eee76f493019dee97f93a43fcaa9ecdaa3004eece68586fbbdc928143b074b09833c7443290ec4fd516f8317f79cde9095d4780da27dbc97a2bed3362060af89913a8fdeca55ed68359eef66ab4f65ee6d5f4ebcf912a60a3faa7a8ca6482dea69d4ba290ea41a52f2c28ef3cba6d74d16a3060bef60bdfbc89e5667099e4cc3d14285c46c9d2eb37f7849ac315a302fcbe4156cf2eaa039bedd1da7bccd40a7f9af18ea47010bf491308b34e5e612c234fb6fa29dd70880684764e14027b19b607ef33bd1ba8fe425d83254925c3cda93901820d6c48423086befc5e0e81a3d38369185c4d26afe6d37f81a12ba96d52bd94bcc2b43e87fce7d1009f751b93bd5340ee5d34abd73b902a1f5cf15e40ab90f7ebaf5afe049bd02a0dd783e2df6a04dca320fb7d2a11b762f59bfb0009ce36c1a5c6d725f3786c24cd92878c5e3fa1df1ecc4785146d70426fc981cfb79d9748a08e3605f7419574afa6a03d207d0b459f6e11e01400a2be34ba681497f6503878d398167de3827e6b85a582569a575a135b7748046f945f04e6c04281eaa14059ef95186689471c1731d4f0e7e1c61f4d560bbf2a67d414eb902d0cddc19cbedb905c180e12adaadf1818f9e5a141beabf87715b158b0edc89b06cb43fa4d2e284cc9abb087828d8813e71734240c1f6af037e4b8e726217873b90c3f7ca1bf01a6c36fffad53d88d7bcd8ded353f7a05899ece31457e5075cda4b682a65673f72f790321fba4ccf7936b59cc75d59dc87078b9c043c48f82483a181bdc0714ffcaf07babeae257994506a354271780cb687fd88b772da55135b26c5777b8c818a1e9983a0b055e6eb54e3dae239fb7b4f82ae6307da7cc97f9c02f5d9778ce19b25b36ac83</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">Hey, password is required here.</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
       <categories>
         <category>小张日记</category>
       </categories>
@@ -1576,6 +1548,318 @@ Z^{[l]}, A^{[l]}: (n^{[l]}, m)
       </tags>
   </entry>
   <entry>
+    <title>《深度学习》课程笔记3_搭建机器学习项目</title>
+    <url>/2020/11/23/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B03/</url>
+    <content><![CDATA[<h1 id="搭建机器学习项目">搭建机器学习项目</h1>
+<h2 id="机器学习ml策略1">机器学习（ML）策略（1）</h2>
+<p>对于一个已经被构建好且产生初步结果的机器学习系统，为了能使结果更令人满意，往往还要进行大量的改进。鉴于之前的课程介绍了多种改进的方法，例如收集更多数据、调试超参数、调整神经网络的大小或结构、采用不同的优化算法、进行正则化等等，我们有可能浪费大量时间在一条错误的改进路线上。</p>
+<p>想要找准改进的方向，使一个机器学习系统更快更有效地工作，就需要学习一些在构建机器学习系统时常用到的策略。</p>
+<h3 id="正交化">正交化</h3>
+<p><strong>正交化（Orthogonalization）</strong>的核心在于<strong>每次调整只会影响模型某一方面的性能，而对其他功能没有影响</strong>。这种方法有助于更快更有效地进行机器学习模型的调试和优化。</p>
+<p>在机器学习（监督学习）系统中，可以划分四个“功能”：</p>
+<ol type="1">
+<li>建立的模型在训练集上表现良好；</li>
+<li>建立的模型在验证集上表现良好；</li>
+<li>建立的模型在测试集上表现良好；</li>
+<li>建立的模型在实际应用中表现良好。</li>
+</ol>
+<p>其中，</p>
+<ul>
+<li>对于第一条，如果模型在训练集上表现不好，可以尝试<strong>训练更大的神经网络</strong>或者<strong>换一种更好的优化算法（例如 Adam）</strong>；</li>
+<li>对于第二条，如果模型在验证集上表现不好，可以进行<strong>正则化处理</strong>或者<strong>加入更多训练数据</strong>；</li>
+<li>对于第三条，如果模型在测试集上表现不好，可以尝试<strong>使用更大的验证集</strong>进行验证；</li>
+<li>对于第四条，如果模型在实际应用中表现不好，可能是因为<strong>测试集没有设置正确</strong>或者<strong>成本函数评估指标有误，需要改变测试集或成本函数</strong>。</li>
+</ul>
+<p>面对遇到的各种问题，正交化能够帮助我们更为精准有效地解决问题。</p>
+<p>一个反例是早停止法（Early Stopping）。如果早期停止，虽然可以改善验证集的拟合表现，但是对训练集的拟合就不太好。因为对两个不同的“功能”都有影响，所以早停止法不具有正交化。虽然也可以使用，但是用其他正交化控制手段来进行优化会更简单有效。</p>
+<h3 id="单值评价指标">单值评价指标</h3>
+<p>构建机器学习系统时，通过设置一个量化的<strong>单值评价指标</strong>（single-number evaluation metric），可以使我们根据这一指标比较不同超参数对应的模型的优劣，从而选择最优的那个模型。</p>
+<p>例如，对于二分类问题，常用的评价指标是<strong>查准率</strong>（Precision）和<strong>查全率（Recall）</strong>。</p>
+<p>首先：</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201124093957384.png" alt="image-20201124093957384" /><figcaption>image-20201124093957384</figcaption>
+</figure>
+<table>
+<tbody>
+<tr class="odd">
+<td>True Positives（TP）</td>
+<td>False Positives（FP）</td>
+</tr>
+<tr class="even">
+<td>True Negatives（TN）</td>
+<td>False Negatives（FN）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>TP的英文全称为True Positives，其指的是<strong>被分配为正样本，而且分配对了</strong>的样本，代表的是<strong>被正确分类的正样本</strong>。</li>
+<li>TN的英文全称为True Negatives，其指的是<strong>被分配为负样本，而且分配对了</strong>的样本，代表的是<strong>被正确分类的负样本</strong>。</li>
+<li>FP的英文全称为False Positives，其指的是<strong>被分配为正样本，但分配错了</strong>的样本，代表的是<strong>被错误分类的负样本</strong>。</li>
+<li>FN的英文全称为False Negatives，其指的是<strong>被分配为负样本，但分配错了</strong>的样本，代表的是<strong>被错误分类的正样本</strong>。</li>
+</ul>
+<blockquote>
+<p>True：看作是正确</p>
+<p>Positive：看作是正</p>
+</blockquote>
+<div class="note warning">
+            <ul><li><span class="math inline">\(查准率=\frac{分类器认为是正类并且确实是正类的部分}{分类器认为是正类}=\frac{TP}{TP+FP}\)</span></li><li><span class="math inline">\(查全率=\frac{分类器认为是正类并且确实是正类的部分}{确实是正类}=\frac{TP}{TP+FN}\)</span></li></ul>
+          </div>
+<p>接下来，</p>
+<p>假设我们有 A 和 B 两个分类器，其两项指标分别如下：</p>
+<table>
+<thead>
+<tr class="header">
+<th>分类器</th>
+<th>查准率（Precision）</th>
+<th>查全率（Recall）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>95%</td>
+<td>90%</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>98%</td>
+<td>85%</td>
+</tr>
+</tbody>
+</table>
+<p>实际应用中，我们通常使用综合了精确率和召回率的单值评价指标 <strong>F1 Score</strong> 来评价模型的好坏。F1 Score 其实就是精准率和召回率的<strong>调和平均数（Harmonic Mean）</strong>，比单纯的平均数效果要好。 <span class="math display">\[
+F_1 = \frac{2}{\frac{1}{P}+\frac{1}{R}} = \frac{2PR}{P+R}
+\]</span> 因此，我们计算出两个分类器的 F1 Score。可以看出 A 模型的效果要更好。</p>
+<table>
+<thead>
+<tr class="header">
+<th>分类器</th>
+<th>精确率</th>
+<th>召回率</th>
+<th>F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>95%</td>
+<td>90%</td>
+<td>92.4%</td>
+</tr>
+<tr class="even">
+<td>B</td>
+<td>98%</td>
+<td>85%</td>
+<td>91.0%</td>
+</tr>
+</tbody>
+</table>
+<p>通过引入单值评价指标，我们可以更方便快速地对不同模型进行比较。</p>
+<p>举栗：假如某个班级有男生<strong>80</strong>人，女生<strong>20</strong>人，共计<strong>100</strong>人。目标是找出所有女生. 现在某人挑选出<strong>50</strong>个人,其中<strong>20</strong>人是女生,另外还错误的把<strong>30</strong>个男生也当作女生挑选出来了. 作为评估者的你需要来评估(<strong>evaluation</strong>)下他的工作。</p>
+<p><strong>答：</strong>假设女生是正样本，则男生是负样本。题中表明目的是选出所有女生，即一共挑选的50人它都以为是女生（正样本），而剩下的50人就被认定成男生（负样本）。其中20个女生是分类正确的正样本，30个是分类错误的正样本。进而得到，剩下的50个男生本来就是男生，即分类正确的负样本为50，分类错误的负样本为0，如下图所示：</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>正样本 Positive （女）</th>
+<th>负样本 Negative （男）</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>分类正确 True</td>
+<td>（True Positive） 20</td>
+<td>（True Negative）50</td>
+<td>20</td>
+</tr>
+<tr class="even">
+<td>分类错误 False</td>
+<td>（False Negative）30</td>
+<td>（False Negative）0</td>
+<td>80</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>50</td>
+<td>50</td>
+<td>100</td>
+</tr>
+</tbody>
+</table>
+<p>可以评估他的工作：</p>
+<ul>
+<li>查准率 <span class="math inline">\(P=\frac{TP}{TP+FP}=40\%\)</span></li>
+<li>查全率 <span class="math inline">\(R=\frac{TP}{TP+FN}=100\%\)</span></li>
+<li><span class="math inline">\(F_1=\frac{2PR}{P+R} = 57.1\%\)</span></li>
+</ul>
+<h3 id="优化指标和满足指标">优化指标和满足指标</h3>
+<p>如果我们还想要将分类器的运行时间也纳入考虑范围，将其和精确率、召回率组合成一个单值评价指标显然不那么合适。</p>
+<p>这时，我们可以将某些指标作为<strong>优化指标（Optimizing Matric）</strong>，寻求它们的最优值；而将某些指标作为<strong>满足指标（Satisficing Matric）</strong>，只要在一定阈值以内即可。</p>
+<p>比如，你要考虑 N 个指标，有时候选择其中一个指标作为优化指标是合理的。所以想尽可能地去优化那个指标，然后剩下 N-1 个指标都是满足指标，意味着只要他么达到一定阈值之后，就不必在乎过了那个门槛之后的表现，去看优化指标就行。但是首先他们必须要达到这个门槛。</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204154310114.png" alt="image-20201204154310114" /><figcaption>image-20201204154310114</figcaption>
+</figure>
+<p>在这个例子中，准确率就是一个优化指标，因为我们想要分类器尽可能做到正确分类；而运行时间就是一个满足指标，如果你想要分类器的运行时间不多于某个阈值，那最终选择的分类器就应该是以这个阈值为界里面准确率最高的那个，即为 B 。</p>
+<h3 id="动态改变评价指标">动态改变评价指标</h3>
+<p>对于模型的评价标准优势需要根据实际情况进行动态调整，以让模型在实际应用中获得更好的效果。</p>
+<p>例如，有时我们不太能接受某些分类错误，于是改变单纯用错误率作为评价标准，给某些分类错误更高的权重，以从追求最小错误率转为追求最小风险。</p>
+<h3 id="训练验证测试集划分">训练/验证/测试集划分</h3>
+<p>我们一般将数据集分为训练集、验证集、测试集。构建机器学习系统时，我们采用不同的学习方法，在<strong>训练集</strong>上训练出不同的模型，然后使用<strong>验证集</strong>对模型的好坏进行评估，确信其中某个模型足够好时再用<strong>测试集</strong>对其进行测试。</p>
+<p>因此，训练集、验证集、测试集的设置对于机器学习模型非常重要，合理的设置能够大大提高模型训练效率和模型质量。</p>
+<h4 id="验证集和测试集的分布">验证集和测试集的分布</h4>
+<p>验证集和测试集的数据来源应该相同（来自同一分布）、和机器学习系统将要在实际应用中面对的数据一致，且必须从所有数据中随机抽取。这样，系统才能做到尽可能不偏离目标。</p>
+<blockquote>
+<p>即 “瞄准一个目标”</p>
+</blockquote>
+<h4 id="验证集和测试集的大小">验证集和测试集的大小</h4>
+<p>过去数据量较小（小于 1 万）时，通常将数据集按照以下比例进行划分：</p>
+<ul>
+<li>无验证集的情况：70% / 30%；</li>
+<li>有验证集的情况：60% / 20% / 20%；</li>
+</ul>
+<p>这是为了保证验证集和测试集有足够的数据。现在的机器学习时代数据集规模普遍较大，例如 100 万数据量，这时将相应比例设为 98% / 1% / 1% 或 99% / 1% 就已经能保证验证集和测试集的规模足够。</p>
+<p>测试集的大小应该设置得足够提高系统整体性能的可信度，验证集的大小也要设置得足够用于评估几个不同的模型。应该根据实际情况对数据集灵活地进行划分，而不是死板地遵循老旧的经验。</p>
+<h3 id="比较人类表现水平">比较人类表现水平</h3>
+<p>很多机器学习模型的诞生是为了取代人类的工作，因此其表现也会跟人类表现水平作比较。</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204160303692.png" alt="image-20201204160303692" /><figcaption>image-20201204160303692</figcaption>
+</figure>
+<p>上图展示了随着时间的推进，机器学习系统和人的表现水平的变化。一般的，当机器学习超过人的表现水平后，它的进步速度逐渐变得缓慢，最终性能无法超过某个理论上限，这个上限被称为<strong>贝叶斯最优误差（Bayes Optimal Error）</strong>。</p>
+<p>贝叶斯最优误差一般认为是理论上可能达到的最优误差，换句话说，其就是理论最优函数，任何从 x 到精确度 y 映射的函数都不可能超过这个值。例如，对于语音识别，某些音频片段嘈杂到基本不可能知道说的是什么，所以完美的识别率不可能达到 100%。</p>
+<p>因为人类对于一些自然感知问题的表现水平十分接近贝叶斯最优误差，所以当机器学习系统的表现超过人类后，就没有太多继续改善的空间了。</p>
+<p>也因此，只要建立的机器学习模型的表现还没达到人类的表现水平时，就可以通过各种手段来提升它。例如采用人工标记过的数据进行训练，通过人工误差分析了解为什么人能够正确识别，或者是进行偏差、方差分析。</p>
+<p>当模型的表现超过人类后，这些手段起的作用就微乎其微了。</p>
+<h4 id="可避免偏差">可避免偏差</h4>
+<p>通过与贝叶斯最优误差，或者说，与人类表现水平的比较，可以表明一个机器学习模型表现的好坏程度，由此判断后续操作应该注重于减小偏差还是减小方差。</p>
+<p>模型在<strong>训练集</strong>上的误差与人类表现水平<strong>（贝叶斯错误率）</strong>的<strong>差值</strong>被称作<strong>可避免偏差（Avoidable Bias）</strong>。可避免偏差低便意味着模型在训练集上的表现很好，而<strong>训练集与验证集之间错误率的差值</strong>越小，意味着模型在验证集与测试集上的表现和训练集同样好。</p>
+<p>如果<strong>可避免偏差</strong>大于<strong>训练集与验证集之间错误率的差值</strong>，之后的工作就应该专注于减小偏差；反之，就应该专注于减小方差。</p>
+<h4 id="理解人类表现水平">理解人类表现水平</h4>
+<p>我们一般用<strong>人类水平误差（Human-level Error）</strong>来代表贝叶斯最优误差（或者简称贝叶斯误差）。对于不同领域的例子，不同人群由于其经验水平不一，错误率也不同。一般来说，<strong>我们将表现最好的作为人类水平误差</strong>。但是实际应用中，不同人选择人类水平误差的基准是不同的，这会带来一定的影响。</p>
+<p>例如，如果某模型在训练集上的错误率为 8%，验证集的错误率为 10%。如果选择的人类水平误差为 1%，那么应该专注减少偏差；而如果选择的人类水平误差为 7.5%，则应该专注减少方差。也就是说，根据人类水平误差的不同选择，我们可能因此选择不同的优化操作。</p>
+<p>这种问题只会发生在模型表现很好，接近人类水平误差的时候才会出现。人类水平误差给了我们一种估计贝叶斯误差的方式，而不是像之前一样将训练的错误率直接对着 0% 的方向进行优化。</p>
+<p>当机器学习模型的表现超过了人类水平误差时，很难再通过人的直觉去判断模型还能够往什么方向优化以提高性能。</p>
+<h3 id="总结">总结</h3>
+<p>想让一个监督学习算法达到使用程度，应该做到以下两点：</p>
+<ol type="1">
+<li>算法对训练集的拟合很好，可以看作可避免偏差很低；</li>
+<li>推广到验证集和测试集效果也很好，即方差不是很大。</li>
+</ol>
+<p>根据正交化的思想，我们有一些措施可以独立地优化二者之一。</p>
+<h2 id="机器学习ml策略2">机器学习（ML）策略（2）</h2>
+<h3 id="错误分析">错误分析</h3>
+<p>通过人工检查机器学习模型得出的结果中出现的一些错误，有助于深入了解下一步要进行的工作。这个过程被称作<strong>错误分析（Error Analysis）</strong>。</p>
+<p>例如，你可能会发现一个猫图片识别器错误地将一些看上去像猫的狗误识别为猫。这时，立即盲目地去研究一个能够精确识别出狗的算法不一定是最好的选择，因为我们不知道这样做会对提高分类器的准确率有多大的帮助。</p>
+<p>这时，我们可以从分类错误的样本中统计出狗的样本数量。根据狗样本所占的比重来判断这一问题的重要性。假如狗类样本所占比重仅为 5%，那么即使花费几个月的时间来提升模型对狗的识别率，改进后的模型错误率并没有显著改善；而如果错误样本中狗类所占比重为 50%，那么改进后的模型性能会有较大的提升。因此，花费更多的时间去研究能够精确识别出狗的算法是值得的。</p>
+<p>这种人工检查看似简单而愚笨，但却是十分必要的，因为这项工作能够有效避免花费大量的时间与精力去做一些对提高模型性能收效甚微的工作，让我们专注于解决影响模型准确率的主要问题。</p>
+<p>在对输出结果中分类错误的样本进行人工分析时，可以建立一个表格来记录每一个分类错误的具体信息，例如某些图像是模糊的，或者是把狗识别成了猫等，并统计属于不同错误类型的错误数量。这样，分类结果会更加清晰。</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204205644683.png" alt="image-20201204205644683" /><figcaption>image-20201204205644683</figcaption>
+</figure>
+<p>总结一下，进行错误分析时，你应该观察错误标记的例子，看看假阳性(False Positive)和假阴性(False Negative)，统计属于不同错误类型的错误数量。在这个过程中，你可能会得到启发，归纳出新的错误类型。总之，通过统计不同错误标记类型占总数的百分比，有助于发现哪些问题亟待解决，或者提供构思新优化方向的灵感。</p>
+<h3 id="修正错误标记">修正错误标记</h3>
+<p>我们用 mislabeled examples 来表示学习算法输出了错误的 Y 值。而在做误差分析时，有时会注意到数据集中有些样本被人为地错误标记（incorrectly labeled）了，这时该怎么做？</p>
+<p>如果是在训练集中，由于机器学习算法对于随机误差的<strong>稳健性（Robust）</strong>（也称作“鲁棒性”），只要这些出错的样本数量较小，且分布近似随机，就不必花费时间一一修正。</p>
+<p>而如果出现在验证集或者测试集，则可以在进行误差分析时，通过统计人为标记错误所占的百分比，来大致分析这种情况对模型的识别准确率的影响，并比较该比例的大小和其他错误类型的比例，以此判断是否值得去将错误的标记一一进行修正，还是可以忽略。</p>
+<p>当你决定在验证集和测试集上手动检查标签并进行修正时，有一些额外的方针和原则需要考虑：</p>
+<ul>
+<li>在验证集和测试集上<strong>同时使用同样的修正手段</strong>，以保证验证集和测试集来自相同的分布；</li>
+<li>同时检查判断正确和判断错误的例子（通常不用这么做）；</li>
+<li>在修正验证集和测试集时，鉴于训练集的分布不必和验证/测试集完全相同，可以不去修正训练集。</li>
+</ul>
+<h3 id="快读搭建系统并迭代">快读搭建系统并迭代</h3>
+<p>对于每个可以改善模型的合理方向，如何选择一个方向集中精力处理成了问题。如果想搭建一个全新的机器学习系统，建议根据以下步骤快速搭建好第一个系统，然后开始迭代：</p>
+<ol type="1">
+<li>设置好训练、验证、测试集及衡量指标，确定目标；</li>
+<li>快速训练出一个初步的系统，用训练集来拟合参数，用验证集调参，用测试集评估；</li>
+<li>通过偏差/方差分析以及错误分析等方法，决定下一步优先处理的方向。</li>
+</ol>
+<h3 id="在不同的分布上训练和测试">在不同的分布上训练和测试</h3>
+<p>有时，我们很难得到来自同一个分布的训练集和验证/测试集。还是以猫识别作为例子，我们的训练集可能由网络爬取得到，图片比较清晰，而且规模较大（例如 20 万）；而验证/测试集可能来自用户手机拍摄，图片比较模糊，且数量较少（例如 1 万），难以满足作为训练集时的规模需要。</p>
+<p>虽然验证/测试集的质量不高，但是机器学习模型最终主要应用于识别这些用户上传的模糊图片。考虑到这一点，在划分数据集时，可以将 20 万张网络爬取的图片和 5000 张用户上传的图片作为训练集，而将剩下的 5000 张图片一半作验证集，一半作测试集。比起混合数据集所有样本再随机划分，这种分配方法虽然使训练集分布和验证/测试集的分布并不一样，但是能保证<strong>验证/测试集更接近实际应用场景</strong>，在长期能带来更好的系统性能。</p>
+<h3 id="数据不匹配">==数据不匹配==</h3>
+<p>之前的学习中，我们通过比较人类水平误差、训练集错误率、验证集错误率的相对差值来判断进行偏差/方差分析。但在训练集和验证/测试集分布不一致的情况下，无法根据相对差值来进行偏差/方差分析。这是因为训练集错误率和验证集错误率的差值<u>可能来自于算法本身（归为方差）</u>，也<u>可能来自于样本分布不同，和模型关系不大</u>。</p>
+<p>在可能存在训练集和验证/测试集分布不一致的情况下，为了解决这个问题，我们可以再定义一个<strong>训练-验证集（Training-dev Set）</strong>。训练-验证集和训练集的分布相同（或者是训练集分割出的子集），但是不参与训练过程。</p>
+<p>现在，我们有了 <em>训练集</em> 错误率、 <em>训练-验证集</em> 错误率，以及 <em>验证集</em> 错误率。其中， <em>训练集</em> 错误率和 <em>训练-验证集</em> 错误率的差值反映了方差；而 <em>训练-验证集</em> 错误率和 <em>验证集</em> 错误率的差值反映了样本分布不一致的问题，从而说明<strong>模型擅长处理的数据和我们关心的数据来自不同的分布</strong>，我们称之为<strong>数据不匹配（Data Mismatch）</strong>问题。</p>
+<p>人类水平误差、<em>训练集</em>错误率、<em>训练-验证集</em>错误率、<em>验证集</em>错误率、<em>测试集</em>错误率之间的差值所反映的问题如下图所示：</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201205104721879.png" alt="image-20201205104721879" /><figcaption>image-20201205104721879</figcaption>
+</figure>
+<h4 id="处理方法">处理方法</h4>
+<p>这里有两条关于如何解决数据不匹配问题的建议：</p>
+<ul>
+<li>做错误分析，尝试了解训练集和验证/测试集的具体差异（主要是人工查看训练集和验证集的样本）；</li>
+<li>尝试将训练数据调整得更像验证集，或者收集更多类似于验证/测试集的数据。</li>
+</ul>
+<p>如果你打算将训练数据调整得更像验证集，可以使用的一种技术是<strong>人工合成数据</strong>。我们以语音识别问题为例，实际应用场合（验证/测试集）是包含背景噪声的，而作为训练样本的音频很可能是清晰而没有背景噪声的。为了让训练集与验证/测试集分布一致，我们可以给训练集人工添加背景噪声，合成类似实际场景的声音。</p>
+<p>人工合成数据能够使数据集匹配，从而提升模型的效果。但需要注意的是，不能给每段语音都增加同一段背景噪声，因为这样模型会对这段背景噪音出现过拟合现象，使得效果不佳。</p>
+<h3 id="迁移学习">迁移学习</h3>
+<p><strong>迁移学习（Transfer Learning）</strong>是通过将已训练好的神经网络模型的一部分网络结构应用到另一模型，将一个神经网络从某个任务中学到的知识和经验运用到另一个任务中，以显著提高学习任务的性能。</p>
+<p>例如，我们将为猫识别器构建的神经网络迁移应用到放射科诊断中。因为猫识别器的神经网络已经学习到了有关图像的结构和性质等方面的知识，所以只要先删除神经网络中原有的输出层，加入新的输出层并随机初始化权重系数（<span class="math inline">\(W^{[L]}\)</span>、<span class="math inline">\(b^{[L]}\)</span>），随后用新的训练集进行训练，就完成了以上的迁移学习。</p>
+<p>如果新的数据集很小，可能只需要重新训练输出层前的最后一层的权重，即 <span class="math inline">\(W^{[L]}\)</span>、<span class="math inline">\(b^{[L]}\)</span>，并保持其他参数不变；而如果有足够多的数据，可以只保留网络结构，重新训练神经网络中所有层的系数。这时初始权重由之前的模型训练得到，这个过程称为<strong>预训练（Pre-Training）</strong>，之后的权重更新过程称为<strong>微调（Fine-Tuning）</strong>。</p>
+<p>你也可以不止加入一个新的输出层，而是多向神经网络加几个新层。</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204213709492.png" alt="image-20201204213709492" /><figcaption>image-20201204213709492</figcaption>
+</figure>
+<p>在下述场合进行迁移学习是有意义的：</p>
+<ol type="1">
+<li>两个任务有同样的输入（比如都是图像或者都是音频）；</li>
+<li><strong>拥有更多数据的任务迁移到数据较少的任务</strong>；</li>
+<li>某一任务的低层次特征（底层神经网络的某些功能）对另一个任务的学习有帮助。</li>
+</ol>
+<h3 id="多任务学习">多任务学习</h3>
+<p>迁移学习中的步骤是串行的；而<strong>多任务学习（Multi-Task Learning）</strong>使用单个神经网络模型，利用共享表示采用并行训练同时学习多个任务。多任务学习的基本假设是<strong>多个任务之间具有相关性</strong>，并且任务之间可以利用相关性相互促进。例如，属性分类中，抹口红和戴耳环有一定的相关性，单独训练的时候是无法利用这些信息，多任务学习则可以利用任务相关性联合提高多个属性分类的精度。</p>
+<p>以汽车自动驾驶为例，需要实现的多任务是识别行人、车辆、交通标志和信号灯。如果在输入的图像中检测出车辆和交通标志，则输出的 y 为： <span class="math display">\[
+y = \begin{bmatrix} 0 \\ 1 \\ 1 \\ 0 \end{bmatrix}\quad
+\]</span></p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201205115842523.png" alt="image-20201205115842523" /><figcaption>image-20201205115842523</figcaption>
+</figure>
+<p>多任务学习模型的成本函数为： <span class="math display">\[
+\frac{1}{m} \sum^m_{i=1} \sum^c_{j=1} L(\hat y_j^{(i)}, y_j^{(i)})
+\]</span> 其中，j 代表任务下标，总有 c 个任务。对应的损失函数为： <span class="math display">\[
+L(\hat y_j^{(i)}, y_j^{(i)}) = -y_j^{(i)} log \hat y_j^{(i)} - (1 -y_j^{(i)})log(1 - \hat y_j^{(i)})
+\]</span> 多任务学习是使用单个神经网络模型来实现多个任务。实际上，也可以分别构建多个神经网络来实现。多任务学习中可能存在训练样本 Y 某些标签空白的情况，这不会影响多任务学习模型的训练。</p>
+<p>多任务学习和 Softmax 回归看上去有些类似，容易混淆。它们的区别是，Softmax 回归的输出向量 y 中只有一个元素为 1；而多任务学习的输出向量 y 中可以有多个元素为 1。</p>
+<blockquote>
+<p>例如一个图像多个标签。</p>
+</blockquote>
+<p>在下述场合进行多任务学习是有意义的：</p>
+<ol type="1">
+<li>训练的一组任务可以共用低层次特征；</li>
+<li><em>通常</em>，每个任务的数据量接近；</li>
+<li>能够训练一个足够大的神经网络，以同时做好所有的工作。多任务学习会降低性能的唯一情况（即和为每个任务训练单个神经网络相比性能更低的情况）是神经网络还不够大。</li>
+</ol>
+<p>在多任务深度网络中，低层次信息的共享有助于减少计算量，同时共享表示层可以使得几个有共性的任务更好的结合相关性信息，任务特定层则可以单独建模任务特定的信息，实现共享信息和任务特定信息的统一。</p>
+<p>在实践中，多任务学习的使用频率要远低于迁移学习。计算机视觉领域中的物体识别是一个多任务学习的例子hh。</p>
+<h3 id="端到端学习">端到端学习</h3>
+<p>在传统的机器学习分块模型中，每一个模块处理一种输入，然后其输出作为下一个模块的输入，构成一条流水线。而<strong>端到端深度学习（End-to-end Deep Learning）</strong>只用一个单一的神经网络模型来实现所有的功能。它将所有模块混合在一起，只关心输入和输出。</p>
+<p>如果数据量较少，传统机器学习分块模型所构成的流水线效果会很不错。但如果训练样本足够大，并且训练出的神经网络模型足够复杂，那么端到端深度学习模型的性能会比传统机器学习分块模型更好。</p>
+<p>而如果数据集规模适中，还是可以使用流水线方法，但是可以混合端到端深度学习，通过神经网络绕过某些模块，直接输出某些特征。</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204213920952.png" alt="image-20201204213920952" /><figcaption>image-20201204213920952</figcaption>
+</figure>
+<h4 id="优点与缺点">优点与缺点</h4>
+<p>应用端到端学习的优点：</p>
+<ul>
+<li>只要有足够多的数据，剩下的全部交给一个足够大的神经网络。比起传统的机器学习分块模型，可能更能捕获数据中的任何统计信息，而不需要用人类固有的认知（或者说，成见）来进行分析；</li>
+<li>所需手工设计的组件更少，简化设计工作流程；</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>需要大量的数据；</li>
+<li>排除了可能有用的人工设计组件；</li>
+</ul>
+<p>根据以上分析，决定一个问题是否应用端到端学习的<strong>关键点</strong>是：是否有足够的数据，支持能够直接学习从 x 映射到 y 并且足够复杂的函数？</p>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>《深度学习》课程笔记4_卷积神经网络</title>
     <url>/2020/12/06/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B04/</url>
     <content><![CDATA[<p>[toc]</p>
@@ -1910,318 +2194,6 @@ n_H \times n_W \times n_c
       <tags>
         <tag>深度学习</tag>
         <tag>CNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>《深度学习》课程笔记3_搭建机器学习项目</title>
-    <url>/2020/11/23/%E3%80%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E3%80%8B%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B03/</url>
-    <content><![CDATA[<h1 id="搭建机器学习项目">搭建机器学习项目</h1>
-<h2 id="机器学习ml策略1">机器学习（ML）策略（1）</h2>
-<p>对于一个已经被构建好且产生初步结果的机器学习系统，为了能使结果更令人满意，往往还要进行大量的改进。鉴于之前的课程介绍了多种改进的方法，例如收集更多数据、调试超参数、调整神经网络的大小或结构、采用不同的优化算法、进行正则化等等，我们有可能浪费大量时间在一条错误的改进路线上。</p>
-<p>想要找准改进的方向，使一个机器学习系统更快更有效地工作，就需要学习一些在构建机器学习系统时常用到的策略。</p>
-<h3 id="正交化">正交化</h3>
-<p><strong>正交化（Orthogonalization）</strong>的核心在于<strong>每次调整只会影响模型某一方面的性能，而对其他功能没有影响</strong>。这种方法有助于更快更有效地进行机器学习模型的调试和优化。</p>
-<p>在机器学习（监督学习）系统中，可以划分四个“功能”：</p>
-<ol type="1">
-<li>建立的模型在训练集上表现良好；</li>
-<li>建立的模型在验证集上表现良好；</li>
-<li>建立的模型在测试集上表现良好；</li>
-<li>建立的模型在实际应用中表现良好。</li>
-</ol>
-<p>其中，</p>
-<ul>
-<li>对于第一条，如果模型在训练集上表现不好，可以尝试<strong>训练更大的神经网络</strong>或者<strong>换一种更好的优化算法（例如 Adam）</strong>；</li>
-<li>对于第二条，如果模型在验证集上表现不好，可以进行<strong>正则化处理</strong>或者<strong>加入更多训练数据</strong>；</li>
-<li>对于第三条，如果模型在测试集上表现不好，可以尝试<strong>使用更大的验证集</strong>进行验证；</li>
-<li>对于第四条，如果模型在实际应用中表现不好，可能是因为<strong>测试集没有设置正确</strong>或者<strong>成本函数评估指标有误，需要改变测试集或成本函数</strong>。</li>
-</ul>
-<p>面对遇到的各种问题，正交化能够帮助我们更为精准有效地解决问题。</p>
-<p>一个反例是早停止法（Early Stopping）。如果早期停止，虽然可以改善验证集的拟合表现，但是对训练集的拟合就不太好。因为对两个不同的“功能”都有影响，所以早停止法不具有正交化。虽然也可以使用，但是用其他正交化控制手段来进行优化会更简单有效。</p>
-<h3 id="单值评价指标">单值评价指标</h3>
-<p>构建机器学习系统时，通过设置一个量化的<strong>单值评价指标</strong>（single-number evaluation metric），可以使我们根据这一指标比较不同超参数对应的模型的优劣，从而选择最优的那个模型。</p>
-<p>例如，对于二分类问题，常用的评价指标是<strong>查准率</strong>（Precision）和<strong>查全率（Recall）</strong>。</p>
-<p>首先：</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201124093957384.png" alt="image-20201124093957384" /><figcaption>image-20201124093957384</figcaption>
-</figure>
-<table>
-<tbody>
-<tr class="odd">
-<td>True Positives（TP）</td>
-<td>False Positives（FP）</td>
-</tr>
-<tr class="even">
-<td>True Negatives（TN）</td>
-<td>False Negatives（FN）</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>TP的英文全称为True Positives，其指的是<strong>被分配为正样本，而且分配对了</strong>的样本，代表的是<strong>被正确分类的正样本</strong>。</li>
-<li>TN的英文全称为True Negatives，其指的是<strong>被分配为负样本，而且分配对了</strong>的样本，代表的是<strong>被正确分类的负样本</strong>。</li>
-<li>FP的英文全称为False Positives，其指的是<strong>被分配为正样本，但分配错了</strong>的样本，代表的是<strong>被错误分类的负样本</strong>。</li>
-<li>FN的英文全称为False Negatives，其指的是<strong>被分配为负样本，但分配错了</strong>的样本，代表的是<strong>被错误分类的正样本</strong>。</li>
-</ul>
-<blockquote>
-<p>True：看作是正确</p>
-<p>Positive：看作是正</p>
-</blockquote>
-<div class="note warning">
-            <ul><li><span class="math inline">\(查准率=\frac{分类器认为是正类并且确实是正类的部分}{分类器认为是正类}=\frac{TP}{TP+FP}\)</span></li><li><span class="math inline">\(查全率=\frac{分类器认为是正类并且确实是正类的部分}{确实是正类}=\frac{TP}{TP+FN}\)</span></li></ul>
-          </div>
-<p>接下来，</p>
-<p>假设我们有 A 和 B 两个分类器，其两项指标分别如下：</p>
-<table>
-<thead>
-<tr class="header">
-<th>分类器</th>
-<th>查准率（Precision）</th>
-<th>查全率（Recall）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A</td>
-<td>95%</td>
-<td>90%</td>
-</tr>
-<tr class="even">
-<td>B</td>
-<td>98%</td>
-<td>85%</td>
-</tr>
-</tbody>
-</table>
-<p>实际应用中，我们通常使用综合了精确率和召回率的单值评价指标 <strong>F1 Score</strong> 来评价模型的好坏。F1 Score 其实就是精准率和召回率的<strong>调和平均数（Harmonic Mean）</strong>，比单纯的平均数效果要好。 <span class="math display">\[
-F_1 = \frac{2}{\frac{1}{P}+\frac{1}{R}} = \frac{2PR}{P+R}
-\]</span> 因此，我们计算出两个分类器的 F1 Score。可以看出 A 模型的效果要更好。</p>
-<table>
-<thead>
-<tr class="header">
-<th>分类器</th>
-<th>精确率</th>
-<th>召回率</th>
-<th>F1 Score</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A</td>
-<td>95%</td>
-<td>90%</td>
-<td>92.4%</td>
-</tr>
-<tr class="even">
-<td>B</td>
-<td>98%</td>
-<td>85%</td>
-<td>91.0%</td>
-</tr>
-</tbody>
-</table>
-<p>通过引入单值评价指标，我们可以更方便快速地对不同模型进行比较。</p>
-<p>举栗：假如某个班级有男生<strong>80</strong>人，女生<strong>20</strong>人，共计<strong>100</strong>人。目标是找出所有女生. 现在某人挑选出<strong>50</strong>个人,其中<strong>20</strong>人是女生,另外还错误的把<strong>30</strong>个男生也当作女生挑选出来了. 作为评估者的你需要来评估(<strong>evaluation</strong>)下他的工作。</p>
-<p><strong>答：</strong>假设女生是正样本，则男生是负样本。题中表明目的是选出所有女生，即一共挑选的50人它都以为是女生（正样本），而剩下的50人就被认定成男生（负样本）。其中20个女生是分类正确的正样本，30个是分类错误的正样本。进而得到，剩下的50个男生本来就是男生，即分类正确的负样本为50，分类错误的负样本为0，如下图所示：</p>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th>正样本 Positive （女）</th>
-<th>负样本 Negative （男）</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>分类正确 True</td>
-<td>（True Positive） 20</td>
-<td>（True Negative）50</td>
-<td>20</td>
-</tr>
-<tr class="even">
-<td>分类错误 False</td>
-<td>（False Negative）30</td>
-<td>（False Negative）0</td>
-<td>80</td>
-</tr>
-<tr class="odd">
-<td></td>
-<td>50</td>
-<td>50</td>
-<td>100</td>
-</tr>
-</tbody>
-</table>
-<p>可以评估他的工作：</p>
-<ul>
-<li>查准率 <span class="math inline">\(P=\frac{TP}{TP+FP}=40\%\)</span></li>
-<li>查全率 <span class="math inline">\(R=\frac{TP}{TP+FN}=100\%\)</span></li>
-<li><span class="math inline">\(F_1=\frac{2PR}{P+R} = 57.1\%\)</span></li>
-</ul>
-<h3 id="优化指标和满足指标">优化指标和满足指标</h3>
-<p>如果我们还想要将分类器的运行时间也纳入考虑范围，将其和精确率、召回率组合成一个单值评价指标显然不那么合适。</p>
-<p>这时，我们可以将某些指标作为<strong>优化指标（Optimizing Matric）</strong>，寻求它们的最优值；而将某些指标作为<strong>满足指标（Satisficing Matric）</strong>，只要在一定阈值以内即可。</p>
-<p>比如，你要考虑 N 个指标，有时候选择其中一个指标作为优化指标是合理的。所以想尽可能地去优化那个指标，然后剩下 N-1 个指标都是满足指标，意味着只要他么达到一定阈值之后，就不必在乎过了那个门槛之后的表现，去看优化指标就行。但是首先他们必须要达到这个门槛。</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204154310114.png" alt="image-20201204154310114" /><figcaption>image-20201204154310114</figcaption>
-</figure>
-<p>在这个例子中，准确率就是一个优化指标，因为我们想要分类器尽可能做到正确分类；而运行时间就是一个满足指标，如果你想要分类器的运行时间不多于某个阈值，那最终选择的分类器就应该是以这个阈值为界里面准确率最高的那个，即为 B 。</p>
-<h3 id="动态改变评价指标">动态改变评价指标</h3>
-<p>对于模型的评价标准优势需要根据实际情况进行动态调整，以让模型在实际应用中获得更好的效果。</p>
-<p>例如，有时我们不太能接受某些分类错误，于是改变单纯用错误率作为评价标准，给某些分类错误更高的权重，以从追求最小错误率转为追求最小风险。</p>
-<h3 id="训练验证测试集划分">训练/验证/测试集划分</h3>
-<p>我们一般将数据集分为训练集、验证集、测试集。构建机器学习系统时，我们采用不同的学习方法，在<strong>训练集</strong>上训练出不同的模型，然后使用<strong>验证集</strong>对模型的好坏进行评估，确信其中某个模型足够好时再用<strong>测试集</strong>对其进行测试。</p>
-<p>因此，训练集、验证集、测试集的设置对于机器学习模型非常重要，合理的设置能够大大提高模型训练效率和模型质量。</p>
-<h4 id="验证集和测试集的分布">验证集和测试集的分布</h4>
-<p>验证集和测试集的数据来源应该相同（来自同一分布）、和机器学习系统将要在实际应用中面对的数据一致，且必须从所有数据中随机抽取。这样，系统才能做到尽可能不偏离目标。</p>
-<blockquote>
-<p>即 “瞄准一个目标”</p>
-</blockquote>
-<h4 id="验证集和测试集的大小">验证集和测试集的大小</h4>
-<p>过去数据量较小（小于 1 万）时，通常将数据集按照以下比例进行划分：</p>
-<ul>
-<li>无验证集的情况：70% / 30%；</li>
-<li>有验证集的情况：60% / 20% / 20%；</li>
-</ul>
-<p>这是为了保证验证集和测试集有足够的数据。现在的机器学习时代数据集规模普遍较大，例如 100 万数据量，这时将相应比例设为 98% / 1% / 1% 或 99% / 1% 就已经能保证验证集和测试集的规模足够。</p>
-<p>测试集的大小应该设置得足够提高系统整体性能的可信度，验证集的大小也要设置得足够用于评估几个不同的模型。应该根据实际情况对数据集灵活地进行划分，而不是死板地遵循老旧的经验。</p>
-<h3 id="比较人类表现水平">比较人类表现水平</h3>
-<p>很多机器学习模型的诞生是为了取代人类的工作，因此其表现也会跟人类表现水平作比较。</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204160303692.png" alt="image-20201204160303692" /><figcaption>image-20201204160303692</figcaption>
-</figure>
-<p>上图展示了随着时间的推进，机器学习系统和人的表现水平的变化。一般的，当机器学习超过人的表现水平后，它的进步速度逐渐变得缓慢，最终性能无法超过某个理论上限，这个上限被称为<strong>贝叶斯最优误差（Bayes Optimal Error）</strong>。</p>
-<p>贝叶斯最优误差一般认为是理论上可能达到的最优误差，换句话说，其就是理论最优函数，任何从 x 到精确度 y 映射的函数都不可能超过这个值。例如，对于语音识别，某些音频片段嘈杂到基本不可能知道说的是什么，所以完美的识别率不可能达到 100%。</p>
-<p>因为人类对于一些自然感知问题的表现水平十分接近贝叶斯最优误差，所以当机器学习系统的表现超过人类后，就没有太多继续改善的空间了。</p>
-<p>也因此，只要建立的机器学习模型的表现还没达到人类的表现水平时，就可以通过各种手段来提升它。例如采用人工标记过的数据进行训练，通过人工误差分析了解为什么人能够正确识别，或者是进行偏差、方差分析。</p>
-<p>当模型的表现超过人类后，这些手段起的作用就微乎其微了。</p>
-<h4 id="可避免偏差">可避免偏差</h4>
-<p>通过与贝叶斯最优误差，或者说，与人类表现水平的比较，可以表明一个机器学习模型表现的好坏程度，由此判断后续操作应该注重于减小偏差还是减小方差。</p>
-<p>模型在<strong>训练集</strong>上的误差与人类表现水平<strong>（贝叶斯错误率）</strong>的<strong>差值</strong>被称作<strong>可避免偏差（Avoidable Bias）</strong>。可避免偏差低便意味着模型在训练集上的表现很好，而<strong>训练集与验证集之间错误率的差值</strong>越小，意味着模型在验证集与测试集上的表现和训练集同样好。</p>
-<p>如果<strong>可避免偏差</strong>大于<strong>训练集与验证集之间错误率的差值</strong>，之后的工作就应该专注于减小偏差；反之，就应该专注于减小方差。</p>
-<h4 id="理解人类表现水平">理解人类表现水平</h4>
-<p>我们一般用<strong>人类水平误差（Human-level Error）</strong>来代表贝叶斯最优误差（或者简称贝叶斯误差）。对于不同领域的例子，不同人群由于其经验水平不一，错误率也不同。一般来说，<strong>我们将表现最好的作为人类水平误差</strong>。但是实际应用中，不同人选择人类水平误差的基准是不同的，这会带来一定的影响。</p>
-<p>例如，如果某模型在训练集上的错误率为 8%，验证集的错误率为 10%。如果选择的人类水平误差为 1%，那么应该专注减少偏差；而如果选择的人类水平误差为 7.5%，则应该专注减少方差。也就是说，根据人类水平误差的不同选择，我们可能因此选择不同的优化操作。</p>
-<p>这种问题只会发生在模型表现很好，接近人类水平误差的时候才会出现。人类水平误差给了我们一种估计贝叶斯误差的方式，而不是像之前一样将训练的错误率直接对着 0% 的方向进行优化。</p>
-<p>当机器学习模型的表现超过了人类水平误差时，很难再通过人的直觉去判断模型还能够往什么方向优化以提高性能。</p>
-<h3 id="总结">总结</h3>
-<p>想让一个监督学习算法达到使用程度，应该做到以下两点：</p>
-<ol type="1">
-<li>算法对训练集的拟合很好，可以看作可避免偏差很低；</li>
-<li>推广到验证集和测试集效果也很好，即方差不是很大。</li>
-</ol>
-<p>根据正交化的思想，我们有一些措施可以独立地优化二者之一。</p>
-<h2 id="机器学习ml策略2">机器学习（ML）策略（2）</h2>
-<h3 id="错误分析">错误分析</h3>
-<p>通过人工检查机器学习模型得出的结果中出现的一些错误，有助于深入了解下一步要进行的工作。这个过程被称作<strong>错误分析（Error Analysis）</strong>。</p>
-<p>例如，你可能会发现一个猫图片识别器错误地将一些看上去像猫的狗误识别为猫。这时，立即盲目地去研究一个能够精确识别出狗的算法不一定是最好的选择，因为我们不知道这样做会对提高分类器的准确率有多大的帮助。</p>
-<p>这时，我们可以从分类错误的样本中统计出狗的样本数量。根据狗样本所占的比重来判断这一问题的重要性。假如狗类样本所占比重仅为 5%，那么即使花费几个月的时间来提升模型对狗的识别率，改进后的模型错误率并没有显著改善；而如果错误样本中狗类所占比重为 50%，那么改进后的模型性能会有较大的提升。因此，花费更多的时间去研究能够精确识别出狗的算法是值得的。</p>
-<p>这种人工检查看似简单而愚笨，但却是十分必要的，因为这项工作能够有效避免花费大量的时间与精力去做一些对提高模型性能收效甚微的工作，让我们专注于解决影响模型准确率的主要问题。</p>
-<p>在对输出结果中分类错误的样本进行人工分析时，可以建立一个表格来记录每一个分类错误的具体信息，例如某些图像是模糊的，或者是把狗识别成了猫等，并统计属于不同错误类型的错误数量。这样，分类结果会更加清晰。</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204205644683.png" alt="image-20201204205644683" /><figcaption>image-20201204205644683</figcaption>
-</figure>
-<p>总结一下，进行错误分析时，你应该观察错误标记的例子，看看假阳性(False Positive)和假阴性(False Negative)，统计属于不同错误类型的错误数量。在这个过程中，你可能会得到启发，归纳出新的错误类型。总之，通过统计不同错误标记类型占总数的百分比，有助于发现哪些问题亟待解决，或者提供构思新优化方向的灵感。</p>
-<h3 id="修正错误标记">修正错误标记</h3>
-<p>我们用 mislabeled examples 来表示学习算法输出了错误的 Y 值。而在做误差分析时，有时会注意到数据集中有些样本被人为地错误标记（incorrectly labeled）了，这时该怎么做？</p>
-<p>如果是在训练集中，由于机器学习算法对于随机误差的<strong>稳健性（Robust）</strong>（也称作“鲁棒性”），只要这些出错的样本数量较小，且分布近似随机，就不必花费时间一一修正。</p>
-<p>而如果出现在验证集或者测试集，则可以在进行误差分析时，通过统计人为标记错误所占的百分比，来大致分析这种情况对模型的识别准确率的影响，并比较该比例的大小和其他错误类型的比例，以此判断是否值得去将错误的标记一一进行修正，还是可以忽略。</p>
-<p>当你决定在验证集和测试集上手动检查标签并进行修正时，有一些额外的方针和原则需要考虑：</p>
-<ul>
-<li>在验证集和测试集上<strong>同时使用同样的修正手段</strong>，以保证验证集和测试集来自相同的分布；</li>
-<li>同时检查判断正确和判断错误的例子（通常不用这么做）；</li>
-<li>在修正验证集和测试集时，鉴于训练集的分布不必和验证/测试集完全相同，可以不去修正训练集。</li>
-</ul>
-<h3 id="快读搭建系统并迭代">快读搭建系统并迭代</h3>
-<p>对于每个可以改善模型的合理方向，如何选择一个方向集中精力处理成了问题。如果想搭建一个全新的机器学习系统，建议根据以下步骤快速搭建好第一个系统，然后开始迭代：</p>
-<ol type="1">
-<li>设置好训练、验证、测试集及衡量指标，确定目标；</li>
-<li>快速训练出一个初步的系统，用训练集来拟合参数，用验证集调参，用测试集评估；</li>
-<li>通过偏差/方差分析以及错误分析等方法，决定下一步优先处理的方向。</li>
-</ol>
-<h3 id="在不同的分布上训练和测试">在不同的分布上训练和测试</h3>
-<p>有时，我们很难得到来自同一个分布的训练集和验证/测试集。还是以猫识别作为例子，我们的训练集可能由网络爬取得到，图片比较清晰，而且规模较大（例如 20 万）；而验证/测试集可能来自用户手机拍摄，图片比较模糊，且数量较少（例如 1 万），难以满足作为训练集时的规模需要。</p>
-<p>虽然验证/测试集的质量不高，但是机器学习模型最终主要应用于识别这些用户上传的模糊图片。考虑到这一点，在划分数据集时，可以将 20 万张网络爬取的图片和 5000 张用户上传的图片作为训练集，而将剩下的 5000 张图片一半作验证集，一半作测试集。比起混合数据集所有样本再随机划分，这种分配方法虽然使训练集分布和验证/测试集的分布并不一样，但是能保证<strong>验证/测试集更接近实际应用场景</strong>，在长期能带来更好的系统性能。</p>
-<h3 id="数据不匹配">==数据不匹配==</h3>
-<p>之前的学习中，我们通过比较人类水平误差、训练集错误率、验证集错误率的相对差值来判断进行偏差/方差分析。但在训练集和验证/测试集分布不一致的情况下，无法根据相对差值来进行偏差/方差分析。这是因为训练集错误率和验证集错误率的差值<u>可能来自于算法本身（归为方差）</u>，也<u>可能来自于样本分布不同，和模型关系不大</u>。</p>
-<p>在可能存在训练集和验证/测试集分布不一致的情况下，为了解决这个问题，我们可以再定义一个<strong>训练-验证集（Training-dev Set）</strong>。训练-验证集和训练集的分布相同（或者是训练集分割出的子集），但是不参与训练过程。</p>
-<p>现在，我们有了 <em>训练集</em> 错误率、 <em>训练-验证集</em> 错误率，以及 <em>验证集</em> 错误率。其中， <em>训练集</em> 错误率和 <em>训练-验证集</em> 错误率的差值反映了方差；而 <em>训练-验证集</em> 错误率和 <em>验证集</em> 错误率的差值反映了样本分布不一致的问题，从而说明<strong>模型擅长处理的数据和我们关心的数据来自不同的分布</strong>，我们称之为<strong>数据不匹配（Data Mismatch）</strong>问题。</p>
-<p>人类水平误差、<em>训练集</em>错误率、<em>训练-验证集</em>错误率、<em>验证集</em>错误率、<em>测试集</em>错误率之间的差值所反映的问题如下图所示：</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201205104721879.png" alt="image-20201205104721879" /><figcaption>image-20201205104721879</figcaption>
-</figure>
-<h4 id="处理方法">处理方法</h4>
-<p>这里有两条关于如何解决数据不匹配问题的建议：</p>
-<ul>
-<li>做错误分析，尝试了解训练集和验证/测试集的具体差异（主要是人工查看训练集和验证集的样本）；</li>
-<li>尝试将训练数据调整得更像验证集，或者收集更多类似于验证/测试集的数据。</li>
-</ul>
-<p>如果你打算将训练数据调整得更像验证集，可以使用的一种技术是<strong>人工合成数据</strong>。我们以语音识别问题为例，实际应用场合（验证/测试集）是包含背景噪声的，而作为训练样本的音频很可能是清晰而没有背景噪声的。为了让训练集与验证/测试集分布一致，我们可以给训练集人工添加背景噪声，合成类似实际场景的声音。</p>
-<p>人工合成数据能够使数据集匹配，从而提升模型的效果。但需要注意的是，不能给每段语音都增加同一段背景噪声，因为这样模型会对这段背景噪音出现过拟合现象，使得效果不佳。</p>
-<h3 id="迁移学习">迁移学习</h3>
-<p><strong>迁移学习（Transfer Learning）</strong>是通过将已训练好的神经网络模型的一部分网络结构应用到另一模型，将一个神经网络从某个任务中学到的知识和经验运用到另一个任务中，以显著提高学习任务的性能。</p>
-<p>例如，我们将为猫识别器构建的神经网络迁移应用到放射科诊断中。因为猫识别器的神经网络已经学习到了有关图像的结构和性质等方面的知识，所以只要先删除神经网络中原有的输出层，加入新的输出层并随机初始化权重系数（<span class="math inline">\(W^{[L]}\)</span>、<span class="math inline">\(b^{[L]}\)</span>），随后用新的训练集进行训练，就完成了以上的迁移学习。</p>
-<p>如果新的数据集很小，可能只需要重新训练输出层前的最后一层的权重，即 <span class="math inline">\(W^{[L]}\)</span>、<span class="math inline">\(b^{[L]}\)</span>，并保持其他参数不变；而如果有足够多的数据，可以只保留网络结构，重新训练神经网络中所有层的系数。这时初始权重由之前的模型训练得到，这个过程称为<strong>预训练（Pre-Training）</strong>，之后的权重更新过程称为<strong>微调（Fine-Tuning）</strong>。</p>
-<p>你也可以不止加入一个新的输出层，而是多向神经网络加几个新层。</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204213709492.png" alt="image-20201204213709492" /><figcaption>image-20201204213709492</figcaption>
-</figure>
-<p>在下述场合进行迁移学习是有意义的：</p>
-<ol type="1">
-<li>两个任务有同样的输入（比如都是图像或者都是音频）；</li>
-<li><strong>拥有更多数据的任务迁移到数据较少的任务</strong>；</li>
-<li>某一任务的低层次特征（底层神经网络的某些功能）对另一个任务的学习有帮助。</li>
-</ol>
-<h3 id="多任务学习">多任务学习</h3>
-<p>迁移学习中的步骤是串行的；而<strong>多任务学习（Multi-Task Learning）</strong>使用单个神经网络模型，利用共享表示采用并行训练同时学习多个任务。多任务学习的基本假设是<strong>多个任务之间具有相关性</strong>，并且任务之间可以利用相关性相互促进。例如，属性分类中，抹口红和戴耳环有一定的相关性，单独训练的时候是无法利用这些信息，多任务学习则可以利用任务相关性联合提高多个属性分类的精度。</p>
-<p>以汽车自动驾驶为例，需要实现的多任务是识别行人、车辆、交通标志和信号灯。如果在输入的图像中检测出车辆和交通标志，则输出的 y 为： <span class="math display">\[
-y = \begin{bmatrix} 0 \\ 1 \\ 1 \\ 0 \end{bmatrix}\quad
-\]</span></p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201205115842523.png" alt="image-20201205115842523" /><figcaption>image-20201205115842523</figcaption>
-</figure>
-<p>多任务学习模型的成本函数为： <span class="math display">\[
-\frac{1}{m} \sum^m_{i=1} \sum^c_{j=1} L(\hat y_j^{(i)}, y_j^{(i)})
-\]</span> 其中，j 代表任务下标，总有 c 个任务。对应的损失函数为： <span class="math display">\[
-L(\hat y_j^{(i)}, y_j^{(i)}) = -y_j^{(i)} log \hat y_j^{(i)} - (1 -y_j^{(i)})log(1 - \hat y_j^{(i)})
-\]</span> 多任务学习是使用单个神经网络模型来实现多个任务。实际上，也可以分别构建多个神经网络来实现。多任务学习中可能存在训练样本 Y 某些标签空白的情况，这不会影响多任务学习模型的训练。</p>
-<p>多任务学习和 Softmax 回归看上去有些类似，容易混淆。它们的区别是，Softmax 回归的输出向量 y 中只有一个元素为 1；而多任务学习的输出向量 y 中可以有多个元素为 1。</p>
-<blockquote>
-<p>例如一个图像多个标签。</p>
-</blockquote>
-<p>在下述场合进行多任务学习是有意义的：</p>
-<ol type="1">
-<li>训练的一组任务可以共用低层次特征；</li>
-<li><em>通常</em>，每个任务的数据量接近；</li>
-<li>能够训练一个足够大的神经网络，以同时做好所有的工作。多任务学习会降低性能的唯一情况（即和为每个任务训练单个神经网络相比性能更低的情况）是神经网络还不够大。</li>
-</ol>
-<p>在多任务深度网络中，低层次信息的共享有助于减少计算量，同时共享表示层可以使得几个有共性的任务更好的结合相关性信息，任务特定层则可以单独建模任务特定的信息，实现共享信息和任务特定信息的统一。</p>
-<p>在实践中，多任务学习的使用频率要远低于迁移学习。计算机视觉领域中的物体识别是一个多任务学习的例子hh。</p>
-<h3 id="端到端学习">端到端学习</h3>
-<p>在传统的机器学习分块模型中，每一个模块处理一种输入，然后其输出作为下一个模块的输入，构成一条流水线。而<strong>端到端深度学习（End-to-end Deep Learning）</strong>只用一个单一的神经网络模型来实现所有的功能。它将所有模块混合在一起，只关心输入和输出。</p>
-<p>如果数据量较少，传统机器学习分块模型所构成的流水线效果会很不错。但如果训练样本足够大，并且训练出的神经网络模型足够复杂，那么端到端深度学习模型的性能会比传统机器学习分块模型更好。</p>
-<p>而如果数据集规模适中，还是可以使用流水线方法，但是可以混合端到端深度学习，通过神经网络绕过某些模块，直接输出某些特征。</p>
-<figure>
-<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20201204213920952.png" alt="image-20201204213920952" /><figcaption>image-20201204213920952</figcaption>
-</figure>
-<h4 id="优点与缺点">优点与缺点</h4>
-<p>应用端到端学习的优点：</p>
-<ul>
-<li>只要有足够多的数据，剩下的全部交给一个足够大的神经网络。比起传统的机器学习分块模型，可能更能捕获数据中的任何统计信息，而不需要用人类固有的认知（或者说，成见）来进行分析；</li>
-<li>所需手工设计的组件更少，简化设计工作流程；</li>
-</ul>
-<p>缺点：</p>
-<ul>
-<li>需要大量的数据；</li>
-<li>排除了可能有用的人工设计组件；</li>
-</ul>
-<p>根据以上分析，决定一个问题是否应用端到端学习的<strong>关键点</strong>是：是否有足够的数据，支持能够直接学习从 x 映射到 y 并且足够复杂的函数？</p>
-]]></content>
-      <categories>
-        <category>机器学习</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
       </tags>
   </entry>
   <entry>
@@ -6955,8 +6927,8 @@ decayed{\_}learning{\_}rate=learning{\_}rate*decayed
         <category>Python</category>
       </categories>
       <tags>
-        <tag>计算机基础</tag>
         <tag>Python</tag>
+        <tag>计算机基础</tag>
       </tags>
   </entry>
   <entry>
