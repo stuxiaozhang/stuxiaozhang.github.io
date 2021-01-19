@@ -200,10 +200,13 @@
   <entry>
     <title>Python模块与文件操作</title>
     <url>/2021/01/17/Python%E6%A8%A1%E5%9D%97%E5%92%8C%E5%8C%85/</url>
-    <content><![CDATA[<p>这篇文章整理了Python的模块与文件的相关操作。</p>
+    <content><![CDATA[<p>这篇文章整理了Python的模块和包的相关操作。</p>
 <p><em><a id="more"></a></em></p>
 <hr />
-<h1 id="python中的包">Python中的包</h1>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/编程语言/Python/python模块和包.png" alt="img" /><figcaption>img</figcaption>
+</figure>
+<h1 id="python中的包">1. Python中的包</h1>
 <ul>
 <li><p>包就是文件夹，包中还可以有包，也就是子文件夹。</p></li>
 <li><p>包里要有 <code>__init__.py</code> 文件才会被认为是python包。(相当于身份证；<code>__init__.py</code>文件里可以什么都没有)</p></li>
@@ -8390,7 +8393,10 @@ decayed{\_}learning{\_}rate=learning{\_}rate*decayed
   <entry>
     <title>Python文件操作</title>
     <url>/2021/01/18/Python%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/</url>
-    <content><![CDATA[<p>这篇文章整理了Python相关的文件操作与。</p>
+    <content><![CDATA[<p>这篇文章整理了Python相关的文件操作：文件的读写，序列化等等。</p>
+<figure>
+<img data-src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/编程语言/Python/python文件操作.png" alt="img" /><figcaption>img</figcaption>
+</figure>
 <p><em><a id="more"></a></em></p>
 <hr />
 <h1 id="文件的创建与写入">1. 文件的创建与写入</h1>
