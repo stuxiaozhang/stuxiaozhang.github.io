@@ -198,7 +198,7 @@
 ]]></content>
   </entry>
   <entry>
-    <title>Python模块与文件操作</title>
+    <title>Python模块和包</title>
     <url>/2021/01/17/Python%E6%A8%A1%E5%9D%97%E5%92%8C%E5%8C%85/</url>
     <content><![CDATA[<p>这篇文章整理了Python的模块和包的相关操作。</p>
 <p><em><a id="more"></a></em></p>
@@ -8655,6 +8655,450 @@ decayed{\_}learning{\_}rate=learning{\_}rate*decayed
       </categories>
       <tags>
         <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Python常用函数与高阶函数</title>
+    <url>/2021/01/19/Python%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E4%B8%8E%E9%AB%98%E9%98%B6%E5%87%BD%E6%95%B0/</url>
+    <content><![CDATA[<p>这篇文章整理了Python的常用函数与高阶函数。</p>
+<p><em><a id="more"></a></em></p>
+<hr />
+<h1 id="python中的加密工具">1. Python中的加密工具</h1>
+<h2 id="hashlib-模块">1.1 <code>hashlib</code> 模块</h2>
+<p>特点：</p>
+<ul>
+<li><u>难破解</u></li>
+<li><u>不可逆</u></li>
+</ul>
+<p><code>hashlib</code> 常用加密方法</p>
+<table>
+<thead>
+<tr class="header">
+<th>函数名</th>
+<th>参数</th>
+<th>介绍</th>
+<th>举例</th>
+<th>返回值</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>md5</code></td>
+<td>byte</td>
+<td>md5算法加密</td>
+<td><code>hashlib.md5(b'hello')</code></td>
+<td>hash对象</td>
+</tr>
+<tr class="even">
+<td><code>sha1</code></td>
+<td>byte</td>
+<td>sha1算法加密</td>
+<td><code>hashlib.sha1(b'hello')</code></td>
+<td>hash对象</td>
+</tr>
+<tr class="odd">
+<td><code>sha256</code></td>
+<td>byte</td>
+<td>sha256算法加密</td>
+<td><code>hashlib.sha256(b'hello')</code></td>
+<td>hash对象</td>
+</tr>
+<tr class="even">
+<td><code>sha512</code></td>
+<td>byte</td>
+<td>sha512算法加密</td>
+<td><code>hashlib.sha512(b'hello')</code></td>
+<td>hash对象</td>
+</tr>
+</tbody>
+</table>
+<p>栗子：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"></span><br><span class="line">base_sign = <span class="string">&#x27;xiaoming&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># a服务</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">custom</span>():</span></span><br><span class="line">    a_timestamp = <span class="built_in">int</span>(time.time())  <span class="comment"># 时间戳</span></span><br><span class="line">    _token = <span class="string">&#x27;%s%s&#x27;</span> % (base_sign, a_timestamp)</span><br><span class="line">    hashobj = hashlib.sha1(_token.encode(<span class="string">&#x27;utf-8&#x27;</span>))</span><br><span class="line">    a_token = hashobj.hexdigest()  <span class="comment"># 返回十六进制加密串</span></span><br><span class="line">    <span class="keyword">return</span> a_token, a_timestamp  <span class="comment"># return 支持多个值返回</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># b服务进行验证</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">b_service_check</span>(<span class="params">token, timestamp</span>):</span></span><br><span class="line">    _token = <span class="string">&#x27;%s%s&#x27;</span> % (base_sign, timestamp)</span><br><span class="line">    b_token = hashlib.sha1(_token.encode(<span class="string">&#x27;utf-8&#x27;</span>)).hexdigest()</span><br><span class="line">    <span class="keyword">if</span> token == b_token:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    need_help_token, timestamp = custom()</span><br><span class="line">    <span class="comment"># result = b_service_check(need_help_token, timestamp)</span></span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    result = b_service_check(need_help_token, <span class="built_in">int</span>(time.time()))</span><br><span class="line">    <span class="keyword">if</span> result == <span class="literal">True</span>:</span><br><span class="line">        print(<span class="string">&#x27;a合法，b服务可以进行帮助&#x27;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        print(<span class="string">&#x27;a不合法，b不可以进行帮助&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="base64-模块">1.2 <code>base64</code> 模块</h2>
+<p>特点：</p>
+<ul>
+<li><u>通用型</u></li>
+<li><u>可解密</u></li>
+</ul>
+<p><code>base64</code> 包常用方法：</p>
+<table>
+<thead>
+<tr class="header">
+<th>函数名</th>
+<th>参数</th>
+<th>介绍</th>
+<th>举例</th>
+<th>返回值</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>encodestring</code></td>
+<td>byte</td>
+<td>进行base64加密</td>
+<td><code>base64.encodestring(b'py')</code></td>
+<td>byte</td>
+</tr>
+<tr class="even">
+<td><code>decodingstring</code></td>
+<td>byte</td>
+<td>对base64解密</td>
+<td><code>base64.decoding(b'eGlhb211\n')</code></td>
+<td>byte</td>
+</tr>
+<tr class="odd">
+<td><strong><code>encodebytes</code></strong></td>
+<td>byte</td>
+<td>进行base64加密</td>
+<td><code>base64.encodebytes(b'py')</code></td>
+<td>byte</td>
+</tr>
+<tr class="even">
+<td><strong><code>decodingbytes</code></strong></td>
+<td>byte</td>
+<td>对base64解密</td>
+<td><code>base64.decodingbytes(b'eGlhb211\n')</code></td>
+<td>byte</td>
+</tr>
+</tbody>
+</table>
+<p>栗子：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">encode</span>(<span class="params">data</span>):</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(data, <span class="built_in">str</span>):</span><br><span class="line">        data = data.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(data, <span class="built_in">bytes</span>):</span><br><span class="line">        data = data</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">&#x27;data shoude be str or bytes&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> base64.encodebytes(data).decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode</span>(<span class="params">data</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">isinstance</span>(data, <span class="built_in">bytes</span>):  <span class="comment"># 不是byte类型抛出异常，逻辑不要弄反了</span></span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">&#x27;data should be bytes&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> base64.decodebytes(data).decode(<span class="string">&#x27;utf-8&#x27;</span>)  <span class="comment"># 变成字符串</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    result = encode(<span class="string">&#x27;hello world&#x27;</span>)</span><br><span class="line">    print(result)</span><br><span class="line">    new_result = decode(result.encode(<span class="string">&#x27;utf-8&#x27;</span>)) <span class="comment"># 因为result是str类型, 所以要转成byte类型</span></span><br><span class="line">    print(new_result)</span><br></pre></td></tr></table></figure>
+<p>因为我们都知道base64的加密和解密方式，那咋办？其实可以二次转换一下。</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"></span><br><span class="line">replace_one = <span class="string">&#x27;%&#x27;</span></span><br><span class="line">replace_two = <span class="string">&#x27;$&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">encode</span>(<span class="params">data</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">isinstance</span>(data, <span class="built_in">str</span>):</span><br><span class="line">        data = data.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> <span class="built_in">isinstance</span>(data, <span class="built_in">bytes</span>):</span><br><span class="line">        data = data</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">&#x27;data shoude be str or bytes&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    _data =  base64.encodebytes(data).decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    new_data = _data.replace(<span class="string">&#x27;a&#x27;</span>, replace_one).replace(<span class="string">&#x27;2&#x27;</span>, replace_two)</span><br><span class="line">    <span class="keyword">return</span> new_data</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode</span>(<span class="params">data</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">isinstance</span>(data, <span class="built_in">bytes</span>):  <span class="comment"># 不是byte类型抛出异常，逻辑不要弄反了</span></span><br><span class="line">        <span class="keyword">raise</span> TypeError(<span class="string">&#x27;data should be bytes&#x27;</span>)</span><br><span class="line">    replace_one_b = replace_one.encode(<span class="string">&#x27;utf-8&#x27;</span>)  <span class="comment"># bytes -&gt; str</span></span><br><span class="line">    replace_two_b = replace_two.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line">    data = data.replace(replace_one_b, <span class="string">b&#x27;a&#x27;</span>).replace(replace_two_b, <span class="string">b&#x27;2&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> base64.decodebytes(data).decode(<span class="string">&#x27;utf-8&#x27;</span>)  <span class="comment"># 变成字符串</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    result = encode(<span class="string">&#x27;hello world&#x27;</span>)</span><br><span class="line">    print(result)</span><br><span class="line">    new_result = decode(result.encode(<span class="string">&#x27;utf-8&#x27;</span>)) <span class="comment"># 因为result是str类型, 所以要转成byte类型</span></span><br><span class="line">    print(new_result)</span><br></pre></td></tr></table></figure>
+<h1 id="python中的内置函数总结">2. Python中的内置函数总结</h1>
+<p>以下是Python中的一些内置函数总结：</p>
+<table>
+<thead>
+<tr class="header">
+<th>函数名</th>
+<th>参数</th>
+<th>介绍</th>
+<th>返回值</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>abs</code></td>
+<td>number</td>
+<td>返回数字绝对值</td>
+<td>正数字</td>
+<td><code>abs(-10)</code></td>
+</tr>
+<tr class="even">
+<td><code>all</code></td>
+<td>list</td>
+<td>判断列表内容是否全是true</td>
+<td>bool</td>
+<td><code>all(['', '123'])</code></td>
+</tr>
+<tr class="odd">
+<td><code>help</code></td>
+<td>object</td>
+<td>打印对象的用法</td>
+<td>无</td>
+<td><code>help(list)</code></td>
+</tr>
+<tr class="even">
+<td><code>enumerate</code></td>
+<td>iterable</td>
+<td>迭代时记录索引</td>
+<td>无</td>
+<td><code>for index, item in enumerate(list)</code></td>
+</tr>
+<tr class="odd">
+<td><code>input</code></td>
+<td>str</td>
+<td>命令行输入消息</td>
+<td>str</td>
+<td><code>input('请输出信息：')</code></td>
+</tr>
+<tr class="even">
+<td><code>isinstance</code></td>
+<td>object, type</td>
+<td>判断对象是否是某种类型</td>
+<td>bool</td>
+<td><code>isinstance('a', str)</code></td>
+</tr>
+<tr class="odd">
+<td><code>type</code></td>
+<td>object</td>
+<td>判断对象的类型</td>
+<td>str</td>
+<td><code>type(10)</code></td>
+</tr>
+<tr class="even">
+<td><code>vars</code></td>
+<td>instance</td>
+<td>返回实例化的字典信息</td>
+<td>dict</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>dir</code></td>
+<td>object</td>
+<td>返回对象中所有可用方法和属性</td>
+<td>list</td>
+<td><code>dir('asd')</code></td>
+</tr>
+<tr class="even">
+<td><code>hasattr</code></td>
+<td>obj, key</td>
+<td>判断对象中是否有某个属性</td>
+<td>bool</td>
+<td><code>hasatr('1', 'upper')</code></td>
+</tr>
+<tr class="odd">
+<td><code>setattr</code></td>
+<td>obj, key, val, ue</td>
+<td>为实例化对象添加属性与值</td>
+<td>无</td>
+<td><code>setattr(instance, 'run', go)</code></td>
+</tr>
+<tr class="even">
+<td><code>getattr</code></td>
+<td>obj, key</td>
+<td>通过对象获取属性</td>
+<td>任何类型</td>
+<td><code>getattr(obj, key)</code></td>
+</tr>
+<tr class="odd">
+<td><code>any</code></td>
+<td>iterable</td>
+<td>判断内容是否有true值</td>
+<td>bool</td>
+<td><code>any([1, 0, ' '])</code></td>
+</tr>
+</tbody>
+</table>
+<h1 id="random-模块">3. <code>random</code> 模块</h1>
+<ul>
+<li><p><code>random.random</code> ：随机返回0~1之间的浮点数（模块.函数）</p></li>
+<li><p><code>random.uniform</code> ：产生一个[a, b]区间的随机浮点数</p></li>
+<li><p><code>random.randint</code> ：产生一个[a, b]区间的随机整数</p></li>
+<li><p><code>random.choice</code> ：返回对象中的一个随机元素</p></li>
+<li><p><code>random.sample</code> ：随机返回对象中指定数量的元素(以列表形式返回)</p></li>
+<li><p><code>random.randrange</code> ：获取区间内的一个随机数。(类似 <code>random.choice</code>)</p></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line">gitfs = [<span class="string">&#x27;iphone&#x27;</span>, <span class="string">&#x27;apple watch&#x27;</span>, <span class="string">&#x27;car&#x27;</span>, <span class="string">&#x27;house&#x27;</span>, <span class="string">&#x27;money&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">choice_gifts</span>():</span></span><br><span class="line">    data = random.choice(gitfs)</span><br><span class="line">    print(<span class="string">&#x27;你得到了%s&#x27;</span> % data)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">choice_gifts_new</span>():</span></span><br><span class="line">    count = random.randrange(<span class="number">0</span>, <span class="number">100</span>, <span class="number">1</span>)  <span class="comment"># 0~100 随机返回一个数字</span></span><br><span class="line">    <span class="keyword">if</span> <span class="number">0</span> &lt;= count &lt;= <span class="number">50</span>:</span><br><span class="line">        print(<span class="string">&#x27;你中了一个apple watch&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> <span class="number">50</span> &lt; count &lt;= <span class="number">75</span>:</span><br><span class="line">        print(<span class="string">&#x27;你中了一个iphone&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> <span class="number">75</span> &lt; count &lt;= <span class="number">90</span>:</span><br><span class="line">        print(<span class="string">&#x27;你中了一个money&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> <span class="number">90</span> &lt; count &lt;= <span class="number">98</span>:</span><br><span class="line">        print(<span class="string">&#x27;你中了一个car&#x27;</span>)</span><br><span class="line">    <span class="keyword">elif</span> count &gt; <span class="number">98</span>:</span><br><span class="line">        print(<span class="string">&#x27;你中了一个house&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    choice_gifts()</span><br><span class="line">    choice_gifts_new()</span><br></pre></td></tr></table></figure>
+<h1 id="python中的迭代器iterator">4. Python中的迭代器（iterator）</h1>
+<p><strong>1、什么是可迭代对象（iterable）？</strong></p>
+<p><strong>可迭代对象可以直接作用于 for 循环。</strong>可迭代对象有以下几种：</p>
+<ul>
+<li>一类是<strong>集合数据类型</strong>，如 <code>str</code> 、 <code>tuple</code> 、<code>list</code> 、 <code>dict</code> 、 <code>set</code>等；</li>
+<li>一类是 <strong>generator</strong> ，包括生成器和带 yield 的 generator function。</li>
+</ul>
+<p><strong>可迭代对象 <code>Iterable</code> 有 <code>__iter__</code> 内置方法， <code>obj.__iter__</code> 就是可迭代对象</strong>，如下:</p>
+<ul>
+<li><code>'world'.__iter__</code></li>
+<li><code>(4,5,6).__iter__</code></li>
+<li><code>[1,2,3].__iter</code>__</li>
+<li><code>&#123;'a':1&#125;.__iter__</code></li>
+<li><code>&#123;'a','b'&#125;.__iter__</code></li>
+<li><code>open('a.txt').__iter__</code> （文件类型是迭代器对象）</li>
+</ul>
+<blockquote>
+<p>如何判断对象是不是可迭代对象？</p>
+<ul>
+<li>可以使用 <code>isinstance()</code> 判断一个对象是否是 Iterable 对象：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Iterable</span><br><span class="line"><span class="built_in">isinstance</span>(&#123;&#125;, Iterable)  <span class="comment"># True</span></span><br><span class="line"><span class="built_in">isinstance</span>(<span class="number">100</span>, Iterable)  <span class="comment"># False　</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>2、什么是迭代器？</strong></p>
+<p>对于序列类型：字符串、列表、元组，我们可以使用索引的方式迭代取出其包含的元素。</p>
+<p>但对于字典、集合、文件等类型是没有索引的，若还想取出其内部包含的元素，则必须找出一种不依赖于索引的迭代方式，这就是迭代器。迭代器是一个可以记住遍历的位置的对象。</p>
+<p><strong>3、迭代器有两个基本的方法</strong></p>
+<ol type="1">
+<li><p><code>iter(iterable)</code> ：生成一个迭代器对象</p></li>
+<li><p><code>next(iterator)</code> ：返回迭代器中的数据</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">list</span>=[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>]</span><br><span class="line">it = <span class="built_in">iter</span>(<span class="built_in">list</span>)    <span class="comment"># 创建迭代器对象</span></span><br><span class="line"><span class="built_in">print</span> (<span class="built_in">next</span>(it))   <span class="comment"># 输出迭代器的下一个元素:1</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>4、总结</strong>：</p>
+<ol type="1">
+<li><p><strong>凡是可作用于 <code>for</code> 循环的对象都是 Iterable 类型。</strong></p></li>
+<li><p><strong>凡是可作用于 <code>next()</code> 函数的对象都是 Iterator 类型。</strong></p></li>
+<li><p>集合数据类型如 <code>list</code> 、 <code>dict</code> 、 <code>str</code> 等<strong>是 Iterable 但不是 Iterator ，不过可以通过 iter() 函数转化成 Iterator 对象</strong>；</p>
+<blockquote>
+<p><code>list</code> 是可迭代对象， <code>it = next(list)</code> 中的 <code>it</code> 是迭代器对象。</p>
+</blockquote></li>
+<li><strong>可迭代对象包含迭代器。</strong></li>
+<li>如果一个对象拥有 <code>__iter__</code> 方法，其是可迭代对象；如果一个对象拥有 <code>next()</code> 方法，其是迭代器。</li>
+<li><p>定义可迭代对象，必须实现 <code>__iter__</code> 方法；定义迭代器，必须实现 <code>__iter__</code> 和 <code>next()</code> 方法。</p></li>
+</ol>
+<blockquote>
+<p>一个对象拥有了next方法就是迭代器，那为什么迭代器必须同时实现 <code>__iter__</code> 和 <code>next()</code> 两种方法呢？</p>
+<p><strong>答：迭代器也是可迭代对象，因此迭代器必须也实现 <code>__iter__</code> 方法。</strong></p>
+</blockquote>
+<p>如何定义可迭代对象和迭代器呢？</p>
+<p>1）<code>__iter__()</code></p>
+<p><strong>该方法返回的是当前对象的迭代器类的实例</strong>。因为可迭代对象与迭代器都要实现这个方法，因此有以下两种写法。</p>
+<ol type="1">
+<li><p>用于可迭代对象类的写法，返回该可迭代对象的迭代器类的实例。</p></li>
+<li><p>用于迭代器类的写法，直接返回self（即自己本身），表示自身即是自己的迭代器。</p></li>
+</ol>
+<p>也许有点晕，没关系，下面会给出两写法的例子，我们结合具体例子看。</p>
+<p>2）<code>next()</code></p>
+<p>返回迭代的每一步，实现该方法时注意要最后超出边界要抛出StopIteration异常。</p>
+<p>举个栗子</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyList</span>(<span class="params"><span class="built_in">object</span></span>):</span>            <span class="comment"># 定义可迭代对象类</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, num</span>):</span></span><br><span class="line">        self.data = num          <span class="comment"># 上边界</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> MyListIterator(self.data)  <span class="comment"># 返回该可迭代对象的迭代器类的实例</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyListIterator</span>(<span class="params"><span class="built_in">object</span></span>):</span>    <span class="comment"># 定义迭代器类，其是MyList可迭代对象的迭代器类</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, data</span>):</span></span><br><span class="line">        self.data = data         <span class="comment"># 上边界</span></span><br><span class="line">        self.now = <span class="number">0</span>             <span class="comment"># 当前迭代值，初始为0</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span>(<span class="params">self</span>):</span></span><br><span class="line">        <span class="keyword">return</span> self              <span class="comment"># 返回该对象的迭代器类的实例；因为自己就是迭代器，所以返回self</span></span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">next</span>(<span class="params">self</span>):</span>              <span class="comment"># 迭代器类必须实现的方法</span></span><br><span class="line">        <span class="keyword">while</span> self.now &lt; self.data:</span><br><span class="line">            self.now += <span class="number">1</span></span><br><span class="line">            <span class="keyword">return</span> self.now - <span class="number">1</span>  <span class="comment"># 返回当前迭代值</span></span><br><span class="line">        <span class="keyword">raise</span> StopIteration      <span class="comment"># 超出边界要抛出StopIteration异常。</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">my_list = MyList(<span class="number">5</span>)              <span class="comment"># 得到一个可迭代对象</span></span><br><span class="line"><span class="built_in">print</span> <span class="built_in">type</span>(my_list)              <span class="comment"># 返回该对象的类型</span></span><br><span class="line"> </span><br><span class="line">my_list_iter = <span class="built_in">iter</span>(my_list)     <span class="comment"># 得到该对象的迭代器实例，iter函数在下面会详细解释</span></span><br><span class="line"><span class="built_in">print</span> <span class="built_in">type</span>(my_list_iter)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> my_list:                <span class="comment"># 迭代</span></span><br><span class="line">    <span class="built_in">print</span> i</span><br></pre></td></tr></table></figure>
+<h1 id="python中的高级函数">5. Python中的高级函数</h1>
+<h2 id="filter">5.1 <code>filter</code></h2>
+<p><code>filter(func, list)</code> ：对循环根据过滤条件进行过滤。</p>
+<ul>
+<li><p><code>func</code> ：对 list 的每个 item 进行条件过滤的定义</p></li>
+<li><p><code>list</code> ：需要过滤的列表</p></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fruits = [<span class="string">&#x27;apple&#x27;</span>, <span class="string">&#x27;banana&#x27;</span>, <span class="string">&#x27;orange&#x27;</span>]</span><br><span class="line">result = <span class="built_in">filter</span>(<span class="keyword">lambda</span> x: <span class="string">&#x27;e&#x27;</span> <span class="keyword">in</span> x, fruits)</span><br><span class="line">print(<span class="built_in">list</span>(result))  <span class="comment"># [&#x27;apple&#x27;, &#x27;orange&#x27;]</span></span><br><span class="line">print(fruits)  <span class="comment"># [&#x27;apple&#x27;, &#x27;banana&#x27;, &#x27;orange&#x27;]</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fruit_func</span>(<span class="params">x</span>):</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&#x27;e&#x27;</span> <span class="keyword">in</span> x:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">fruit_result = <span class="built_in">filter</span>(fruit_func, fruits)</span><br><span class="line">print(<span class="built_in">list</span>(fruit_result))  <span class="comment"># [&#x27;apple&#x27;, &#x27;orange&#x27;]</span></span><br></pre></td></tr></table></figure>
+<h2 id="map">5.2 <code>map</code></h2>
+<p><code>map(func, list)</code> ：对列表中的每个成员是否满足条件返回对应的True与False</p>
+<ul>
+<li><p><code>func</code> ：对 list 的每个 item 进行条件过滤的定义</p></li>
+<li><p><code>list</code> ：需要过滤的列表</p></li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">map_result = <span class="built_in">map</span>(fruit_func, fruits)</span><br><span class="line">print(<span class="built_in">list</span>(map_result))  <span class="comment"># [True, None, True]</span></span><br></pre></td></tr></table></figure>
+<h2 id="reduce">5.3 <code>reduce</code></h2>
+<p><code>reduce(func, list)</code> ：对循环前后两个数据进行累加</p>
+<ul>
+<li><p><code>func</code> ：对 数据累加的函数</p></li>
+<li><p><code>list</code> ：需要处理的列表</p></li>
+</ul>
+<blockquote>
+<p>需要导入：from functools import reduce</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line"></span><br><span class="line">reduce_result = reduce(<span class="keyword">lambda</span> x, y: x + y, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>])</span><br><span class="line">print(reduce_result)  <span class="comment"># 7</span></span><br><span class="line"></span><br><span class="line">reduce_result = reduce(<span class="keyword">lambda</span> x, y: x * y, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>])</span><br><span class="line">print(reduce_result)  <span class="comment"># 8</span></span><br><span class="line"></span><br><span class="line">reduce_result = reduce(<span class="keyword">lambda</span> x, y: x + y, fruits)</span><br><span class="line">print(reduce_result)  <span class="comment"># applebananaorange</span></span><br><span class="line"></span><br><span class="line">reduce_result = reduce(<span class="keyword">lambda</span> x, y: x * y, fruits)</span><br><span class="line">print(reduce_result)  <span class="comment"># TypeError: can&#x27;t multiply sequence by non-int of type &#x27;str&#x27;</span></span><br></pre></td></tr></table></figure>
+<h1 id="日志模块">6. 日志模块</h1>
+]]></content>
+      <categories>
+        <category>编程语言</category>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>机器学习介绍</title>
+    <url>/2021/01/23/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%BB%8B%E7%BB%8D/</url>
+    <content><![CDATA[<p>这篇文章整理了介绍了机器学习的分类。</p>
+<p><em><a id="more"></a></em></p>
+<hr />
+<h1 id="机器学习介绍">机器学习介绍</h1>
+<blockquote>
+<p>define a set of function(model) -&gt; goodness of function -&gt; pick the best function</p>
+</blockquote>
+<h2 id="learning-map">Learning Map</h2>
+<p>下图中，同样的颜色指的是同一个类型的事情</p>
+<p>蓝色方块指的是 scenario，即学习的情境。通常学习的情境是我们没有办法控制的，比如做 reinforcement Learning 是因为我们没有 data 、没有办法来做 supervised Learning 的情况下才去做的。如果有 data ， supervised Learning 当然比 reinforcement Learning 要好；因此手上有什么样的 data ，就决定你使用什么样的 scenario</p>
+<p>红色方块指的是 task ，即要解决的问题。你要解的问题，随着你要找的 function 的 output 的不同，有输出 scalar 的 regression 、有输出 options 的 classification 、有输出 structured object 的 structured Learning ...</p>
+<p>绿色的方块指的是 model ，即用来解决问题的模型(function set)。在这些 task 里面有不同的 model ，也就是说，同样的 task ，我们可以用不同的方法来解它，比如 linear model 、 Non-linear model (deep Learning、SVM、decision tree、K-NN...)</p>
+<center>
+<img data-src="https://gitee.com/Sakura-gh/ML-notes/raw/master/img/learningMap.png" alt="learning map" width="60%;" />
+</center>
+<h2 id="supervised-learning监督学习">1. Supervised Learning(监督学习)</h2>
+<ul>
+<li><p><strong>监督学习是指从标注数据中学习预测模型的机器学习问题，其本质是学习输入到输出的映射的统计规律。</strong></p>
+<blockquote>
+<p>标注数据表示输入输出对应关系。</p>
+<p>预测模型对给定的输入产生相应的输出。</p>
+</blockquote></li>
+<li><p>输入变量 <span class="math inline">\(X\)</span> 和输出变量 <span class="math inline">\(Y\)</span> 有不同的类型，可以是连续或是离散的。根据输入输出变量的不同类型，对预测任务给予不同的名称：</p>
+<ul>
+<li>输入与输出变量均为连续变量的预测问题称为<strong>回归问题</strong>；</li>
+<li>输出变量为有限个离散变量的预测问题称为<strong>分类问题</strong>；</li>
+<li>输入与输出变量均为变量序列的预测问题称为<strong>标注问题</strong>。</li>
+</ul></li>
+</ul>
+<p>supervised learning 需要大量的 training data ，这些 training data 告诉我们说，一个我们要找的 function ，它的 input 和 output 之间有什么样的关系</p>
+<p>而这种 function 的 output ，通常被叫做 label (标签)，也就是说，我们要使用 supervised learning 这样一种技术，我们需要告诉机器， function 的 input 和 output 分别是什么，而这种 output 通常是通过人工的方式标注出来的，因此称为人工标注的 label ，它的缺点是需要大量的人工 effort</p>
+<h3 id="regression-回归">1.1 Regression (回归)</h3>
+<p>回归问题是监督学习的一个重要问题。回归用于预测输入变量(自变量)和输出变量(因变量)之间的关系，特别是当输入变量的值发生变化时，输出变量的值随之发生的变化。</p>
+<p>回归模型正是表示从输入变量到输出变量之间映射的函数。回归问题的学习等价于函数拟合：选择一条函数曲线使其很好地拟合已知数据，且很好地预测未知数据。</p>
+<p>regression 是 machine learning 的一个 task ，特点是 通过 regression 找到的 function ，它的输出是一个scalar数值</p>
+<blockquote>
+<p>比如 PM2.5 的预测，给 machine 的 training data 是过去的PM2.5资料，而输出的是对未来PM2.5的预测<strong>数值</strong>，这就是一个典的 regression 的问题</p>
+</blockquote>
+<h3 id="classification-分类">1.2 Classification (分类)</h3>
+<p>分类是监督学习的一个核心问题。在监督学习中，当输出变量 Y 取有限个离散值时，预测问题便成为分类问题。这时，输入变量 X 可以是离散的，也可以是连续。</p>
+<p>监督学习从数据中学习一个分类模型或分类决策函数称为分类器。分类器对新的输入进行输出的预测称为分类。</p>
+<p>分类问题包括学习和分类两个过程：在学习过程中，根据已知的训练数据集，利用有效的学习方法学习一个分类器；在分类过程中，利用学习的分类器对新的输入实例进行分类。</p>
+<p>regression 和 classification 的区别是，我们要机器输出的东西的类型是不一样的，在 regression 里机器输出的是 scalar ，而 classification 又分为两类：</p>
+<p>1、Binary Classification(二元分类)</p>
+<p>在 binary classification 里，我们要机器输出的是 yes or no ，是或否</p>
+<blockquote>
+<p>比如 G-mail 的 spam filtering (垃圾邮件过滤器)，输入是邮件，输出是该邮件是否是垃圾邮件</p>
+</blockquote>
+<p>2、Multi-class classification(多元分类)</p>
+<p>在 multi-class classification 里，机器要做的是选择题，等于给他数个选项，每一个选项就是一个类别，它要从数个类别里面选择正确的类别</p>
+<blockquote>
+<p>比如 document classification (新闻文章分类)，输入是一则新闻，输出是这个新闻属于哪一个类别(选项)</p>
+</blockquote>
+<h3 id="tagging-标注">1.3 Tagging (标注)</h3>
+<p>标注问题也是一个监督学习问题。可以认为标注问题是分类问题的一个推广，标注问题又是更复杂的结构预测问题的简单形式。</p>
+<p>评价标注模型得指标于评价分类模型的指标一样，常用的有标注准确率，精确率和召回率。其定义与分类模型相同。</p>
+<p>标注常用的统计学习方法有：隐马尔科夫模型、条件随机场。</p>
+<h2 id="unsupervised-learning无监督学习">2. Unsupervised Learning(无监督学习)</h2>
+<ul>
+<li><p><strong>无监督学习指从无标注数据中学习预测模型的机器学习问题，其本质是学习数据中的统计规律或内在结构。</strong></p>
+<blockquote>
+<p>无标注数据是指自然得到的数据。</p>
+<p>预测模型表示数据的类别、转换或概率。</p>
+</blockquote></li>
+<li><p>无监督学习旨在从假设空间中选出在给定评价标准下的最优模型，模型可以实现对数据的聚类、降维或是概率估计。</p>
+<blockquote>
+<p>模型属于输入空间到输出空间的映射的集合，这个集合就是假设空间。</p>
+</blockquote></li>
+</ul>
+<p>区别于supervised learning，unsupervised learning希望机器学到无师自通，在完全没有任何 label 的情况下，机器到底能学到什么样的知识</p>
+<p>举例来说，如果我们给机器看大量的文章，机器看过大量的文章之后，它到底能够学到什么事情？它能不能学会每个词汇的意思？</p>
+<p>学会每个词汇的意思可以理解为：我们要找一个 function ，然后把一个词汇丢进去，机器要输出告诉你说这个词汇是什么意思，也许他用一个向量来表示这个词汇的不同的特性，不同的 attribute</p>
+<h2 id="reinforcement-learning强化学习">3. Reinforcement Learning(强化学习)</h2>
+<ul>
+<li><strong>强化学习指智能系统在与环境的连续互动中学习最优行为策略的机器学习问题，其本质是学习最优的序贯决策。</strong></li>
+<li>智能系统的目标不是短期奖励的最大化，而是长期累积奖励的最大化。强化学习过程中，系统不断地试错，以达到学习最优策略地目的。</li>
+</ul>
+<blockquote>
+<p><strong>Supervised Learning</strong>：我们会告诉机器正确的答案是什么 ，其特点是 <strong>Learning from teacher</strong></p>
+<ul>
+<li>比如训练一个聊天机器人，告诉他如果使用者说了“Hello”，你就说“Hi”；如果使用者说了“Bye bye”，你就说“Good bye”；就好像有一个家教在它的旁边手把手地教他每一件事情</li>
+</ul>
+<p><strong>Reinforcement Learning</strong>：我们没有告诉机器正确的答案是什么，机器最终得到的只有一个分数，就是它做的好还是不好，但他不知道自己到底哪里做的不好，他也没有正确的答案；很像真实社会中的学习，你没有一个正确的答案，你只知道自己是做得好还是不好。其特点是 <strong>Learning from critics</strong></p>
+</blockquote>
+<p>比如训练一个聊天机器人，让它跟客人直接对话；如果客人勃然大怒把电话挂掉了，那机器就学到一件事情，刚才做错了，它不知道自己哪里做错了，必须自己回去反省检讨到底要如何改进，比如一开始不应该打招呼吗？还是中间不能骂脏话之类的</p>
+<center>
+<img data-src="https://gitee.com/Sakura-gh/ML-notes/raw/master/img/reinforcement-Learning.png" alt="reinforcement" width="60%;" />
+</center>
+<p>再拿下棋这件事举例，supervised Learning 是说看到眼前这个棋盘，告诉机器下一步要走什么位置；而 reinforcement Learning 是说让机器和对手互弈，下了好几手之后赢了，机器就知道这一局棋下的不错，但是到底哪一步是赢的关键，机器是不知道的，他只知道自己是赢了还是输了</p>
+<p>其实 Alpha Go 是用 supervised Learning + reinforcement Learning 的方式去学习的，机器先是从棋谱学习，有棋谱就可以做supervised 的学习；之后再做 reinforcement Learning ，机器的对手是另外一台机器，Alpha Go 就是和自己下棋，然后不断的进步</p>
+<h2 id="semi-supervised-learning半监督学习">4. Semi-supervised Learning(半监督学习)</h2>
+<p>举例：如果想要做一个区分猫和狗的 function</p>
+<p>手头上有少量的 labeled data ，它们标注了图片上哪只是猫哪只是狗；同时又有大量的 unlabeled data ，它们仅仅只有猫和狗的图片，但没有标注去告诉机器哪只是猫哪只是狗</p>
+<p>在 Semi-supervised Learning 的技术里面，这些没有 labeled 的 data ，对机器学习也是有帮助的</p>
+<center>
+<img data-src="https://gitee.com/Sakura-gh/ML-notes/raw/master/img/semi-supervised-Learning.png" alt="semi-supervised" width="60%;" />
+</center>
+<h2 id="transfer-learning迁移学习">5. Transfer Learning(迁移学习)</h2>
+<p>假设一样我们要做猫和狗的分类问题</p>
+<p>我们也一样只有少量的有 labeled 的 data ；但是我们现在有大量的不相干的 data (不是猫和狗的图片，而是一些其他不相干的图片)，在这些大量的 data 里面，它可能有 label 也可能没有 label</p>
+<p>Transfer Learning 要解决的问题是，这一堆不相干的 data 可以对结果带来什么样的帮助</p>
+<center>
+<img data-src="https://gitee.com/Sakura-gh/ML-notes/raw/master/img/transfer-Learning.png" alt="transfer" width="60%;" />
+</center>
+<h2 id="structured-learning结构化学习">6. Structured Learning(结构化学习)</h2>
+<p>在 structured Learning 里，我们要机器输出的是，一个有结构性的东西</p>
+<p>在分类的问题中，机器输出的只是一个选项；在 structured 类的 problem 里面，机器要输出的是一个复杂的物件</p>
+<p>举例来说，在语音识别的情境下，机器的输入是一个声音信号，输出是一个句子；句子是由许多词汇拼凑而成，它是一个有结构性的 object</p>
+<p>或者说机器翻译、人脸识别(标出不同的人的名称)</p>
+<p>比如 <strong>GAN</strong> 也是 structured Learning 的一种方法</p>
+<center>
+<img data-src="https://gitee.com/Sakura-gh/ML-notes/raw/master/img/structured-Learning.png" alt="structured" width="60%;" />
+</center>
+]]></content>
+      <categories>
+        <category>机器学习</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
       </tags>
   </entry>
 </search>
