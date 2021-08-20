@@ -13855,35 +13855,36 @@ f(x)=\begin{cases}
   <entry>
     <title>循环神经网络 RNN</title>
     <url>/2021/07/05/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%20RNN/</url>
-    <content><![CDATA[<h2 id="循环神经网络-RNN"><a href="#循环神经网络-RNN" class="headerlink" title="循环神经网络 RNN"></a>循环神经网络 RNN</h2><p>循环神经网络（recurrent neural network）或RNN是一类用于处理<strong>序列数据</strong>的神经网络。序列数据用原始的神经网络难以建模，基于此，RNN 引入了 hidden state， 可对序列数据提取特征，接着再转换为输出。</p>
+    <content><![CDATA[<h1 id="循环神经网络-rnn">循环神经网络 RNN</h1>
+<p>循环神经网络（recurrent neural network）或RNN是一类用于处理<strong>序列数据</strong>的神经网络。序列数据用原始的神经网络难以建模，基于此，RNN 引入了 hidden state， 可对序列数据提取特征，接着再转换为输出。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210724085122874.png" style="zoom:60%"/></p>
 <blockquote>
 <p>注：图中的圆圈表示向量，箭头表示对向量做变换。</p>
 </blockquote>
-<p>这就是最经典的RNN结构，它的输入是 $x_1, x_2, …x_n$，输出为 $y1, y2, …yn$，也就是说，<strong>输入和输出序列必须要是等长的</strong>。再详细展开RNN。</p>
+<p>这就是最经典的RNN结构，它的输入是 <span class="math inline">\(x_1, x_2, ...x_n\)</span>，输出为 <span class="math inline">\(y1, y2, ...yn\)</span>，也就是说，<strong>输入和输出序列必须要是等长的</strong>。再详细展开RNN。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210706192557245.png" style="zoom:90%"/></p>
-<p>$x$ 是一个向量，它表示<strong>输入层</strong>的值。$s$ 是一个向量，它表示<strong>隐藏层</strong>的值。$U$ 是输入层到隐藏层的<strong>权重矩阵</strong>。$o$ 也是一个向量，它表示<strong>输出层</strong>的值。$V$ 是隐藏层到输出层的<strong>权重矩阵</strong>。</p>
-<p><strong>循环神经网络</strong>的<strong>隐藏层</strong>的值 $s$ 不仅仅取决于当前这次的输入 $x$，还取决于上一次<strong>隐藏层</strong>的值 $s$。<strong>权重矩阵</strong> $W$ 就是<strong>隐藏层</strong>上一次的值作为这一次的输入的权重。</p>
-<p>所以，RNN这个网络在 $t$ 时刻接收到输入 $x<em>{t}$ 之后, 隐藏层的值是 $s</em>{t}$, 输出值是 $o<em>{t}$ . 关键一点是, $s</em>{t}$ 的值不仅仅取决于 $x<em>{t}$，还取决于 $s</em>{t-1}$ 。可以用下面的公式来表示RNN的计算方法:</p>
-<script type="math/tex; mode=display">
+<p><span class="math inline">\(x\)</span> 是一个向量，它表示<strong>输入层</strong>的值。<span class="math inline">\(s\)</span> 是一个向量，它表示<strong>隐藏层</strong>的值。<span class="math inline">\(U\)</span> 是输入层到隐藏层的<strong>权重矩阵</strong>。<span class="math inline">\(o\)</span> 也是一个向量，它表示<strong>输出层</strong>的值。<span class="math inline">\(V\)</span> 是隐藏层到输出层的<strong>权重矩阵</strong>。</p>
+<p><strong>循环神经网络</strong>的<strong>隐藏层</strong>的值 <span class="math inline">\(s\)</span> 不仅仅取决于当前这次的输入 <span class="math inline">\(x\)</span>，还取决于上一次<strong>隐藏层</strong>的值 <span class="math inline">\(s\)</span>。<strong>权重矩阵</strong> <span class="math inline">\(W\)</span> 就是<strong>隐藏层</strong>上一次的值作为这一次的输入的权重。</p>
+<p>所以，RNN这个网络在 <span class="math inline">\(t\)</span> 时刻接收到输入 <span class="math inline">\(x_{t}\)</span> 之后, 隐藏层的值是 <span class="math inline">\(s_{t}\)</span>, 输出值是 <span class="math inline">\(o_{t}\)</span> . 关键一点是, <span class="math inline">\(s_{t}\)</span> 的值不仅仅取决于 <span class="math inline">\(x_{t}\)</span>，还取决于 <span class="math inline">\(s_{t-1}\)</span> 。可以用下面的公式来表示RNN的计算方法: <span class="math display">\[
 \begin{array}{l}
 S_{t}=f\left(U \cdot X_{t}+W \cdot S_{t-1}\right) \\ 
 O_{t}=g\left(V \cdot S_{t}\right) \\
-\end{array}</script><p>这里的 $f()$ 函数表示激活函数，对于 CNN 来说，激活函数一般选取的都是 ReLU，但是 RNN 一般选用 tanh。$S<em>t$ 的值不仅仅取决于 $X_t$，还取决于 $S</em>{t-1}$。可以将这个过程理解为，你现在大四，你的知识是由大四学到的知识（当前输入 $X<em>t$）和大三以及大三以前学到的知识（记忆 $S</em>{t-1}$）的结合。</p>
+\end{array}
+\]</span> 这里的 <span class="math inline">\(f()\)</span> 函数表示激活函数，对于 CNN 来说，激活函数一般选取的都是 ReLU，但是 RNN 一般选用 tanh。<span class="math inline">\(S_t\)</span> 的值不仅仅取决于 <span class="math inline">\(X_t\)</span>，还取决于 <span class="math inline">\(S_{t-1}\)</span>。可以将这个过程理解为，你现在大四，你的知识是由大四学到的知识（当前输入 <span class="math inline">\(X_t\)</span>）和大三以及大三以前学到的知识（记忆 <span class="math inline">\(S_{t-1}\)</span>）的结合。</p>
 <p><strong>RNN 的结构细节：</strong></p>
-<ol>
-<li>可以把 $S_t$ 当作隐状态，捕捉了之前时间点上的信息。就像你去考研一样，考的时候记住了你能记住的所有信息</li>
-<li>可惜的是 $S_t$ 并不能捕捉之前所有时间点的信息，或者说在网络传播的过程中会 “忘掉” 一部分。就像你考研也记不住所有的英语单词一样</li>
-<li>和卷积神经网络一样，RNN 中的每个节点都共享了一组参数 $(U,V,W)$，这样就能极大降低计算量</li>
+<ol type="1">
+<li>可以把 <span class="math inline">\(S_t\)</span> 当作隐状态，捕捉了之前时间点上的信息。就像你去考研一样，考的时候记住了你能记住的所有信息</li>
+<li>可惜的是 <span class="math inline">\(S_t\)</span> 并不能捕捉之前所有时间点的信息，或者说在网络传播的过程中会 &quot;忘掉&quot; 一部分。就像你考研也记不住所有的英语单词一样</li>
+<li>和卷积神经网络一样，RNN 中的每个节点都共享了一组参数 <span class="math inline">\((U,V,W)\)</span>，这样就能极大降低计算量</li>
 </ol>
 <p>由于 <strong>RNN 输入和输出序列必须是等长的</strong>，因为这个限制的存在，经典RNN的适用范围比较小，但也有一些问题适合用经典的RNN结构建模，如：</p>
 <ul>
-<li><p>计算视频中每一帧的分类标签。因为要对每一帧进行计算，因此输入和输出序列等长。</p>
-</li>
-<li><p>输入为字符，输出为下一个字符的概率。这就是著名的 <a href="http://karpathy.github.io/2015/05/21/rnn-effectiveness/">Char RNN</a></p>
-</li>
+<li><p>计算视频中每一帧的分类标签。因为要对每一帧进行计算，因此输入和输出序列等长。</p></li>
+<li><p>输入为字符，输出为下一个字符的概率。这就是著名的 <a href="http://karpathy.github.io/2015/05/21/rnn-effectiveness/">Char RNN</a></p></li>
 </ul>
-<h3 id="经典的RNN结构（N-vs-N）"><a href="#经典的RNN结构（N-vs-N）" class="headerlink" title="经典的RNN结构（N vs N）"></a>经典的RNN结构（N vs N）</h3><h4 id="N-VS-1"><a href="#N-VS-1" class="headerlink" title="N VS 1"></a>N VS 1</h4><p>有的时候，要处理的问题是，输入是一个序列，输出是一个单独的值(而不是序列)，此时通常在最后的一个 序列上进行输出变换。</p>
+<h2 id="经典的rnn结构n-vs-n">经典的RNN结构（N vs N）</h2>
+<h3 id="n-vs-1">N VS 1</h3>
+<p>有的时候，要处理的问题是，输入是一个序列，输出是一个单独的值(而不是序列)，此时通常在最后的一个 序列上进行输出变换。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210724090448797.png" style="zoom:60%"/></p>
 <p>这种 N VS 1 结构通常用来处理序列分类问题，如：</p>
 <ul>
@@ -13891,7 +13892,8 @@ O_{t}=g\left(V \cdot S_{t}\right) \\
 <li>输入一个句子判断其情感倾向</li>
 <li>输入一段视频并判断它的类别等等。</li>
 </ul>
-<h4 id="1-VS-N"><a href="#1-VS-N" class="headerlink" title="1 VS N"></a>1 VS N</h4><p>有时要处理的问题输入是一个单独的值，输出是一个序列。此时，有两种主要建模方式： </p>
+<h3 id="vs-n">1 VS N</h3>
+<p>有时要处理的问题输入是一个单独的值，输出是一个序列。此时，有两种主要建模方式：</p>
 <p>方式一：可只在其中的某一个序列进行计算，比如序列第一个进行输入计算：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210724090842023.png" style="zoom:60%"/></p>
 <p>方式二：把输入信息X作为每个阶段的输入：</p>
@@ -13901,9 +13903,10 @@ O_{t}=g\left(V \cdot S_{t}\right) \\
 <li>从图像生成文字（image caption），此时输入的X就是图像的特征，而输出的y序列就是一段句子</li>
 <li>从类别生成语音或音乐等</li>
 </ul>
-<h4 id="N-vs-M"><a href="#N-vs-M" class="headerlink" title="N vs M"></a>N vs M</h4><p>RNN最重要的一个变种：N vs M。这种结构又叫 Encoder-Decoder 模型，也可以称之为Seq2Seq模型。原始的 N vs N RNN要求序列等长，然而我们遇到的大部分问题序列都是不等长的，如机器翻译中，源语言和目标语言的句子往往并没有相同的长度。</p>
+<h3 id="n-vs-m">N vs M</h3>
+<p>RNN最重要的一个变种：N vs M。这种结构又叫 Encoder-Decoder 模型，也可以称之为Seq2Seq模型。原始的 N vs N RNN要求序列等长，然而我们遇到的大部分问题序列都是不等长的，如机器翻译中，源语言和目标语言的句子往往并没有相同的长度。</p>
 <p>因此，<strong>Encoder-Decoder结构先将输入数据编码成一个语义向量c，然后用另一个RNN网络对其进行解码</strong>。</p>
-<p><img src="C:%5CUsers%5CHP%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210724091327947.png" alt="image-20210724091327947"></p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210724091327947.png" /></p>
 <p>这种 N VS M 的结构可以处理的问题有：</p>
 <ul>
 <li>机器翻译，输入一种语言文本序列，输出另外一种语言的文本序列</li>
@@ -13912,104 +13915,98 @@ O_{t}=g\left(V \cdot S_{t}\right) \\
 <li>语音识别，输入语音序列信息，输出文字序列</li>
 </ul>
 <p>详细的 Seq2Seq 介绍可以看这篇文章 ==Seq2Seq和Attention==。</p>
-<h3 id="CNN和RNN的区别"><a href="#CNN和RNN的区别" class="headerlink" title="CNN和RNN的区别"></a>CNN和RNN的区别</h3><div class="table-container">
+<h2 id="cnn和rnn的区别">CNN和RNN的区别</h2>
 <table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 90%" />
+</colgroup>
 <thead>
-<tr>
+<tr class="header">
 <th>类别</th>
 <th>特点描述</th>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td>相同点</td>
 <td>1、传统神经网络的扩展。<br />2、前向计算产生结果，反向计算模型更新。<br />3、每层神经网络横向可以多个神经元共存,纵向可以有多层神经网络连接。</td>
 </tr>
-<tr>
+<tr class="even">
 <td>不同点</td>
 <td>1、CNN空间扩展，神经元与特征卷积；RNN时间扩展，神经元与多个时间输出计算<br />2、RNN可以用于描述时间上连续状态的输出，有记忆功能，CNN用于静态输出</td>
 </tr>
 </tbody>
 </table>
-</div>
-<h3 id="前向传播和反向传播BPTT"><a href="#前向传播和反向传播BPTT" class="headerlink" title="前向传播和反向传播BPTT"></a>前向传播和反向传播BPTT</h3><p>以下图为例：</p>
+<h2 id="前向传播和反向传播bptt">前向传播和反向传播BPTT</h2>
+<p>以下图为例：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210706201554377.png" style="zoom:80%"/></p>
-<p>假设时间序列只有三段, $S_{0}$ 为给定值, 神经元没有激活函数, 则RNN最简单的前向传播过程如下:</p>
-<script type="math/tex; mode=display">
+<p>假设时间序列只有三段, <span class="math inline">\(S_{0}\)</span> 为给定值, 神经元没有激活函数, 则RNN最简单的前向传播过程如下: <span class="math display">\[
 S_{1}=W_{x} X_{1}+W_{s} S_{0}+b_{1} O_{1}=W_{o} S_{1}+b_{2} \\
  S_{2}=W_{x} X_{2}+W_{s} S_{1}+b_{1} O_{2}=W_{o} S_{2}+b_{2} \\
- S_{3}=W_{x} X_{3}+W_{s} S_{2}+b_{1} O_{3}=W_{o} S_{3}+b_{2}</script><p>假设在 $\mathrm{t}=3$ 时刻，损失函数为 $L<em>{3}=\frac{1}{2}\left(Y</em>{3}-O<em>{3}\right)^{2}$。则对于一次训练任务的损失函数为 $L=\sum</em>{t=0}^{T} L_{t}$, 即每一时刻损失值的累加.</p>
-<p>BPTT(back-propagation through time)算法是常用的训练RNN的方法，其本质还是BP算法，只不过RNN处理时间序列数据，所以要基于时间反向传播，故叫随时间反向传播。BPTT的中心思想和BP算法相同，沿着需要优化的参数的负梯度方向不断寻找更优的点直至收敛。使用随机梯度下降法训练RNN其实就是对 $W<em>{x},W</em>{s},W<em>{o}$ 以及 $b</em>{1},b_{2}$ 求偏导, 并不断调整它们以使L尽可能达到最小的过程。</p>
-<p>现在假设时间序列只有三段,  $\mathrm{t} 1, \mathrm{t} 2, \mathrm{t} 3$ 。只对 $\mathrm{t} 3$ 时刻的 $W<em>{x},W</em>{s},W_{o}$ 求偏导(其他时刻类似): </p>
-<script type="math/tex; mode=display">
+ S_{3}=W_{x} X_{3}+W_{s} S_{2}+b_{1} O_{3}=W_{o} S_{3}+b_{2} 
+\]</span> 假设在 <span class="math inline">\(\mathrm{t}=3\)</span> 时刻，损失函数为 <span class="math inline">\(L_{3}=\frac{1}{2}\left(Y_{3}-O_{3}\right)^{2}\)</span>。则对于一次训练任务的损失函数为 <span class="math inline">\(L=\sum_{t=0}^{T} L_{t}\)</span>, 即每一时刻损失值的累加.</p>
+<p>BPTT(back-propagation through time)算法是常用的训练RNN的方法，其本质还是BP算法，只不过RNN处理时间序列数据，所以要基于时间反向传播，故叫随时间反向传播。BPTT的中心思想和BP算法相同，沿着需要优化的参数的负梯度方向不断寻找更优的点直至收敛。使用随机梯度下降法训练RNN其实就是对 <span class="math inline">\(W_{x},W_{s},W_{o}\)</span> 以及 <span class="math inline">\(b_{1},b_{2}\)</span> 求偏导, 并不断调整它们以使L尽可能达到最小的过程。</p>
+<p>现在假设时间序列只有三段, <span class="math inline">\(\mathrm{t} 1, \mathrm{t} 2, \mathrm{t} 3\)</span> 。只对 <span class="math inline">\(\mathrm{t} 3\)</span> 时刻的 <span class="math inline">\(W_{x},W_{s},W_{o}\)</span> 求偏导(其他时刻类似): <span class="math display">\[
 \frac{\partial L_{3}}{\partial W_{o}}=\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial W_{o}} \\
  \frac{\partial L_{3}}{\partial W_{x}}=\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial W_{x}}+\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial S_{2}} \frac{\partial S_{2}}{\partial W_{x}}+\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial S_{2}} \frac{\partial S_{2}}{\partial S_{1}} \frac{\partial S_{1}}{\partial W_{x}} \\
- \frac{\partial L_{3}}{\partial W_{s}}=\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial W_{s}}+\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial S_{2}} \frac{\partial S_{2}}{\partial W_{s}}+\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial S_{2}} \frac{\partial S_{2}}{\partial S_{1}} \frac{\partial S_{1}}{\partial W_{s}}</script><p>可以看出对于 $W<em>{0}$ 求偏导并没有长期依赖, 但是对于 $W</em>{x}, W<em>{s}$ 求偏导, 会随着时间序列产生长期依赖。因为 $S</em>{t}$ 随着时间序列向前传播, 而 $S<em>{t}$ 又是 $W</em>{x}, W<em>{s}$ 的函数。<br>根据上述求偏导的过程可以得出任意时刻对 $W</em>{x}, W_{s}$ 求偏导的公式:</p>
-<script type="math/tex; mode=display">
-\frac{\partial L_{t}}{\partial W_{x}}=\sum_{k=0}^{t} \frac{\partial L_{t}}{\partial O_{t}} \frac{\partial O_{t}}{\partial S_{t}}\left(\prod_{j=k+1}^{t} \frac{\partial S_{j}}{\partial S_{j-1}}\right) \frac{\partial S_{k}}{\partial W_{x}} \\
-
-\frac{\partial L_{t}}{\partial W_{s}}=\sum_{k=0}^{t} \frac{\partial L_{t}}{\partial O_{t}} \frac{\partial O_{t}}{\partial S_{t}}\left(\prod_{j=k+1}^{t} \frac{\partial S_{j}}{\partial S_{j-1}}\right) \frac{\partial S_{k}}{\partial W_{s}}</script><p>如果加上激活函数,  $S<em>{j}=\tanh \left(W</em>{x} X<em>{j}+W</em>{s} S<em>{j-1}+b</em>{1}\right) $,<br>则  </p>
-<script type="math/tex; mode=display">
-\prod_{j=k+1}^{t} \frac{\partial S_{j}}{\partial S_{j-1}}=\prod_{j=k+1}^{t} \tanh ^{\prime} \cdot W_{s}</script><h3 id="RNN-梯度消失和梯度爆炸"><a href="#RNN-梯度消失和梯度爆炸" class="headerlink" title="RNN 梯度消失和梯度爆炸"></a>RNN 梯度消失和梯度爆炸</h3><p>激活函数tanh和它的导数图像如下。</p>
+ \frac{\partial L_{3}}{\partial W_{s}}=\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial W_{s}}+\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial S_{2}} \frac{\partial S_{2}}{\partial W_{s}}+\frac{\partial L_{3}}{\partial O_{3}} \frac{\partial O_{3}}{\partial S_{3}} \frac{\partial S_{3}}{\partial S_{2}} \frac{\partial S_{2}}{\partial S_{1}} \frac{\partial S_{1}}{\partial W_{s}}
+\]</span> 可以看出对于 <span class="math inline">\(W_{0}\)</span> 求偏导并没有长期依赖, 但是对于 <span class="math inline">\(W_{x}, W_{s}\)</span> 求偏导, 会随着时间序列产生长期依赖。因为 <span class="math inline">\(S_{t}\)</span> 随着时间序列向前传播, 而 <span class="math inline">\(S_{t}\)</span> 又是 <span class="math inline">\(W_{x}, W_{s}\)</span> 的函数。 根据上述求偏导的过程可以得出任意时刻对 <span class="math inline">\(W_{x}, W_{s}\)</span> 求偏导的公式: $$ =<em>{k=0}^{t}  (</em>{j=k+1}^{t} )  \</p>
+<p>=<em>{k=0}^{t}  (</em>{j=k+1}^{t} )  <span class="math display">\[
+如果加上激活函数,  $S_{j}=\tanh \left(W_{x} X_{j}+W_{s} S_{j-1}+b_{1}\right)$,
+则  
+\]</span> <em>{j=k+1}^{t} =</em>{j=k+1}^{t} ^{} W_{s} $$</p>
+<h2 id="rnn-梯度消失和梯度爆炸">RNN 梯度消失和梯度爆炸</h2>
+<p>激活函数tanh和它的导数图像如下。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/tanh.jpg" style="zoom:30%"/></p>
-<p>由上图可以看出 $\tanh ^{\prime} \leq 1$, 对于训练过程大部分情况下 $tanh$ 的导数是小于1的，因为很少情 况下会出现 $W<em>{x} X</em>{j}+W<em>{s} S</em>{j-1}+b<em>{1}=0$ , 如果 $W</em>{s}$ 也是一个大于0小于1的值, 则当t很大时  $\prod<em>{j=k+1}^{t} \tanh ^{\prime} \cdot W</em>{s}$ 就会趋近于0(和  $0.01^{50} $ 趋近与0是一个道理)。同理当 $W<em>{s}$ 很大时  $\prod</em>{j=k+1}^{t} \tanh ^{\prime} \cdot W_{s}$ 就会趋近于无穷, 这就是RNN中梯度消失和爆炸的原因。</p>
+<p>由上图可以看出 <span class="math inline">\(\tanh ^{\prime} \leq 1\)</span>, 对于训练过程大部分情况下 <span class="math inline">\(tanh\)</span> 的导数是小于1的，因为很少情况下会出现 <span class="math inline">\(W_{x} X_{j}+W_{s} S_{j-1}+b_{1}=0\)</span> , 如果 <span class="math inline">\(W_{s}\)</span> 也是一个大于0小于1的值, 则当t很大时 <span class="math inline">\(\prod_{j=k+1}^{t} \tanh ^{\prime} \cdot W_{s}\)</span> 就会趋近于0(和 $0.01^{50} $ 趋近与0是一个道理)。同理当 <span class="math inline">\(W_{s}\)</span> 很大时 <span class="math inline">\(\prod_{j=k+1}^{t} \tanh ^{\prime} \cdot W_{s}\)</span> 就会趋近于无穷, 这就是RNN中梯度消失和爆炸的原因。</p>
 <p>于是，为了解决这个现象，出现了LSTM.</p>
-<h2 id="LSTM"><a href="#LSTM" class="headerlink" title="LSTM"></a>LSTM</h2><p>所有 RNN 都具有一种重复神经网络模块的链式的形式。在标准的 RNN 中，这个重复的模块只有一个非常简单的结构，例如一个 tanh 层，如下图所示：</p>
+<h1 id="lstm">LSTM</h1>
+<p>长时间的短期记忆网络（Long Short-Term Memory Networks），很多地方翻译为长短期记忆网络，给人一种歧义，以为是网络一会儿能记很长的内容，一会儿能记很短的内容，但其实正确的翻译应该是长时间的短期记忆网络。它的本质就是能够记住很长时期内的信息.</p>
+<p>所有 RNN 都具有一种重复神经网络模块的链式的形式。在标准的 RNN 中，这个重复的模块只有一个非常简单的结构，例如一个 tanh 层，如下图所示：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM1.png" style="zoom:60%"/></p>
-<p>Long Short Term网络，一般就叫做 LSTM。是一种 RNN 特殊的类型，可以学习长期依赖信息。LSTM 同样是这样的结构，但是重复的模块拥有一个不同的结构。不同于单一神经网络层，这里是有四个，以一种非常特殊的方式进行交互。</p>
+<p>LSTM 是一种 RNN 特殊的类型，可以学习长期依赖信息。LSTM 同样是这样的结构，但是重复的模块拥有一个不同的结构。不同于单一神经网络层，这里是有四个，以一种非常特殊的方式进行交互。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM2.png" style="zoom:60%"/></p>
 <p>注：上图图标具体含义如下所示：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM3.png" style="zoom:80%"/></p>
-<p>上图中，每一条黑线传输着一整个向量，从一个节点的输出到其他节点的输入。粉色的圈代表 pointwise 的操作，诸如向量的和，而黄色的矩阵就是学习到的神经网络层。合在一起的线表示向量的连接，分开的线表示内容被复制，然后分发到不同的位置。</p>
-<h3 id="LSTM-核心思想"><a href="#LSTM-核心思想" class="headerlink" title="LSTM 核心思想"></a>LSTM 核心思想</h3><p>LSTM 的关键就是细胞状态，水平线在图上方贯穿运行。细胞状态类似于传送带。直接在整个链上运行，只有一些少量的线性交互。信息在上面流传保持不变会很容易。示意图如下所示：</p>
+<p>上图中，每一条黑线传输着一整个向量，从一个节点的输出到其他节点的输入。粉色的圈代表 pointwise 的操作，如向量的乘法、加法，而黄色的矩阵就是学习到的神经网络层。合在一起的线表示向量的连接（比如一个是 <span class="math inline">\(h_{t−1}\)</span>，另一个是 <span class="math inline">\(x_t\)</span>，那么合并后的输出就是 <span class="math inline">\([h_{t−1},x_t]\)</span>）。分开的线表示内容被复制，然后分发到不同的位置。</p>
+<h2 id="lstm-核心思想">LSTM 核心思想</h2>
+<p>LSTM 的关键就是 cell 状态，即贯穿图顶部的水平线。cell 状态的传输就像一条传送带，向量从整个 cell 中穿过，只是做了少量的线性操作，这种结构能很轻松地实现信息从整个 cell 中穿过而不做改变（这样就可以实现长时期地记忆保留）</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM4.png" style="zoom:80%"/></p>
-<p>LSTM 有通过精心设计的称作为“门”的结构来去除或者增加信息到细胞状态的能力。门是一种让信息选择式通过的方法。他们包含一个 sigmoid 神经网络层和一个 pointwise 乘法操作。示意图如下：</p>
+<p>LSTM 也有能力向 cell 状态中添加或删除信息，这是由称为<strong>门（gates）</strong>的结构仔细控制的。<strong>门</strong>可以选择性的让信息通过，它们由 sigmoid 神经网络层和 pointwise 逐点相乘实现：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM5.png" style="zoom:80%"/></p>
-<p>LSTM 拥有三个门，分别是忘记门，输入门和输出门，来保护和控制细胞状态。</p>
-<h4 id="忘记门"><a href="#忘记门" class="headerlink" title="忘记门"></a>忘记门</h4><p>作用对象：细胞状态 cell state</p>
-<p>作用：表示是否保留当前节点的历史状态</p>
-<p>操作步骤：该门会读取 $h<em>{t-1}$ 和 $x_t$，输出一个在 0 到 1 之间的数值给每个在细胞状态$C</em>{t-1}$中的数字。1 表示“完全保留”，0 表示“完全舍弃”。示意图如下：</p>
+<p>LSTM 拥有三个门，分别是忘记门，输入门和输出门，来控制信息。</p>
+<h3 id="遗忘门">遗忘门</h3>
+<p>LSTM 的第一步是<strong>决定要从 cell 状态中丢弃什么信息</strong>，这个决定是由一个叫做 <code>forget gate layer</code> 的 sigmoid 神经层来实现的。它的输入是 <span class="math inline">\(h_{t−1}\)</span> 和 <span class="math inline">\(x_t\)</span>，输出是一个数值都在 0~1 之间的向量（向量长度和 <span class="math inline">\(C_{t−1}\)</span> 一样），表示让 <span class="math inline">\(C_{t−1}\)</span> 的各部分信息通过的比重，0 表示不让任何信息通过，1 表示让所有信息通过</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM6.png" style="zoom:80%"/></p>
-<h4 id="输入门"><a href="#输入门" class="headerlink" title="输入门"></a>输入门</h4><p>作用对象：细胞状态 cell state</p>
-<p>作用：表示是否允许当前隐层节点的输出值传递到下一层</p>
-<p>操作步骤：</p>
-<ul>
-<li><p>步骤一：sigmoid 层称 “输入门层” 决定什么值我们将要更新。</p>
-</li>
-<li><p>步骤二：tanh 层创建一个新的候选值向量 $\tilde{C}_t$ 加入到状态中。其示意图如下：</p>
-</li>
-</ul>
+<h3 id="输入门">输入门</h3>
+<p>下一步是<strong>决定要让多少新的信息加入到 cell 状态中</strong>。实现这个需要包括两个步骤：首先，一个叫做 <code>input gate layer</code> 的 sigmoid 层决定哪些信息需要更新。另一个 tanh 层创建一个新的 candidate 向量 <span class="math inline">\(\tilde{C}_t\)</span> 。最后，我们把这两个部分联合起来对 cell 状态进行更新.</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM7.png" style="zoom:80%"/></p>
-<ul>
-<li>步骤三：将 $c<em>{t-1}$ 更新为 $c</em>{t}$。将旧状态与 $f_t$ 相乘，丢弃掉我们确定需要丢弃的信息。接着加上 $i_t * \tilde{C}_t$ 得到新的候选值，根据我们决定更新每个状态的程度进行变化。其示意图如下：</li>
-</ul>
+<p>下一步是将 <span class="math inline">\(C_{t-1}\)</span> 更新为 <span class="math inline">\(C_{t}\)</span>。将旧状态与 <span class="math inline">\(f_t\)</span> 相乘，丢弃掉我们确定需要丢弃的信息。接着加上 <span class="math inline">\(i_t * \tilde{C}_t\)</span> 得到新的候选值，根据我们决定更新每个状态的程度进行变化。其示意图如下：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM8.png" style="zoom:80%"/></p>
-<h4 id="输出门"><a href="#输出门" class="headerlink" title="输出门"></a>输出门</h4><p>作用对象：隐层 $h_t$ hidden state</p>
-<p>作用：表示是否允许当前隐层节点的输出值传递到下一层</p>
+<h3 id="输出门">输出门</h3>
+<p>最后，需要决定输出什么值了。这个输出主要是依赖于 cell 状态 <span class="math inline">\(C_t\)</span>，但是是经过筛选的版本。作用对象是隐层 <span class="math inline">\(h_t\)</span> hidden state。</p>
 <p>操作步骤：</p>
 <ul>
-<li><p>步骤一：通过 sigmoid 层来确定细胞状态的哪个部分将输出。</p>
-</li>
-<li><p>步骤二：把细胞状态通过 tanh 进行处理，并将它和 sigmoid 门的输出相乘，最终我们仅仅会输出我们确定输出的那部分。</p>
-</li>
+<li><p>步骤一：通过 sigmoid 层来确定细胞状态的哪个部分将输出。</p></li>
+<li><p>步骤二：把细胞状态 <span class="math inline">\(C_t\)</span> 通过 tanh 进行处理（把数值归一化到 - 1 和 1 之间），并将它和 sigmoid 门的输出相乘，最终我们仅仅会输出我们确定输出的那部分。</p></li>
 </ul>
 <p>其示意图如下所示：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM9.png" style="zoom:80%"/></p>
-<p>无论是“ 遗忘门 ”，“ 输入门 ”，“ 输出门 ”，他们都被一个 $0$ ~ $1$ 之间的值所决定，这个值与一组数据做乘积，来显示这个数据的重要性。 而这个值都是由 $h_{t-1}$ 和 $x_t$ 经过 sigmoid 函数而得出来的，他们在不同的位置，衡量的却都是 “重要性”，更好理解的说法是：他们都衡量当前这个数据往后传递的必要性（重要性）：</p>
+<p>无论是“ 遗忘门 ”，“ 输入门 ”，“ 输出门 ”，他们都被一个 <span class="math inline">\(0\)</span> ~ <span class="math inline">\(1\)</span> 之间的值所决定，这个值与一组数据做乘积，来显示这个数据的重要性。 而这个值都是由 <span class="math inline">\(h_{t-1}\)</span> 和 <span class="math inline">\(x_t\)</span> 经过 sigmoid 函数而得出来的，他们在不同的位置，衡量的却都是 “重要性”，更好理解的说法是：他们都衡量当前这个数据往后传递的必要性（重要性）：</p>
 <ul>
-<li>在遗忘门中，它决定了 $C_{t-1}$ 被遗忘的程度</li>
-<li>在输入门中，它决定了 $\tilde C_{i}$ 的记忆程度，多少加入到记忆中来更新记忆</li>
+<li>在遗忘门中，它决定了 <span class="math inline">\(C_{t-1}\)</span> 被遗忘的程度</li>
+<li>在输入门中，它决定了 <span class="math inline">\(\tilde C_{i}\)</span> 的记忆程度，多少加入到记忆中来更新记忆</li>
 <li>在输出门中，它决定了 这个更新的记忆输入到下一个隐藏层的重要程度。</li>
 </ul>
-<p>公式总结：</p>
-<script type="math/tex; mode=display">
+<p>公式总结： <span class="math display">\[
 \begin{aligned}
 \left(\begin{array}{l}
 i \\
 f \\
 o \\
 g
-\end{array}\right) &=\left(\begin{array}{c}
+\end{array}\right) &amp;=\left(\begin{array}{c}
 \sigma \\
 \sigma \\
 \sigma \\
@@ -14018,23 +14015,23 @@ g
 h_{t-1} \\
 x_{t}
 \end{array}\right) \\
-c_{t} &=f \odot c_{t-1}+i \odot g \\
-h_{t} &=o \odot \tanh \left(c_{t}\right)
-\end{aligned}</script><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210723162852993.png" style="zoom:80%"/></p>
-<h2 id="GRU"><a href="#GRU" class="headerlink" title="GRU"></a>GRU</h2><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210710222902681.png" style="zoom:80%"/></p>
+c_{t} &amp;=f \odot c_{t-1}+i \odot g \\
+h_{t} &amp;=o \odot \tanh \left(c_{t}\right)
+\end{aligned}
+\]</span> <img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210723162852993.png" style="zoom:80%"/></p>
+<h1 id="gru">GRU</h1>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210710222902681.png" style="zoom:80%"/></p>
 <p>GRU(Gate Recurrent Unit) 是 RNN 的另一类演化变种，与LSTM非常相似。GRU结构中<strong>去除了单元状态，而使用隐藏状态来传输信息。</strong>它只有两个门结构，分别是更新门和重置门。相比LSTM，使用GRU能够达到相当的效果，并且相比之下更容易进行训练，能够很大程度上提高训练效率，因此很多时候会更倾向于使用GRU。</p>
-<h3 id="重置门"><a href="#重置门" class="headerlink" title="重置门"></a>重置门</h3><p>重置门用于决定丢弃先前信息的程度。</p>
-<h3 id="更新门"><a href="#更新门" class="headerlink" title="更新门"></a>更新门</h3><p>更新门的作用类似于LSTM中的遗忘门和输入门，它能决定要丢弃哪些信息和要添加哪些新信息。</p>
+<h3 id="重置门">重置门</h3>
+<p>重置门用于决定丢弃先前信息的程度。</p>
+<h3 id="更新门">更新门</h3>
+<p>更新门的作用类似于LSTM中的遗忘门和输入门，它能决定要丢弃哪些信息和要添加哪些新信息。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/LSTM12.png" style="zoom:80%"/></p>
-<p>可以看到，这里的遗忘 $z<em>t$ 和选择 $1-z_t$是联动的。也就是说，对于传递进来的维度信息，我们会进行选择性遗忘，则遗忘了多少权重 $1-z_t$ ，我们就会使用包含当前输入的 $\tilde{h}</em>{t}$ 中所对应的权重进行弥补 $z_t$ 。以保持一种”恒定“状态。</p>
-<h2 id="BiRNN"><a href="#BiRNN" class="headerlink" title="BiRNN"></a>BiRNN</h2><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210730213648990.png" alt="image-20210730213648990"></p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210730213824267.png" alt="image-20210730213824267" style="zoom: 67%;" /></p>
-<blockquote>
-<p>计算 t1 到 tT 时刻所有的前向传播结果，上图中的黑实线，黄实线</p>
-<p>再计算反向传播（输入反转）的黑虚线，黄虚线，从 tT 到 t1</p>
-<p>再从黄点计算输出结果到红点</p>
-<p>(好像是这样?)</p>
-</blockquote>
+<p>可以看到，这里的遗忘 <span class="math inline">\(z_t\)</span> 和选择 <span class="math inline">\(1-z_t\)</span>是联动的。也就是说，对于传递进来的维度信息，我们会进行选择性遗忘，则遗忘了多少权重 <span class="math inline">\(1-z_t\)</span> ，我们就会使用包含当前输入的 <span class="math inline">\(\tilde{h}_{t}\)</span> 中所对应的权重进行弥补 <span class="math inline">\(z_t\)</span> 。以保持一种”恒定“状态。</p>
+<h2 id="birnn">BiRNN</h2>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210730213648990.png" /></p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210730213824267.png" style="zoom: 67%;" /></p>
+<p>可以将 BiRNN 看成是两层神经网络，第一层从左边作为系列的起始输入，在文本处理上可以理解成从句子的开头开始输入，而第二层则是从右边作为系列的起始输入，在文本处理上可以理解成从句子的最后一个词语作为输入，反向做与第一层一样的处理处理。最后对得到的两个结果进行处理。</p>
 ]]></content>
       <categories>
         <category>深度学习</category>
@@ -14386,7 +14383,7 @@ e_{i j} = a\left(z_{i-1}, h_{j}\right)
   </entry>
   <entry>
     <title>TransE：Translating Embeddings for Modeling Multi-relational Data</title>
-    <url>/2021/08/14/TransE%EF%BC%9ATranslating%20Embeddings%20for%20Modeling%20Multi-relational%20Data/</url>
+    <url>/2021/08/13/TransE%EF%BC%9ATranslating%20Embeddings%20for%20Modeling%20Multi-relational%20Data/</url>
     <content><![CDATA[<h1 id="transetranslating-embeddings-for-modeling-multi-relational-data">TransE：Translating Embeddings for Modeling Multi-relational Data</h1>
 <p>TransE 模型的目标是学习出 <strong>实体(entity)和关系(relation)的低维向量表示</strong>。以前有很多种训练三元组的方法，但是参数过多，以至于模型过于复杂难以理解。本文作者提出了 TransE 模型，工作效果和以前一样，但模型简单易扩展，达到了不错的效果。</p>
 <h2 id="basic-idea">Basic Idea</h2>
@@ -14430,9 +14427,7 @@ S_{(h, \ell, t)}^{\prime}=\left\{\left(h^{\prime}, \ell, t\right) \mid h^{\prime
 <p>上式构造错误的三元组，头部或尾部被随机实体代替（不能同时替换，但肯定有一个是属于训练项中的实体）。</p>
 <p>为了避免出现生成的负例其实存在于知识库中的情况，我们可以对生成的负例进行过滤，如果它是知识库中的正例，那我们就不把它作为负例，而是重新生成一个负例。</p>
 <h3 id="algorithm">Algorithm</h3>
-<figure>
-<img src="C:%5CUsers%5CHP%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210813094032687.png" alt="image-20210813094032687" /><figcaption>image-20210813094032687</figcaption>
-</figure>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210819112248295.png" /></p>
 <p>算法1中描述了详细的过程：</p>
 <ol start="0" type="1">
 <li><p>输入训练集三元组 <span class="math inline">\(S={(h, \ell, t)}\)</span>，实体集 <span class="math inline">\(E\)</span>，关系集 <span class="math inline">\(L\)</span>，嵌入维度 <span class="math inline">\(k\)</span>，超参数：margin <span class="math inline">\(\gamma\)</span>，学习率 <span class="math inline">\(\lambda\)</span></p></li>
@@ -14444,7 +14439,7 @@ S_{(h, \ell, t)}^{\prime}=\left\{\left(h^{\prime}, \ell, t\right) \mid h^{\prime
 <li>对于每批数据 <span class="math inline">\(S_{batch}\)</span>
 <ol type="1">
 <li>进行负采样（将训练集中的三元组头实体 or 尾实体随机替换掉）</li>
-<li><span class="math inline">\(T_{batch}\)</span> 初始为一个空列表，然后向其添加由元组对（原三元组，错误三元组）组成的列表 <span class="math inline">\(T_{batch} = [ ( [h,r,t], [h&#39;,r,t&#39;] ), （[ ], [ ]）, ......]\)</span></li>
+<li><span class="math inline">\(T_{batch}\)</span> 初始为一个空列表，然后向其添加由元组对（原三元组，错误三元组）组成的列表 <span class="math inline">\(T_{batch} = [ ( [h,r,t], [h&#39;,r,t&#39;] ), ([ ], [ ]), ......]\)</span></li>
 </ol></li>
 <li>利用 SGD 优化目标函数，进行 embedding 参数的更新</li>
 </ol></li>
@@ -14544,14 +14539,10 @@ hotel  &amp;=\left[\begin{array}{llllllllllll}
 <li>当一个单词 <span class="math inline">\(w\)</span> 出现在文本中时，它的上下文是出现在其附近的一组单词(在一个固定大小的窗口中)。</li>
 <li>使用 <span class="math inline">\(w\)</span> 的许多上下文来构建 <span class="math inline">\(w\)</span> 的表示</li>
 </ul>
-<figure>
-<img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210729225215683.png" alt="image-20210729225215683" /><figcaption>image-20210729225215683</figcaption>
-</figure>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210729225215683.png" /></p>
 <p>我们为每个单词构建一个 <strong>密集</strong> 的向量，使其与出现在相似上下文中的单词向量相似。</p>
 <p>词向量 <strong><em>word vectors</em></strong> 有时被称为词嵌入 <strong><em>word embeddings</em></strong> 或词表示 <strong><em>word representations</em></strong>。它们是分布式表示 <strong><em>distributed representation</em></strong>。</p>
-<figure>
-<img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210729231215648.png" alt="image-20210729231215648" /><figcaption>image-20210729231215648</figcaption>
-</figure>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210729231215648.png" /></p>
 <p><strong><em>Word2vec</em></strong> (Mikolov et al. 2013)是一个学习单词向量的 <strong>框架</strong></p>
 <p><strong>IDEA</strong>：</p>
 <ul>
@@ -14562,9 +14553,7 @@ hotel  &amp;=\left[\begin{array}{llllllllllll}
 <li><strong>不断调整词向量</strong> 来最大化这个概率</li>
 </ul>
 <p>下图为窗口大小 <span class="math inline">\(j=2\)</span> 时的 <span class="math inline">\(P(w_{t+j}|w_t)\)</span> 计算过程，center word 分别为 <span class="math inline">\(into\)</span> 和 <span class="math inline">\(banking\)</span></p>
-<figure>
-<img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210729232018361.png" alt="image-20210729232018361" /><figcaption>image-20210729232018361</figcaption>
-</figure>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210729232018361.png" /></p>
 <h3 id="word2vec-model">word2vec model</h3>
 <p>2013 年，Google 团队发表了 word2vec 工具。word2vec 词向量可以较好地表达不同词之间的相似度和类比关系。word2vec 是一个软件包,实际上包含：</p>
 <ul>
@@ -14573,7 +14562,7 @@ hotel  &amp;=\left[\begin{array}{llllllllllll}
 </ul>
 <p>对于在语义上有意义的表示，它们的训练依赖于条件概率，条件概率可以被看作是使用语料库中一些词来预测另一些单词。由于是不带标签的数据，因此跳字模型和连续词袋模型都是<strong>自监督模型</strong>。</p>
 <h4 id="skip-gram-跳字模型">skip-gram 跳字模型</h4>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210811211150440.png" alt="image-20210811211150440" style="zoom:67%;" /></p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210811211150440.png" style="zoom:67%;" /></p>
 <p>在<strong>跳字模型中，我们用一个词来预测它在文本序列周围的词。</strong>例如，给定文本序列 &quot;the&quot;,&quot;man&quot;,&quot;loves&quot;,&quot;his&quot;,&quot;son&quot;。设背景窗口大小为 2， 跳字模型所关心的是，给定 &quot;loves&quot;，生成它邻近词 &quot;the&quot;,&quot;man&quot;.&quot;his&quot;,&quot;son&quot; 的概率（在这个例子中，&quot;loves&quot; 叫中心词，&quot;the&quot;,&quot;man&quot;,&quot;his&quot;,&quot;son&quot; 叫背景词），即 <span class="math display">\[
 P(\textrm{&quot;the&quot;},\textrm{&quot;man&quot;},\textrm{&quot;his&quot;},\textrm{&quot;son&quot;}\mid\textrm{&quot;loves&quot;}).
 \]</span> 假设在给定中心词的情况下，上下文词的生成是相互独立的，那么上式可以改写成 <span class="math display">\[
@@ -14643,7 +14632,7 @@ P(w_o|w_c)=\frac{\exp(\boldsymbol{u}_o^T\boldsymbol {v}_c)}{\sum_{i\in V}\exp(\b
 \end{align}
 \]</span> 最终，对于词典中任一索引为 <span class="math inline">\(i\)</span> 的词，我们均得到该词作为中心词和上下文词的两组词向量 <span class="math inline">\(\boldsymbol {v}_i\)</span> 和 <span class="math inline">\(\boldsymbol {u}_i\)</span></p>
 <h4 id="cbow-连续词袋模型">CBOW 连续词袋模型</h4>
-<p><img src="C:%5CUsers%5CHP%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210811170513754.png" alt="image-20210811170513754" style="zoom:67%;" /></p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210811170513754.png" style="zoom:67%;" /></p>
 <p>连续词袋模型（Continuous Bag of Words）与跳字模型类似。与跳字模型最大的不同是，连续词袋模型是用一个中心词在文本序列<strong>周围的词 来预测中心词</strong>。例如，给定文本 &quot;the&quot;,&quot;man&quot;,&quot;hit&quot;,&quot;the&quot;,&quot;ball&quot;，连续词袋模型所关心的是，邻近词 &quot;the&quot;,&quot;man&quot;,&quot;the&quot;,&quot;ball&quot; 一起生成中心词 &quot;hit&quot; 的概率</p>
 <p>连续词袋模型需要最大化由背景词生成任一中心词的概率： <span class="math display">\[
 \prod_{t=1}^TP(w^{(t)}\mid w^{(t-m)},...,w^{(t-1)},w^{(t+1)},...,w^{(t+m)})
@@ -14690,9 +14679,7 @@ P(D=1\mid w_o,w_c)=\sigma(\boldsymbol{u}_o^T,\boldsymbol{v}_c)
 \]</span></p>
 <h4 id="层序-softmax">层序 softmax</h4>
 <p>层序 softmax 利用了二叉树(哈夫曼树)。树的每个叶子节点代表着词典 <span class="math inline">\(V\)</span> 中的每个词。每个词 <span class="math inline">\(w_i\)</span> 对应的词向量为 <span class="math inline">\(v_i\)</span>。我们以下图为例，来描述层序 softmax 的工作机制</p>
-<figure>
-<img src="C:%5CUsers%5CHP%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210812222709840.png" alt="image-20210812222709840" /><figcaption>image-20210812222709840</figcaption>
-</figure>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210812222709840.png" style="zoom: 50%;" /></p>
 <p>设 <span class="math inline">\(L(w)\)</span> 为从二叉树根节点到代表词 <span class="math inline">\(w\)</span> 的叶子节点的路径上的节点数，并设 $n(w,i) $ 为该路径上第 i 个节点，该节点的向量为 <span class="math inline">\(u_{n(w,j)}\)</span>。以上图为例，<span class="math inline">\(L(w_3)=4\)</span>。那么，跳字模型和连续词袋模型所需要计算的任意词 <span class="math inline">\(w_i\)</span> 生成词 <span class="math inline">\(w\)</span> 的概率为：</p>
 <p><span class="math display">\[
 P(w\mid w_i)=\prod_{j=1}^{L(w)-1}\sigma([n(w,j+1)=left\_child(n(w,j))]·\boldsymbol{u}_{n(w,j)}^T\boldsymbol{v}_i)
@@ -14839,7 +14826,7 @@ p_{t}=S \cdot \operatorname{sigmoid}\left(\boldsymbol{v}_{p}^{\top} \tanh \left(
   </entry>
   <entry>
     <title>Transformer：Attention Is All You Need</title>
-    <url>/2021/07/31/Transformer%EF%BC%9AAttention%20Is%20All%20You%20Need/</url>
+    <url>/2021/08/07/Transformer%EF%BC%9AAttention%20Is%20All%20You%20Need/</url>
     <content><![CDATA[<h1 id="transformerattention-is-all-you-need">Transformer：Attention Is All You Need</h1>
 <div class="note note-primary">
             <p>实在是看不动了，留一些坑：</p><p><strong><em>位置编码还未理解。</em></strong>可以研究一下这篇 <a href="https://wmathor.com/index.php/archives/1453/">Transformer 中的 Positional Encoding</a></p><p><a href="https://www.nowcoder.com/discuss/258321">一些关于Transformer的问题整理</a></p><p><a href="http://jalammar.github.io/illustrated-transformer/">图解 Transformer</a></p>
@@ -15009,7 +14996,7 @@ X_{\text {hidden }} \in \mathbb{R}^{\text {batch_size } * \text { seq_len. } * \
     <url>/2021/08/01/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E6%9E%84%E5%BB%BA%E6%8A%80%E6%9C%AF%E7%BB%BC%E8%BF%B0/</url>
     <content><![CDATA[<h1 id="知识图谱构建技术综述">知识图谱构建技术综述</h1>
 <div class="note note-info">
-            <p>本文是对《知识图谱构建技术综述》这篇综述的简要总结。</p>
+            <p>本文是对《知识图谱构建技术综述》这篇综述的略读。</p>
           </div>
 <h2 id="知识图谱的定义与架构">1. 知识图谱的定义与架构</h2>
 <h3 id="知识图谱的定义">1.1 知识图谱的定义</h3>
@@ -15125,6 +15112,275 @@ X_{\text {hidden }} \in \mathbb{R}^{\text {batch_size } * \text { seq_len. } * \
       </categories>
       <tags>
         <tag>NLP</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Joint Extraction of Entities and Relations Based on a Novel Tagging Scheme</title>
+    <url>/2021/08/15/Joint%20Extraction%20of%20Entities%20and%20Relations%20Based%20on%20a%20Novel%20Tagging%20Scheme/</url>
+    <content><![CDATA[<h1 id="joint-extraction-of-entities-and-relations-based-on-a-novel-tagging-scheme">Joint Extraction of Entities and Relations Based on a Novel Tagging Scheme</h1>
+<p>作者提出了一个新的标注方案，并使用神经网络进行实体和关系的联合抽取。</p>
+<h2 id="basic-idea">Basic Idea</h2>
+<p>实体与关系抽取是构建 KB 的重要步骤。两个主要框架已被广泛用于解决抽取实体及其关系的问题。一个是<strong>流水线方法</strong>，另一个是<strong>联合学习方法</strong>。</p>
+<ul>
+<li><p>传统方法以<strong>流水线</strong>方法将这个任务视为两个分离的任务<strong>，即命名实体识别（NER）和关系分类（RC）。</strong>先抽取实体，然后识别它们的关系。这种分离的框架使得任务易于处理，并且每个组件都可以更加灵活。但它<strong>忽略了这两个子任务之间的相关性</strong>，每个子任务都是一个独立的模型。实体识别的结果可能会影响关系分类的性能，并导致错误的传播。</p></li>
+<li><p><strong>联合学习框架是使用单一模型将实体和关系一起抽取出来。它可以有效地整合实体和关系的信息</strong>，并在这项任务中取得了较好的效果。然而，大多数现有的联合方法都是基于特征的结构化系统，他们需要复杂的特征工程，并且严重依赖其他 NLP 工具包，这也可能导致错误传播。</p></li>
+</ul>
+<p>基于两个方法的问题，作者提出了一个新颖的标注方案，然后抽取由两个实体和这两个实体之间的一个关系组成的三元组（而不是分别抽取实体和关系），并配以端到端的模型。标注方案包含实体信息和它们所持有的关系。基于这种标注方案，实体和关系的联合抽取可以转化为标记问题。这样，可以用神经网络来建模任务，而不需要复杂的特征工程。</p>
+<h2 id="method">Method</h2>
+<p>作者提出了一种<strong>新的标注方案</strong>和一个具<strong>有偏置目标函数</strong>的<strong>端到端模型</strong>来联合抽取实体及其关系。</p>
+<h3 id="tagging-scheme">Tagging Scheme</h3>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816093540180.png" /></p>
+<p>每个单词都被分配一个标签 tags，用于抽取结果。<strong>标签“O”代表“Other”标签</strong>，这意味着相应的单词与抽取结果无关。除了“O”之外，其他标签由<strong>三部分组成</strong>：<strong>实体中的单词位置</strong>、<strong>关系类型</strong>和<strong>关系角色</strong>。<strong>使用“BIES”（Begin, Inside, End, Single）符号来表示单词在实体中的位置信息</strong>。<strong>关系类型信息是从一组预定义的关系中获得的</strong>，<strong>关系角色信息由数字“1”和“2”表示</strong>。抽取的结果由三元组表示：<code>(Entity1，RelationType，Entity2)</code>。“1”表示该词属于三元组中的第一个实体，而“2”则属于该关系类型后面的第二个实体。</p>
+<p>图2是一个说明标注方法的例子。输入句子包含两个三元组：<code>&#123;United States, Country-President, Trump&#125;</code> 和 <code>&#123;Apple Inc, Company-Founder, Steven Paul Jobs&#125;</code>，其中 <code>“Country-President”</code> 和 <code>“Company-Founder”</code> 是预定义的关系类型。<code>”United”</code>, <code>“States”</code>, <code>“Trump”</code>, <code>“Apple”</code>, <code>“Inc”</code> , <code>“Steven”</code>, <code>“Paul”</code> 和 <code>“Jobs”</code> 等词都与最终抽取的结果有关。因此，他们根据特殊标签进行标注。例如 <code>“United”</code> 这个词是<code>“United States”</code> 实体的第一个词，与 <code>“Country-President”</code> 关系有关，所以它的标签是 <code>“B-CP-1”</code>。对应于 <code>“United States”</code> 的另一个实体 <code>“Trump”</code> 被标记为 <code>“S-CP-2”</code>。此外，与最终结果无关的其他字词标记为 <code>“O”</code>。</p>
+<h3 id="end-to-end-model">End-to-end Model</h3>
+<p>本文采用了一个端到端的模型来生成标注序列，如图 3 所示。模型用 Bi-LSTM 来对输入句子进行编码，用具有偏置损失的 LSTM 进行解码，偏置损失可以增强实体标签的相关性。</p>
+<figure>
+<img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816095825365.png" alt="image-20210816095825365" /><figcaption>image-20210816095825365</figcaption>
+</figure>
+<h4 id="bi-lstm-编码层">Bi-LSTM 编码层</h4>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816194652396.png" style="zoom:50%;" /></p>
+<p><strong>在序列标注问题中，Bi-LSTM 编码层已被证明有效捕获每个单词的语义信息</strong>。它包含前向 LSTM 层，后向 LSTM 层和连接层。<strong>词嵌入层将 one-hot 表示的单词转换为嵌入向量</strong>。因此，一个单词序列可以表示为 <span class="math inline">\(W = {w_1，… w_t，w_{t+1} … w_n}\)</span>，其中 <span class="math inline">\(w_t \in R_d\)</span> 是对应于句中第 <span class="math inline">\(t\)</span> 个单词的 <span class="math inline">\(d\)</span> 维词向量，<span class="math inline">\(n\)</span> 是给定句子的长度。在词嵌入层之后，有两个平行的 LSTM 层：前向 LSTM 层 和 后向 LSTM 层。 LSTM 体系结构由一组递归连接的子网（称为 memory blocks）组成。每个时间步是一个 LSTM memory block。 Bi-LSTM 编码层中的 LSTM 记忆块用于根据上一个隐藏向量 <span class="math inline">\(h_{t-1}\)</span>、上一个单元向量 <span class="math inline">\(c_{t-1}\)</span> 和当前输入词表示 <span class="math inline">\(w_t\)</span> 计算当前隐藏向量<span class="math inline">\(h_t\)</span>。其结构图如图3（b）所示，具体操作定义如下： <span class="math display">\[
+\begin{array}{l}
+f_{t}=\delta\left(W_{w f} w_{t}+W_{h f} h_{t-1}+W_{c f} c_{t-1}+b_{f}\right) \quad (遗忘门 f_t) \\
+i_{t}=\delta\left(W_{w i} w_{t}+W_{h i} h_{t-1}+W_{c i} c_{t-1}+b_{i}\right) \quad (输入门 i_t)  \\  
+z_{t}=\tanh \left(W_{w c} w_{t}+W_{h c} h_{t-1}+b_{c}\right) \\
+c_{t}=f_{t} c_{t-1}+i_{t} z_{t} \\
+o_{t}=\delta\left(W_{w o} w_{t}+W_{h o} h_{t-1}+W_{c o} c_{t}+b_{o}\right) \quad (输出门 o_t)  \\
+h_{t}=o_{t} \tanh \left(c_{t}\right) \quad (输出结果：当前隐藏向量h_t,作为Decoder层的其中一种输入)
+\end{array}
+\]</span></p>
+<h4 id="lstm-解码器层">LSTM 解码器层</h4>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816194348347.png" style="zoom: 50%;" /></p>
+<p>作者也<strong>采用LSTM结构来生成标注序列</strong>。当检测到单词 <span class="math inline">\(w_t\)</span> 的标注时，解码层的输入为：从 Bi-LSTM 编码层获得的 <span class="math inline">\(h_t\)</span>，上一个的预测标签表示 <span class="math inline">\(T_{t-1}\)</span>，上一个单元单元值：<span class="math inline">\(c_{t-1}\)</span>，以及解码层中的上一个隐藏向量 <span class="math inline">\(h_{t-1}\)</span>。图3（c）显示了 LSTMd 记忆块的结构图，具体操作定义如下 <span class="math display">\[
+\begin{array}{l}
+f_{t}^{(2)}=\delta\left(W_{w f}^{(2)} h_{t}+W_{h f}^{(2)} h_{t-1}^{(2)}+W_{t f} T_{t-1}+b_{f}^{(2)}\right) \quad (遗忘门 f_t) \\
+i_{t}^{(2)}=\delta\left(W_{w i}^{(2)} h_{t}+W_{h i}^{(2)} h_{t-1}^{(2)}+W_{t i} T_{t-1}+b_{i}^{(2)}\right) \quad (输入门 i_t)  \\  
+z_{t}^{(2)}=\tanh \left(W_{w c}^{(2)} h_{t}+W_{h c}^{(2)} h_{t-1}^{(2)}+W_{t c} T_{t-1}+b_{c}^{(2)}\right) \\
+c_{t}^{(2)}=f_{t}^{(2)} c_{t-1}^{(2)}+i_{t}^{(2)} z_{t}^{(2)} \\
+o_{t}^{(2)}=\delta\left(W_{w o}^{(2)} h_{t}+W_{h o}^{(2)} h_{t-1}^{(2)}+W_{c o}^{(2)} c_{t}+b_{o}^{(2)}\right)\quad (输出门 o_t)  \\
+h_{t}^{(2)}=o_{t}^{(2)} \tanh \left(c_{t}^{(2)}\right) \\
+T_{t}=W_{t s} h_{t}^{(2)}+b_{t s}
+\end{array}
+\]</span> 最终的 softmax 层根据标签预测向量 <span class="math inline">\(T_t\)</span> 计算归一化实体标签概率： <span class="math display">\[
+y_{t}=W_{y} T_{t}+b_{y} \\
+p_{t}^{i}=\frac{\exp \left(y_{t}^{i}\right)}{\sum_{j=1}^{N_{t}} \exp \left(y_{t}^{j}\right)}
+\]</span> <span class="math inline">\(W_y\)</span> 是 softmax 矩阵，<span class="math inline">\(N_t\)</span> 是标签总数。由于 <span class="math inline">\(T\)</span> 与标签嵌入类似，并且 LSTM 能够学习长期相关性，所以解码方式可以对标签交互进行建模。</p>
+<h4 id="偏置目标函数">偏置目标函数</h4>
+<p>目标函数用的是 Hinton 提出的 RMSprop，定义为： <span class="math display">\[
+\begin{aligned}
+L=&amp; \max \sum_{j=1}^{|\mathbb{D}|} \sum_{t=1}^{L_{j}}\left(\log \left(p_{t}^{(j)}=y_{t}^{(j)} \mid x_{j}, \Theta\right) \cdot I(O)\right.
+\left.+\alpha \cdot \log \left(p_{t}^{(j)}=y_{t}^{(j)} \mid x_{j}, \Theta\right) \cdot(1-I(O))\right)
+\end{aligned}
+\]</span></p>
+<p><span class="math inline">\(|D|\)</span> 是训练集的大小，<span class="math inline">\(L_j\)</span> 是句子 <span class="math inline">\(x_j\)</span> 的长度，<span class="math inline">\(y_t^{(j)}\)</span> 是单词 <span class="math inline">\(x_j\)</span> 中词 <span class="math inline">\(t\)</span> 的 tag，<span class="math inline">\(p_t^{(j)}\)</span> 是在上面定义的归一化实体标签概率。<span class="math inline">\(I(O)\)</span> 是一个开关函数，以区分标注 <code>‘O’</code> 与可指示结果的相关 tags 间的损失。定义如下： <span class="math display">\[
+I(O)=\left\{\begin{array}{l}
+1, \text { if } \operatorname{tag}={ }^{\prime} O^{\prime} \\
+0, \text { if } \operatorname{tag} \neq{ }^{\prime} O^{\prime}
+\end{array}\right.
+\]</span></p>
+<p><span class="math inline">\(α\)</span> 是偏置权重，<span class="math inline">\(α\)</span> 越大，对模型中相关 tags 的影响越大。</p>
+<blockquote>
+<p><font color="red">RMSprop 留坑</font></p>
+</blockquote>
+<h2 id="experiments">Experiments</h2>
+<h3 id="dataset">Dataset</h3>
+<p>数据集使用公共数据集 NYT。大量的训练数据可以通过远程监督的方式获得，无需人工标注。测试集是手工标记以确保其质量。训练数据总共包含353k三元组，测试集包含3,880三元组。此外，关系集的大小是24。</p>
+<div class="note note-primary">
+            <p>为了打破有监督学习中人工数据标注的局限性，Mintz等人提出了远程监督（Distant Supervision）算法，该算法的核心思想是将文本与大规模知识图谱进行实体对齐，利用知识图谱已有的实体间关系对文本进行标注。</p><p>远程监督基于的基本假设是：如果从知识图谱中可获取三元组R（E1，E2）（注：R代表关系，E1、E2代表两个实体），且E1和E2共现与句子S中，则S表达了E1和E2间的关系R，标注为训练正例。</p><p>远程监督算法是目前主流的关系抽取系统广泛采用的方法，也是该领域的研究热点之一。该算法很好地解决了数据标注的规模问题，但它基于的基本假设过强，会引入大量噪音数据。出现 <code>the wrong label problem</code> 的根本原因，是远程监督假设一个实体对只对应一种关系，但实际上实体对间可以同时具有多种关系.</p>
+          </div>
+<h3 id="performance-comparison">Performance Comparison</h3>
+<p>采用标准<strong>Precision（Prec）、Recall（Rec）和F1分数</strong>来评估结果。当三元组的关系类型和两个对应的实体的头部偏移都是正确的时，这个三元组被认为是正确的。从测试集中随机抽取10％的数据来创建验证集。对每个实验运行10次，然后报告平均结果和它们的标准偏差，如表1所示。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816103031029.png" /></p>
+<p>表一：抽取两个实体及其关系的不同方法的预测结果。第一部分（从第一行到第三行）是流水线方法，第二部分（第四行到第六行）是联合抽取方法。作者的标注方法在第三部分（第7到第9行）中显示。在这一部分在准确率、召回率和F1的结果同时，还计算了它们的标准差。</p>
+<p>从表 1 可以看出，</p>
+<ol type="1">
+<li>联合抽取方法优于流水线方法，作者的标注方法优于流水线方法和大多数联合抽取方法。这也验证了标注方案对共同抽取实体和关系的任务的有效性。</li>
+<li>与传统方法相比，<strong>端到端模型的准确率显著提高</strong>。但是<strong>只有 LSTM-LSTM-Bias 可以更好地平衡准确率和召回率</strong>（通过比较 F1 分数）。原因可能是这些端到端模型都使用 Bi-LSTM 编码输入句子和不同的神经网络来解码结果，而基于神经网络的方法可以很好地拟合数据，因此，他们可以很好地学习训练集的共同特征，并可能导致较低的可扩展性。</li>
+<li>基于作者的标注方案，LSTM-LSTM 模型优于 LSTM-CRF 模型。因为，LSTM 能够学习长期的依赖关系，CRF 擅长捕捉整个标注序列的联合概率。相关的标签可能相距很远。因此，LSTM 解码方式比 CRF 好一些。 LSTM-LSTM-Bias 增加了一个偏置权重，以增强实体标注的效果，减弱无效标注的影响。因此，在这个标注方案中，作者的方法可以比普通的 LSTM 解码方法更好。</li>
+</ol>
+<div class="note note-primary">
+            <p><strong>有关Precision（Prec）、Recall（Rec）和F1分数：</strong></p><ul><li>TP（True Positives）意思就是<strong>被分为了正样本，而且分对了</strong>。</li><li>TN（True Negatives）意思就是<strong>被分为了负样本，而且分对了</strong>。</li><li>FP（False Positives）意思就是<strong>被分为了正样本，但是分错了（事实上这个样本是负样本）</strong>。</li><li>FN（False Negatives）意思就是<strong>被分为了负样本，但是分错了（事实上这个样本是正样本）。</strong></li></ul><p><strong>precision（精确度）：</strong> <span class="math display">\[Precision= \frac{TP}{TP+FP}\]</span></p><p>TP是 分类器认为是正样本而且确实是正样本的例子，FP是 分类器认为是正样本但实际上不是正样本的例子，Precision 翻译过来就是<strong>“分类器认为是正类并且确实是正类的部分占所有分类器认为是正类的比例”</strong>。</p><p><strong>recall（召回率）：</strong> <span class="math display">\[Recall=\frac{TP}{TP+FN}\]</span> TP是 分类器认为是正样本而且确实是正样本的例子，FN是 分类器认为是负样本但实际上不是负样本的例子，Recall 翻译过来就是“<strong>分类器认为是正类并且确实是正类的部分占所有确实真正是正类的比例</strong>”。</p><p>P 和 R 指标有时候会出现的矛盾的情况，这样就需要综合考虑他们，最常见的方法就是 <strong>F-Measure</strong> ，通过计算F值来评价一个指标</p><p>常见的 <strong>F1 计算方法</strong>： <span class="math display">\[F1 = \frac{2 \cdot P \cdot R}{P + R}\]</span></p>
+          </div>
+<h3 id="predicted-results-on-triplets-elements">Predicted Results on Triplet’s Elements</h3>
+<p>为了<u>找出影响端到端模型结果的因素</u>，作者分析了预测三元组中每个元素的性能，只有当两个相应实体的关系类型和头部偏移量都是正确的时候，它才能处理三元组。如表 2 所示。E1 和 E2 分别表示预测每个实体的性能。如果第一个实体的头部偏移是正确的，那么 E1 的实例是正确的，E2 同理。不管关系类型，如果两个对应实体的头部偏移都是正确的，则（E1，E2）的实例是正确的。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816103433932.png" /></p>
+<ol type="1">
+<li><p>Compare (E1,E2) with single E：与 single E1 和 E2 相比，（E1，E2）具有更高的准确率。<strong>但其召回率低于E1和E2。这意味着一些预测的实体不会形成一对。</strong>他们只获得E1而没有找到相应的E2，或者获得E2并且没有找到相应的E1，导致更多的单个E和更少（E1，E2）对的预测。因此，实体对（E1，E2）比单个E具有更高的准确率和更低的召回率。</p></li>
+<li><p>Compare (E1,E2) with Triplet：与表1中的预测结果相比，表2中（E1，E2）的预测结果有大约3%的改进，这意味着3%的测试数据被预测为错误，因为关系类型被预测为错误。</p></li>
+</ol>
+<h3 id="analysis-of-biased-loss">Analysis of Biased Loss</h3>
+<p>与 LSTM-CRF 和 LSTM-LSTM 不同的是，LSTM-LSTM-Bias 的方法偏向于通过关系标签来增强实体之间的联系。如图 4 是预测单个实体的比例可视化。<u>单个实体是指那些找不到相应实体的实体。</u>作者使用偏置目标函数的方法在单个实体上的比例相对较低。这意味着比起 LSTM-CRF 和 LSTM-LSTM 对关系标签关注不多，LSTM-LSTM-Bias 可以<strong>有效地将两个实体关联起来</strong>。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816103719024.png" alt="image-20210816103719024" style="zoom: 67%;" /></p>
+<p>此外，作者也将偏差参数 α 从1改变到20，预测结果如图5所示。如果 <span class="math inline">\(α\)</span> 太大，会影响预测的准确率，如果 <span class="math inline">\(\alpha\)</span> 太小，召回率会下降。当 <span class="math inline">\(α= 10\)</span> 时，LSTM-LSTM Bias 可以平衡准确率和召回率，并且可以达到最好的 F1 分数。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816103831764.png" alt="image-20210816103831764" style="zoom:67%;" /></p>
+<h3 id="case-study">Case Study</h3>
+<p>作者选取了几个有代表性的例子来说明这些方法的优缺点，如表3所示。每个例子包含三行，第一行是黄金标准，第二行和第三行分别是模型 LSTM-LSTM 和 LSTM-LSTM-Bias 的抽取结果。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210816103917080.png" style="zoom: 50%;" /></p>
+<p>S1 是一个两个相关实体之间的距离彼此很远的栗子，这使得更难以发现他们的关系。</p>
+<p>S2 是一个负面的例子，表明这些方法可能错误地预测了某个实体。</p>
+<p>S3 是模型可以预测实体头部偏移量的情况，但是关系角色是错误的。这说明 LSTM-LSTM-Bias 能够更好地预测实体对，但是在区分两个实体之间的关系方面还有待改进。</p>
+<h2 id="summary">Summary</h2>
+<p>本文的主要贡献是：</p>
+<ol type="1">
+<li><strong>提出了一种新的标注方案，联合抽取实体和关系，可以很容易地将抽取问题转化为标注任务。</strong></li>
+<li><strong>基于新的标注方案，研究了不同类型的端到端模型来解决问题。基于标记的方法比大多数现有的流水线和联合学习方法要好。</strong></li>
+<li>此外，还开发了<strong>具有偏置损失函数的端到端模型，以适应新的标注，它可以增强相关实体之间的关联</strong>。</li>
+</ol>
+<p>在未来的工作中，作者<u>将用多个分类器来替换输出层中的softmax函数</u>，这样一个词可以有多个标签。这样，一个单词可以出现在多个三元组结果中，可以解决重叠关系的问题。尽管的模型可以增强实体标注的效果，但是两个相应的实体之间的关联仍然需要在接下来的工作中进行细化。</p>
+]]></content>
+      <categories>
+        <category>NLP</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>Relation Extraction</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TransH：Knowledge Graph Embedding by Translating on Hyperplanes</title>
+    <url>/2021/08/18/TransH%EF%BC%9AKnowledge%20Graph%20Embedding%20by%20Translating%20on%20Hyperplanes/</url>
+    <content><![CDATA[<h1 id="transhknowledge-graph-embedding-by-translating-on-hyperplanes">TransH：Knowledge Graph Embedding by Translating on Hyperplanes</h1>
+<p>本文提出了 <strong>TransH，这种超平面的想法解决了同一实体的多关系问题</strong>。并且利用一个关系的一对多/多对一映射属性，<strong>提出了一个简单的技巧来降低 False Negative 标签的可能性</strong>。实验表明，与 TransE 相比，TransH 在预测精度上有显著的改进，并具有与之相当的扩展能力。</p>
+<h2 id="basic-idea">Basic Idea</h2>
+<p>TransE 的问题在于在处理一些关系的映射属性比如自反性、一对多、多对一和多对多这些属性嵌入方面做得并不好。</p>
+<p>假设 <span class="math inline">\((h，r，t)∈∆\)</span> 时 <span class="math inline">\(h+ r − t = 0\)</span> 的无误差嵌入的理想情况，可以直接从 TransE 模型获得以下结果：</p>
+<ul>
+<li><p>如果 <span class="math inline">\((h，r，t) \in \Delta\)</span> 且 <span class="math inline">\((t，r，h) \in \Delta\)</span>，即 <span class="math inline">\(r\)</span> 是自反关系图，则 <span class="math inline">\(r = 0\)</span> 且 <span class="math inline">\(h = t\)</span>。</p></li>
+<li><p>如果 <span class="math inline">\(\forall i \in\{0, \ldots, \mathrm{m}\}\)</span>，<span class="math inline">\((h_i，r，t) \in \Delta\)</span>, 即 <span class="math inline">\(r\)</span> 是多对一关系图, 则 <span class="math inline">\(h_0=...=h_m\)</span>。</p>
+<p>同样地, 如果 <span class="math inline">\(\forall i (h，r，t_i) \in \Delta\)</span>，即 <span class="math inline">\(r\)</span> 是一对多关系图，则 <span class="math inline">\(t_0=...=t_m\)</span></p></li>
+</ul>
+<p>问题在于，<strong>在 TransE 中，当涉及任何关系时，实体的表示形式相同。而当涉及不同的关系时，则忽略实体的分布式表示形式。</strong></p>
+<div class="note note-info">
+            <p>既然实际是表达同一关系不同实体最后通过 TransE 后会趋于一致，那么我直接通过一个中介来进行映射将同一表示映射成不同向量表示，那么这些向量表示就可以代表不同的实体，就达到了不同实体拥有不同表示的目的。因为关系是不变的所以想到了将关系作为映射平面，让实体向量向其中映射。</p>
+          </div>
+<p>所以作者提出了一种称为<strong>超平面上的平移（translation on hyperplanes，TransH）</strong>的方法，该方法将关系解释为超平面上的平移操作。在 TransH 中，每个关系由超平面上的范数向量（<span class="math inline">\(\mathbf{w}_{r}\)</span>）和超平面上的平移向量（<span class="math inline">\(\mathbf{d}_{r}\)</span>）表示。对于一个正确三元组 <span class="math inline">\((h, r, t)\)</span>，它在客观现实中是正确的，期望 <span class="math inline">\(\mathbf{h}\)</span> 和 <span class="math inline">\(\mathbf{t}\)</span> 在超平面上的<strong>投影</strong>通过平移向量 <span class="math inline">\(\mathbf{d}_{r}\)</span> 以很小的误差连接起来。这种简单的方法克服了 TransE 在处理自反/一对多/多对一/多对多关系时的缺陷，同时模型复杂度与 TransE 基本相同。</p>
+<h2 id="transh">TransH</h2>
+<p>TransH 允许实体在涉及不同关系时具有<strong>分布式表示</strong>。通过引入<strong>投影到关系特定超平面</strong>的机制，它可以使实体在不同关系/三元组中扮演不同角色。</p>
+<div class="note note-info">
+            <p><strong>同一个实体在不同关系中的意义不同</strong>，同时<strong>不同实体，在同一关系中的意义，也可以相同</strong>。</p><p>将每个关系定义在一个独特的平面，在该平面内有符合该关系的 TransH 的表示 <span class="math inline">\((h,r,t)\)</span>，多加入的代表该平面的法向量完成了将不同实体向平面内和 <span class="math inline">\(h, t\)</span> 转化的任务，使得同一关系的不同实体拥有不同的表示，但是在关系平面内的投影相同；同一实体可以在不同的关系平面内拥有不同的含义（平面内的投影）</p>
+          </div>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820071713715.png" style="zoom: 60%;" /></p>
+<p>对于正确的三元组来说<span class="math inline">\((h, r, t) \in \Delta\)</span>，所需满足的关系如图所示。那么对于一个实体 <span class="math inline">\(h’’\)</span> 如果满足$(h^{}, r, t) <span class="math inline">\(，在 TransE 中是需要\)</span>h’’=h$，而在 TransH 中则将约束放宽到 <span class="math inline">\(h,h’’\)</span> 在超平面 <span class="math inline">\(\mathbf{w}_{r}\)</span> 上的投影相同就可以了，也可以实现将 <span class="math inline">\(h,h’’\)</span> 区分开并且具有不同的表示。</p>
+<p>对于关系 <span class="math inline">\(r\)</span>，<strong>TransH 将特定关系的平移向量 <span class="math inline">\(\mathbf{d}_{r}\)</span> 放置在特定关系的超平面 <span class="math inline">\(\mathbf{w}_{r}\)</span>（法向量）中</strong>，而不是放置在实体嵌入的相同空间中。具体来说，对于三元组 <span class="math inline">\((h，r，t)\)</span>，首先将嵌入 <span class="math inline">\(\mathbf{h}\)</span> 和 <span class="math inline">\(\mathbf{t}\)</span> 投影到超平面 <span class="math inline">\(\mathbf{w}_r\)</span>。投影分别表示为 <span class="math inline">\(\mathbf{h}_{\perp}\)</span> 和 <span class="math inline">\(\mathbf{t}_{\perp}\)</span>。如果 <span class="math inline">\((h，r，t)\)</span> 是正确三元组，期望 <span class="math inline">\(\mathbf{h}_{\perp}\)</span> 和 <span class="math inline">\(\mathbf{t}_{\perp}\)</span> 可以通过平移向量 <span class="math inline">\(\mathbf{d}_{r}\)</span> 连接到超平面，并且误差越小越好。</p>
+<p>于是定义在 TransE 中的 <span class="math inline">\(d(\mathbf{h+r},\mathbf{t})\)</span> ，在 TransH 中定义为： <span class="math display">\[
+d(\mathbf{h+r},\mathbf{t}) =f_{r}(\mathbf{h}, \mathbf{t})= \left\|\mathbf{h}_{\perp}+\mathbf{d}_{r}-\mathbf{t}_{\perp}\right\|_{2}^{2}
+\]</span> 对于超平面，我们用法向量 <span class="math inline">\(\mathbf{w}_{r}\)</span> 来表示，并通过限制 <span class="math inline">\(||\mathbf{w}_{r}||_2=1\)</span> ，所以可以得到 <span class="math inline">\(\mathbf{h}\)</span> 在 法向量 <span class="math inline">\(\mathbf{w}_{r}\)</span> 上的投影为： <span class="math display">\[
+\begin{aligned}
+\mathbf{h}_{\mathbf{w}_{r}} &amp;=\frac{\mathbf{h} \cdot \mathbf{w}_{r}}{\left\|\mathbf{w}_{r}\right\|^{2}} \cdot \mathbf{w}_{r} \\
+&amp;=\left(\mathbf{h} \cdot \mathbf{w}_{r}\right) \cdot \mathbf{w}_{r} \\
+&amp;=\mathbf{w}_{r}^{\top} \mathbf{h} \mathbf{w}_{r}
+\end{aligned}
+\]</span> 所以可以得到： <span class="math display">\[
+\mathbf{h}_{\perp}=\mathbf{h}-\mathbf{h}_{\mathbf{w}_{r}} =\mathbf{h}-\mathbf{w}_{r}^{\top} \mathbf{h} \mathbf{w}_{r}  \\
+\mathbf{t}_{\perp}=\mathbf{t}-\mathbf{t}_{\mathbf{w}_{r}} =\mathbf{t}-\mathbf{w}_{r}^{\top} \mathbf{t} \mathbf{w}_{r}
+\]</span> <img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820105617688.png" /></p>
+<p>得分函数为： <span class="math display">\[
+\begin{aligned}
+f_{r}(\mathbf{h}, \mathbf{t}) &amp;=\left\|\mathbf{h}_{\perp}+\mathbf{d}_{r}-\mathbf{t}_{\perp}\right\|_{2}^{2} \\
+&amp;=\left\|\left(\mathbf{h}-\mathbf{w}_{r}^{\top} \mathbf{h} \mathbf{w}_{r}\right)+\mathbf{d}_{r}-\left(\mathbf{t}-\mathbf{w}_{r}^{\top} \mathbf{t} \mathbf{w}_{r}\right)\right\|_{2}^{2}
+\end{aligned}
+\]</span> 正确三元组的得分预计会更低，而错误三元组的得分将会更高。TransH 模型参数是所有实体的嵌入 <span class="math inline">\(\left\{\mathbf{e}_{i}\right\}_{i=1}^{|E|}\)</span>，所有关系的超平面和平移向量 <span class="math inline">\(\left\{\left(\mathbf{w}_{r}, \mathbf{d}_{r}\right)\right\}_{r=1}^{|R|}\)</span></p>
+<div class="note note-primary">
+            <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820105321802.png" style="zoom: 33%;" /></p><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820105349707.png" style="zoom: 33%;" /></p>
+          </div>
+<h3 id="loss-function">Loss Function</h3>
+<p>作者引入 margin-base ranking function 作为损失函数来训练模型： <span class="math display">\[
+\mathcal{L}=\sum_{(h, r, t) \in \Delta} \sum_{\left(h^{\prime}, r^{\prime}, t^{\prime}\right) \in \Delta_{(h, r, t)}^{\prime}}\left[f_{r}(\mathbf{h}, \mathbf{t})+\gamma-f_{r^{\prime}}\left(\mathbf{h}^{\prime}, \mathbf{t}^{\prime}\right)\right]_{+}
+\]</span> 其中 <span class="math inline">\([x]_{+} \triangleq \max (0, x)\)</span>，<span class="math inline">\(\Delta\)</span> 是正（正确）三元组的集合，<span class="math inline">\(\Delta_{(h, r, t)}^{\prime}\)</span> 表示通过破坏 <span class="math inline">\((h，r，t)\)</span> 构造的错误三元组的集合，<span class="math inline">\(\gamma\)</span> 是分隔正确和错误三元组的 margin。</p>
+<p>除此之外，在最小化 loss function 的过程中，模型还需要遵循三个软约束原则： <span class="math display">\[
+\begin{array}{l}
+\forall e \in E,\|\mathbf{e}\|_{2} \leq 1, / / \text { scale } (保证所有实体的embedding都归一化)\\
+\forall r \in R,\left|\mathbf{w}_{r}^{\top} \mathbf{d}_{r}\right| /\left\|\mathbf{d}_{r}\right\|_{2} \leq \epsilon, \text { //orthogonal } (保证\mathbf{w}_{r} 和 \mathbf{d}_{r} 正交垂直，保证 \mathbf{d}_{r} 在超平面上)\\
+\forall r \in R,\left\|\mathbf{w}_{r}\right\|_{2}=1, / / \text { unit normal vector } (保证单位法向量的模长为1)
+\end{array}
+\]</span> 为了体现上面三个约束条件，需要对 loss function 进行修改，加上对公式一和公式二的约束： <span class="math display">\[
+\begin{aligned}
+\mathcal{L} &amp;=\sum_{(h, r, t) \in \Delta} \sum_{\left(h^{\prime}, r^{\prime}, t^{\prime}\right) \in \Delta_{(h, r, t)}^{\prime}}\left[f_{r}(\mathbf{h}, \mathbf{t})+\gamma-f_{r^{\prime}}\left(\mathbf{h}^{\prime}, \mathbf{t}^{\prime}\right)\right]_{+} \\
+&amp;+C\left\{\sum_{e \in E}\left[\|\mathbf{e}\|_{2}^{2}-1\right]_{+}+\sum_{r \in R}\left[\frac{\left(\mathbf{w}_{r}^{\top} \mathbf{d}_{r}\right)^{2}}{\left\|\mathbf{d}_{r}\right\|_{2}^{2}}-\epsilon^{2}\right]_{+}\right\},
+\end{aligned}
+\]</span></p>
+<p>其中 <span class="math inline">\(C\)</span> 表示软约束的权重，它也是训练过程中的一个超参数。</p>
+<h3 id="reducing-false-negative-labels">Reducing False Negative Labels</h3>
+<p>训练涉及为正确三元组构造负三元组。TransE 的方法只是通过随机破坏正确三元组来获取负三元组，但是这种随机的方式可能会在训练中引入许多 False Negative 标签。</p>
+<blockquote>
+<p>False Negative：被分为了负样本，但是分错了（事实上这个样本是正样本）。就是说随机产生的错误三元组可能刚好是正确三元组。</p>
+</blockquote>
+<p>TransH 采用不同的方法。在破坏三元组时，<strong>通过不同的关系的映射属性(一对多、多对一或多对多)来设置相应的概率来替换头或尾实体</strong>。如果关系为一对多，则倾向于更多的替换头实体，如果关系为多对一，则倾向于更多的替换尾实体。这样，减少了产生假负标签的情况。</p>
+<div class="note note-info">
+            <p>通过这样的方式，例如 one-many 关系，替换头实体显然更不容易得到正样例（因为只有一种头实体是对的，然而替换尾实体因为对于头实体对应该关系的尾实体更多，说不定就有其他不在此many中的尾实体符合这个关系。</p>
+          </div>
+<p>具体而言，在关系 <span class="math inline">\(r\)</span> 的所有三元组中，首先获得以下两个统计信息：</p>
+<ol type="1">
+<li>每个头实体的平均尾实体数，表示为 <span class="math inline">\(tph\)</span> <em>(tail entities per head entity)</em>；</li>
+<li>每个尾实体的平均头实体数，表示为 <span class="math inline">\(hpt\)</span> <em>(head entities per tail entity)</em>。</li>
+</ol>
+<p>然后定义了一个伯努利分布 $ $。给定关系 <span class="math inline">\(r\)</span> 的正确三元组 <span class="math inline">\((h,r,t)\)</span>，通过替换头部损坏三元组时的概率为 $ $，通过替换尾部损坏三元组的概率为 $ $</p>
+<p>以 FB15k 为例，在 1,345 个关系中，对于每个关系 <span class="math inline">\(r\)</span>，计算 <span class="math inline">\({tph_r}\)</span> 和 <span class="math inline">\(hpt_r\)</span>，如果：</p>
+<ul>
+<li><span class="math inline">\(tph_r &lt;1.5\)</span> 并且 <span class="math inline">\(hpt_r &lt;1.5\)</span>，则认为 <span class="math inline">\(r\)</span> 为一对一（一对一的比例为24％）</li>
+<li><span class="math inline">\(tph_r≥1.5\)</span> 并且 <span class="math inline">\(hpt_r≥1.5\)</span>，则认为 <span class="math inline">\(r\)</span> 为多对多（多对多的比例为24％）</li>
+<li><span class="math inline">\(tph_r≥1.5\)</span> 并且 <span class="math inline">\(hpt_r &lt;1.5\)</span>，则认为 <span class="math inline">\(r\)</span> 为一对多（一对多的比例为23％）</li>
+<li><span class="math inline">\(tph_r&lt;1.5\)</span> 并且 <span class="math inline">\(hpt_r≥1.5\)</span>，则认为 <span class="math inline">\(r\)</span> 为多对一（多对一的比例为29％）</li>
+</ul>
+<div class="note note-primary">
+            <p><strong>伯努利分布</strong></p><p>假设抛硬币，正面概率为 p，反面概率为 (1-p)</p><p>伯努利实验：抛一次硬币</p><p>伯努利分布：抛一次硬币，正面概率为 p，反面概率为 (1-p)，这个就是伯努利分布</p><p>n 重伯努利实验：将伯努利实验重复 n 次，就是抛 n 次硬币。</p><p>二项分布：<strong>n重伯努利试验「成功」次数的离散概率分布</strong>，这里的「成功」假设是抛出正面。举个例子：抛硬币 n 次(n 重伯努利试验)，成功次数(抛出正面的次数)为 k 次的概率就是「一个」二项分布概率 <span class="math inline">\(P\{X=k\}=\left(\begin{array}{c} n \\ k \end{array}\right) p^{k}(1-p)^{n-k}\)</span>。</p>
+          </div>
+<h2 id="experiments">Experiments</h2>
+<p>作者对三项任务的相关方法进行了实证研究和评估：链接预测、三元组分类和关系事实提取。这三项任务都从不同的角度评估预测 unseen 三元组的准确性。</p>
+<h3 id="link-prediction">Link Prediction</h3>
+<p>Link Prediction 是为了补全三元组 <span class="math inline">\((h,r,t)\)</span> 中缺失的 <span class="math inline">\(h\)</span> 或 <span class="math inline">\(t\)</span>，即 给定 <span class="math inline">\((h,r)\)</span> 预测 <span class="math inline">\(t\)</span>，或给定 <span class="math inline">\((r,t)\)</span> 预测 <span class="math inline">\(h\)</span>。该任务不是要求得到最佳答案，而是着重于对知识图谱中的一组候选实体集进行排名。</p>
+<p>数据集使用与 TransE 中相同的两个数据集：WN18(Wordnet的子集) 和 FB15k。</p>
+<h4 id="evaluation-protocol">Evaluation protocol</h4>
+<p>遵循与 TransE 相同的 Evaluation protocol，对于每个测试三元组 <span class="math inline">\((h,r,t)\)</span> ，用知识库中的每个实体 e 替换头实体 h 或尾实体 t，并计算错误三元组上的不相似性分数（根据评分函数 <span class="math inline">\(f_r\)</span>）。将分数按升序排列，然后得到原始正确三元组的排名。对所有测试三元组进行汇总，评估两个指标：<strong>Mean Rank </strong>和 <strong>Hits@10</strong>。每个正确三元组的能量值排序后的序号求平均，得到的值称为 Mean Rank，Mean Rank 越小越好。计算正确三元组的能量排序后的序号小于10的比例，得到的值称为 Hits@10，Hits@10 越大越好。 这称为“Raw”设置。</p>
+<p>注意，同 TransE 一样，如果替换后的三元组仍存在于知识图谱中，因为它也是正确的，那么将其排在原始三元组之前并没有错。为了消除这个因素，在获得每个测试三元组的秩之前，删除了存在于训练集、验证集和测试集中的正确三元组。此设置称为“filter”。把上述基本评价过程得到的结果称为 <strong>Raw Mean Rank 和 Raw Hits@10</strong>，把过滤掉正确后得到的结果称为 <strong>Filtered Mean Rank 和 Filtered Hits@10</strong>。</p>
+<h4 id="results">Results</h4>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210818222753407.png"/></p>
+<ul>
+<li>在 WN18 中，<strong>简单的模型</strong>如 TransE，TransH <strong>都优于其他方法</strong>，但是 TransE 要比 TransH 更好点。可能是因为 WN18 中关系数量很少，因此可以忽略不同类型的关系。</li>
+<li>在 FB15k 中，TransH 的指标始终优于同类方法。</li>
+</ul>
+<p>为了证实，与 TransE 相比，TransH 的这些改进是因为放松了几何假设(<em>relaxed geometric assumption</em>)，因此可以更好地处理自反/一对多/多对一/多对多关系。作者深入研究了不同关系映射类别的详细结果，如表 4 所示。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210818223149906.png"  /></p>
+<ul>
+<li>TransE 在 FB15k 中第二好。但是，它在一对多和多对一关系上的相对优势不及在一对一关系上的相对优势。</li>
+<li>TransH 在一对多，多对一和多对多关系上为 TransE 带来了很大的改进。超出预期的是，一对一的性能也得到了显著改善（&gt; 60％）。==这可能是由于 “graph” 属性所致：实体与关系相关联，因此，更好地嵌入某些部分可以总体上带来更好的结果。==</li>
+</ul>
+<p>表 5 显示出 Hits@10 在一对多/多对一/多对多/自反关系上的结果。在这些关系上，TransH 对 TransE 的改进非常有效。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210818223337602.png" style="zoom: 80%;" /></p>
+<h3 id="triplets-classification">Triplets Classification</h3>
+<p>三元组分类是确认给定的三元组 <span class="math inline">\((h,r,t)\)</span> 是否正确，即在三元组上进行二分类。</p>
+<p>该工作使用三个数据集。其中两个与 NTN 中的相同：WN11(WordNet的子集)； FB13(Freebase的子集)。由于 WN11 和 FB13 包含的关系数很少，因此也使用包含更多关系的 FB15k 数据集。详细信息见表2。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210819144133656.png" style="zoom: 50%;" /></p>
+<h4 id="evaluation-protocol-1">Evaluation protocol</h4>
+<p>遵循与 NTN 相同的 Evaluation protocol：对于三元组 <span class="math inline">\((h,r,t)\)</span>，如果不相似性得分（通过 <span class="math inline">\(f_r\)</span>）低于特定于关系的阈值 <span class="math inline">\(\sigma_{r}\)</span>，则预测为正。否则预测为负。根据（最大化）验证集上的分类准确性确定的特定于关系的阈值 <span class="math inline">\(\sigma_{r}\)</span>。</p>
+<h4 id="results-1">Results</h4>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210819191620143.png" style="zoom:50%;" /></p>
+<ul>
+<li>在 WN11 上，TransH 优于所有其他方法。</li>
+<li>在 FB13 上，NTN 模型表现的最好。在较大的 FB15k 上，TransE 和 TransH 比 NTN 好很多。注意，当实体数接近时，FB15k 的关系数比 FB13 的关系数大得多。这说明 FB13 是一个非常密集的子图谱(大量的实体，少量的关系)，其中实体之间存在很强的相关性。在这种情况下，(NTN 模型)通过张量和非线性变换对实体之间复杂的相关性进行建模有助于嵌入。但是，在 FB15k 这个较稀疏子图谱中，似乎简单地假设在超平面上进行 translation 就足够了，而不必使用复杂的 NTN 模型。</li>
+<li>关于运行时间，NTN 的耗时比 TransE / TransH 高得多。</li>
+<li>在所有三个数据集上，减少 False Negative 标签（“ bern ”的结果）的技巧有助于 TransE 和 TransH。</li>
+</ul>
+<h3 id="relational-fact-extraction-from-text">Relational Fact Extraction from Text</h3>
+<p>在本实验中，作者比较了 TransH 和 TransE 对改进关系事实抽取的贡献。该实验包括两个主要部分： text side extraction model 和 knowledge graph embedding.</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210818223623200.png" /></p>
+<p>遵循将知识图谱嵌入的分数与文本侧模型的分数相结合的相同规则，可以获得 TransE 和 TransH 的 PR 曲线，如图2(a) 所示。从图中可以看出，TransH 在改进 Sm2r 方面是“先进”模型，其性能始终优于TransE。图2(a) 中的结果取决于将知识图谱嵌入的得分与文本侧模型的得分相结合的特定规则，实际上规则可能不是最佳方法。因此，图2(a) 不能清楚地展示 TransE / TransH 作为关系事实预测的独立模型的独立功能。为了清楚地展示 TransE / TransH 的独立功能，首先使用 text side model Sm2r 将每个实体对分配给具有最高置信度得分的关系，然后保留那些分配关系不是 “NA” 的事实。对于这些可信的候选事实，仅使用 TransE / TransH 的分数进行预测。结果示于图2(b)，在候选子集上，TransE 和 TransH 的性能均优于 Sm2r。当召回率高于0.6时，TransH 的性能要比 TransE 好得多。</p>
+<blockquote>
+<p>没看懂这个实验怎么做的...</p>
+</blockquote>
+<h2 id="summary">Summary</h2>
+<p>本文两个贡献：</p>
+<ol type="1">
+<li>提出了 TransH 模型，通过超平面解决了同一实体的多关系问题。</li>
+<li>提出了减少 False Negative 标签的方法，分别统计每个头实体对应尾实体的数量（反之亦然），按占比生成负样例。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>NLP</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>TransH</tag>
       </tags>
   </entry>
 </search>
