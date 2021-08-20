@@ -15383,18 +15383,4 @@ f_{r}(\mathbf{h}, \mathbf{t}) &amp;=\left\|\mathbf{h}_{\perp}+\mathbf{d}_{r}-\ma
         <tag>TransH</tag>
       </tags>
   </entry>
-  <entry>
-    <title>hexo 博客常见问题</title>
-    <url>/2021/08/20/hexo%20%E5%8D%9A%E5%AE%A2%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<h2 id="hexo-博客常见问题">hexo 博客常见问题</h2>
-<p>因为博客有时候想修改一些配置项，然后 <code>hexo g</code> 后就会出现一些问题，在此做一些记录方便日后查看。</p>
-<h3 id="err-template-render-error-unknown-path-unexpected-end-of-file">1. err: Template render error: (unknown path) unexpected end of file</h3>
-<p>可能是文章中写了 <code>&#123;% note info %&#125;` 这类的标签，可能是忘记写 `&#123;% endnote %&#125;</code> 了，也可能是写的不标准，检查一下。</p>
-<h3 id="修改-banner-img-不显示">2. 修改 banner img 不显示</h3>
-<p>可能是 banner img 太大了，最好压到1m以内。</p>
-]]></content>
-      <tags>
-        <tag>hexo</tag>
-      </tags>
-  </entry>
 </search>
