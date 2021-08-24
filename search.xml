@@ -15071,7 +15071,8 @@ X_{\text {hidden }} \in \mathbb{R}^{\text {batch_size } * \text { seq_len. } * \
 <h3 id="知识加工">2.3 知识加工</h3>
 <p>通过信息抽取，可以从原始语料中提取出实体、关系与属性等知识要素．再经过知识融合，可以消除实体指称项与实体对象之间的歧义，得到一系列基本的事实表达．然而，事实本身并不等于知识，要想最终获得结构化、网络化的知识体系，还需要经历知识加工的过程．<strong>知识加工主要包括3方面内容：本体构建、知识推理和质量评估．</strong></p>
 <h4 id="本体构建">2.3.1 本体构建</h4>
-<p>本体（ontology）是对概念进行建模的规范，是描述客观世界的抽象模型，以形式化方式对概念及其之间的联系给出明确定义．本体的最大特点在于它是共享的，本体中反映的知识是一种明确定义的共识．虽然在不同时代和领域，学者们对本体曾经给出过不同的定义，但这些定义的内涵是一致的，即：<strong>本体是同一领域内的不同主体之间进行交流的语义基础</strong>．本体是树状结构，相邻层次的节点（概念）之间具有严格的“Is A”关系，这种单纯的关系有助于知识推理，但却不利于表达概念的多样性．在知识图谱中，本体位于模式层，用于描述概念层次体系是知识库中知识的概念模板</p>
+<p>本体（ontology）是对概念进行建模的规范，是描述客观世界的抽象模型，以形式化方式对概念及其之间的联系给出明确定义．本体的最大特点在于它是共享的，本体中反映的知识是一种明确定义的共识．虽然在不同时代和领域，学者们对本体曾经给出过不同的定义，但这些定义的内涵是一致的，即：<strong>本体是同一领域内的不同主体之间进行交流的语义基础</strong>．本体是树状结构，相邻层次的节点（概念）之间具有严格的“Is A”关系，这种单纯的关系有助于知识推理，但却不利于表达概念的多样性．在知识图谱中，本体位于模式层，用于描述概念层次体系是知识库中知识的概念模板。</p>
+<p>本体可以采用人工编辑的方式手动构建（借助 本体编辑软件），也可以采用计算机辅助，以数据驱 动的方式自动构建，然后采用算法评估和人工审核 相结合的方式加以修正和确认．对于特定领域而言， 可以采用领域专家和众包的方式人工构建本体．然 而对于跨领域的全局本体库而言，采用人工方式不 仅工作量巨 大，而且很难找到符合要求的专家．因 此，当前主流的全局本体库产品，都是从一些面向特 定领域的现有本体库出发，采用自动构建技术逐步扩展得到的．</p>
 <h4 id="知识推理">2.3.2 知识推理</h4>
 <p><strong>知识推理是指从知识库中已有的实体关系数据出发，经过计算机推理，建立实体间的新关联，从而拓展和丰富知识网络．知识推理是知识图谱构建的重要手段和关键环节，通过知识推理，能够从现有知识中发现新的知识</strong>．知识的推理方法可以分为２大类： 基于逻辑的推理和基于图的推理．</p>
 <h4 id="质量评估">2.3.3 质量评估</h4>
@@ -15119,14 +15120,14 @@ X_{\text {hidden }} \in \mathbb{R}^{\text {batch_size } * \text { seq_len. } * \
     <title>Joint Extraction of Entities and Relations Based on a Novel Tagging Scheme</title>
     <url>/2021/08/15/Joint%20Extraction%20of%20Entities%20and%20Relations%20Based%20on%20a%20Novel%20Tagging%20Scheme/</url>
     <content><![CDATA[<h1 id="joint-extraction-of-entities-and-relations-based-on-a-novel-tagging-scheme">Joint Extraction of Entities and Relations Based on a Novel Tagging Scheme</h1>
-<p>作者提出了一个新的标注方案，并使用神经网络进行实体和关系的联合抽取。</p>
+<p>这篇文章是 ACL 2017 Outstanding Paper。作者提出了一个新的标注方案，并使用神经网络进行实体和关系的联合抽取。</p>
 <h2 id="basic-idea">Basic Idea</h2>
 <p>实体与关系抽取是构建 KB 的重要步骤。两个主要框架已被广泛用于解决抽取实体及其关系的问题。一个是<strong>流水线方法</strong>，另一个是<strong>联合学习方法</strong>。</p>
 <ul>
 <li><p>传统方法以<strong>流水线</strong>方法将这个任务视为两个分离的任务<strong>，即命名实体识别（NER）和关系分类（RC）。</strong>先抽取实体，然后识别它们的关系。这种分离的框架使得任务易于处理，并且每个组件都可以更加灵活。但它<strong>忽略了这两个子任务之间的相关性</strong>，每个子任务都是一个独立的模型。实体识别的结果可能会影响关系分类的性能，并导致错误的传播。</p></li>
 <li><p><strong>联合学习框架是使用单一模型将实体和关系一起抽取出来。它可以有效地整合实体和关系的信息</strong>，并在这项任务中取得了较好的效果。然而，大多数现有的联合方法都是基于特征的结构化系统，他们需要复杂的特征工程，并且严重依赖其他 NLP 工具包，这也可能导致错误传播。</p></li>
 </ul>
-<p>基于两个方法的问题，作者提出了一个新颖的标注方案，然后抽取由两个实体和这两个实体之间的一个关系组成的三元组（而不是分别抽取实体和关系），并配以端到端的模型。标注方案包含实体信息和它们所持有的关系。基于这种标注方案，实体和关系的联合抽取可以转化为标记问题。这样，可以用神经网络来建模任务，而不需要复杂的特征工程。</p>
+<p>基于两个方法的问题，作者提出了一个新颖的标注方案，然后抽取由两个实体和这两个实体之间的一个关系组成的三元组（而不是分别抽取实体和关系），并配以端到端的模型。标注方案包含实体信息和它们的关系。基于这种标注方案，实体和关系的联合抽取可以转化为标记问题。这样，可以用神经网络来建模任务，而不需要复杂的特征工程。</p>
 <h2 id="method">Method</h2>
 <p>作者提出了一种<strong>新的标注方案</strong>和一个具<strong>有偏置目标函数</strong>的<strong>端到端模型</strong>来联合抽取实体及其关系。</p>
 <h3 id="tagging-scheme">Tagging Scheme</h3>
@@ -15200,7 +15201,7 @@ I(O)=\left\{\begin{array}{l}
 <li>基于作者的标注方案，LSTM-LSTM 模型优于 LSTM-CRF 模型。因为，LSTM 能够学习长期的依赖关系，CRF 擅长捕捉整个标注序列的联合概率。相关的标签可能相距很远。因此，LSTM 解码方式比 CRF 好一些。 LSTM-LSTM-Bias 增加了一个偏置权重，以增强实体标注的效果，减弱无效标注的影响。因此，在这个标注方案中，作者的方法可以比普通的 LSTM 解码方法更好。</li>
 </ol>
 <div class="note note-primary">
-            <p><strong>有关Precision（Prec）、Recall（Rec）和F1分数：</strong></p><ul><li>TP（True Positives）意思就是<strong>被分为了正样本，而且分对了</strong>。</li><li>TN（True Negatives）意思就是<strong>被分为了负样本，而且分对了</strong>。</li><li>FP（False Positives）意思就是<strong>被分为了正样本，但是分错了（事实上这个样本是负样本）</strong>。</li><li>FN（False Negatives）意思就是<strong>被分为了负样本，但是分错了（事实上这个样本是正样本）。</strong></li></ul><p><strong>precision（精确度）：</strong> <span class="math display">\[Precision= \frac{TP}{TP+FP}\]</span></p><p>TP是 分类器认为是正样本而且确实是正样本的例子，FP是 分类器认为是正样本但实际上不是正样本的例子，Precision 翻译过来就是<strong>“分类器认为是正类并且确实是正类的部分占所有分类器认为是正类的比例”</strong>。</p><p><strong>recall（召回率）：</strong> <span class="math display">\[Recall=\frac{TP}{TP+FN}\]</span> TP是 分类器认为是正样本而且确实是正样本的例子，FN是 分类器认为是负样本但实际上不是负样本的例子，Recall 翻译过来就是“<strong>分类器认为是正类并且确实是正类的部分占所有确实真正是正类的比例</strong>”。</p><p>P 和 R 指标有时候会出现的矛盾的情况，这样就需要综合考虑他们，最常见的方法就是 <strong>F-Measure</strong> ，通过计算F值来评价一个指标</p><p>常见的 <strong>F1 计算方法</strong>： <span class="math display">\[F1 = \frac{2 \cdot P \cdot R}{P + R}\]</span></p>
+            <p><strong>有关准确率（Accuracy）、Precision（Prec）、Recall（Rec）和F1分数：</strong></p><ul><li>TP（True Positives）意思就是<strong>被分为了正样本，而且分对了</strong>。</li><li>TN（True Negatives）意思就是<strong>被分为了负样本，而且分对了</strong>。</li><li>FP（False Positives）意思就是<strong>被分为了正样本，但是分错了（事实上这个样本是负样本）</strong>。</li><li>FN（False Negatives）意思就是<strong>被分为了负样本，但是分错了（事实上这个样本是正样本）。</strong></li></ul><p><strong>准确率（Accuracy）：</strong> <span class="math display">\[Accuracy = \frac{TP + TN}{TP + TN+FP + FN}\]</span></p><p>准确率就是所有的预测正确（正类负类）的占总的比重。</p><p><strong>precision（精确度）：</strong> <span class="math display">\[Precision= \frac{TP}{TP+FP}\]</span></p><p>TP是 分类器认为是正样本而且确实是正样本的例子，FP是 分类器认为是正样本但实际上不是正样本的例子，Precision 翻译过来就是<strong>“分类器认为是正类并且确实是正类的部分占所有分类器认为是正类的比例”</strong>。</p><p><strong>recall（召回率）：</strong> <span class="math display">\[Recall=\frac{TP}{TP+FN}\]</span> TP是 分类器认为是正样本而且确实是正样本的例子，FN是 分类器认为是负样本但实际上不是负样本的例子，Recall 翻译过来就是“<strong>分类器认为是正类并且确实是正类的部分占所有确实真正是正类的比例</strong>”。</p><p>P 和 R 指标有时候会出现的矛盾的情况，这样就需要综合考虑他们，最常见的方法就是 <strong>F-Measure</strong> ，通过计算F值来评价一个指标</p><p>常见的 <strong>F1 计算方法</strong>： <span class="math display">\[F1 = \frac{2 \cdot P \cdot R}{P + R}\]</span></p>
           </div>
 <h3 id="predicted-results-on-triplets-elements">Predicted Results on Triplet’s Elements</h3>
 <p>为了<u>找出影响端到端模型结果的因素</u>，作者分析了预测三元组中每个元素的性能，只有当两个相应实体的关系类型和头部偏移量都是正确的时候，它才能处理三元组。如表 2 所示。E1 和 E2 分别表示预测每个实体的性能。如果第一个实体的头部偏移是正确的，那么 E1 的实例是正确的，E2 同理。不管关系类型，如果两个对应实体的头部偏移都是正确的，则（E1，E2）的实例是正确的。</p>
