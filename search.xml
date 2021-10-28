@@ -17413,7 +17413,7 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
 <li>Dynamic Completion：在推理过程中，动态地向 KG 中添加额外的边（关系），缓解 KG 的稀疏性问题。</li>
 </ol>
 <div class="note note-primary">
-            <p><font color='red'>我还不明白为什么 KGE 模型通常比多跳推理模型取得更好的结果？</font></p><p>胡思乱想:p</p><p>这个注意力机制这块能不能进行改进？比如图注意？(我还不清楚...)</p>
+            <p><font color='red'>我还不明白为什么 KGE 模型通常比多跳推理模型取得更好的结果？</font></p><p><font color='blue'>胡思乱想:p 这个注意力机制这块能不能进行改进？比如图注意？(我还不清楚...)</font></p>
           </div>
 ]]></content>
       <categories>
