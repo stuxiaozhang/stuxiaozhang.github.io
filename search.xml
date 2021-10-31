@@ -17728,12 +17728,12 @@ S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)
     <url>/2021/10/31/KGR_Papers_Summarization/</url>
     <content><![CDATA[<p>这里是 Knowledge Graph Reasoning 方向的论文，主要是在看 <a href="https://github.com/THU-KEG/Knowledge_Graph_Reasoning_Papers#2-Multi-Hop-Reasoning">THU-KEG 的这份 paper list</a>，正在不定期更新中....</p>
 <p>有一些年代久远的没看，其余的正在看，慢慢累积起来，做一个总结，希望不要遗忘太快，并且以后方便查阅。</p>
+<a id="more"></a>
 <h1 id="小张的奇思妙想">小张的奇思妙想</h1>
 <div class="note note-primary">
             <ul><li><p>能不能反着想，在嵌入模型中加强化学习？</p></li><li>为什么现在 多跳推理 得基于 强化学习呢？</li><li>其他方向怎么做可解释性的？<ul><li>Learning to explain: Datasets and models for identifying valid reasoning chains in multihop question-answering.</li></ul></li></ul>
           </div>
 <h1 id="kgr_papers_summarization">KGR_papers_Summarization</h1>
-<p>[toc]</p>
 <h2 id="survey-papers">1. Survey Papers</h2>
 <ol type="1">
 <li><p><strong>A Review: Knowledge Reasoning over Knowledge Graph.</strong> <em>Xiaojun Chen, Shengbin Jia, Yang Xiang.</em> Expert Systems with Applications. <a href="https://www.sciencedirect.com/science/article/pii/S0957417419306669">paper</a></p>
@@ -17797,7 +17797,7 @@ S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)
 <li>Author：<em>Xin Lv, Yixin Cao, Lei Hou, Juanzi Li, Zhiyuan Liu....</em> EMNLP 2021</li>
 <li><p>Idea：针对多跳推理没有量化的评价指标的问题，提出了衡量多跳路径可解释性得分的 BIMR，包括三个指标：PR、LI 和 GI，弥补了多跳推理效果没有量化评价指标的空白。</p>
 <p>作者说未来的工作可以研究：如何更好地将 <strong>挖掘出的规则 融入到 多跳推理模型</strong> 中，以获得更好的性能和可解释性。以后可以看一下 Rule mining 的 KGC.</p></li>
-<li><p>我的阅读笔记</p></li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/30/Is%20Multi-Hop%20Reasoning%20Really%20Explainable%20Towards%20Benchmarking%20Reasoning%20%20Interpretability/">我的阅读笔记</a></p></li>
 </ul>
 ]]></content>
       <categories>
