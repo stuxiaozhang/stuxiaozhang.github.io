@@ -16904,7 +16904,8 @@ R_{k} &=\left\{\mathbf{x}_{k}^{L M}, \overrightarrow{\mathbf{h}}_{k, j}^{L M}, \
     <title>Go for a Walk and Arrive at the Answer：Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</title>
     <url>/2021/10/08/Go%20for%20a%20Walk%20and%20Arrive%20at%20the%20Answer%EF%BC%9AReasoning%20Over%20Paths%20in%20Knowledge%20Bases%20using%20Reinforcement%20Learning/</url>
     <content><![CDATA[<h1 id="go-for-a-walk-and-arrive-at-the-answer-reasoning-over-paths-in-knowledge-bases-using-reinforcement-learning">Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</h1>
-<p>在知识图谱补全任务中，大多数模型都是依赖低维 representation 对三元组进行打分。本文提出了一种基于输入问题的强化学习（RL）方法，该方法可以有效地在图中搜索答案提供路径，从而消除了对预计算路径的任何需要。给定一个海量知识图，我们学习一个策略，该策略在给定查询 <code>(entity1,relation,?)</code>的情况下，从 entity1 开始，通过选择在每一步取一个带标签的关系边，学习走到答案节点，条件是查询关系和整个路径历史。这将查询-应答任务描述为强化学习（RL）问题，其目标是采取最佳决策序列（选择关系边）以最大化预期回报（到达正确的答案节点）。称 RL 代理 MINERVA 为 ”Meandering In Networks of Entities to Reach Verisimilar Answers.”</p>
+<p>这篇是 <a href="https://arxiv.org/pdf/1711.05851.pdf">Go for a Walk and Arrive at the Answer</a> 的论文笔记。</p>
+<p>在知识图谱补全任务中，大多数模型都是依赖低维 representation 对三元组进行打分。本文提出了一种基于输入问题的强化学习（RL）方法，该方法可以有效地在图中搜索答案提供路径。给定一个海量知识图，我们学习一个策略，该策略在给定查询 <code>(entity1,relation,?)</code> 的情况下，从 entity1 开始，通过选择在每一步取一个带标签的关系边，学习走到答案节点，条件是查询关系和整个路径历史。这将查询-应答任务描述为强化学习（RL）问题，其目标是采取最佳决策序列（选择关系边）以最大化预期回报（到达正确的答案节点）。称 RL 代理 MINERVA 为 ”Meandering In Networks of Entities to Reach Verisimilar Answers.”</p>
 <p>MINERVA 的特点：</p>
 <ol type="1">
 <li>首先，MINERVA 具有采用可变长度路径的内置灵活性，这对于回答需要复杂推理链的较难问题很重要。</li>
@@ -16914,17 +16915,14 @@ R_{k} &=\left\{\mathbf{x}_{k}^{L M}, \overrightarrow{\mathbf{h}}_{k, j}^{L M}, \
 </ol>
 <h2 id="model">Model</h2>
 <h3 id="environment">Environment</h3>
-<p>我们的环境是一个有限视界的、确定性的、部分观测的<strong>马尔可夫决策过程</strong>，它依赖于从知识库导出的知识图谱 G。在这个图上，现将指定一个确定性的部分观测马尔可夫决策过程，它是一个5元组 <span class="math inline">\((S,O,a,δ,R)\)</span></p>
+<p>Reinforcement Learning 在知识图谱上游走 Path，游走终止得到 Answer。整个 KGR 是一个<strong>马尔可夫决策过程</strong>，现指定一个部分的 MDP，它是一个5元组 <span class="math inline">\((S,O,a,δ,R)\)</span></p>
 <p><strong>States.</strong> 当前所在节点 <span class="math inline">\(e_t\)</span>，初始节点 <span class="math inline">\(e_{1q}\)</span>，初始查询关系 <span class="math inline">\(r_q\)</span>，正确答案 <span class="math inline">\(e_{2q}\)</span> 四元组。所以 State 表示为 <span class="math inline">\(S = (e_t,e_{1q},r_q,e_{2q})\)</span></p>
 <p><strong>Observations.</strong> 未观察到环境的完整状态。即 除了正确答案 <span class="math inline">\(e_{2q}\)</span> 无法观测之外 都知道。所以函数定义为 <span class="math inline">\(O(s=(e_t,e_{1q},r_q,e_{2q}))=(e_t,e_{1q},r_q)。\)</span></p>
 <p><strong>Actions.</strong> 由当前节点 <span class="math inline">\(e_t\)</span> 的关联的三元组 <span class="math inline">\(\mathcal{A}_{S}=\left\{\left(e_t, r, v\right) \in E: S=(e_t,e_{1q},r_q,e_{2q}), r \in \mathcal{R}, v \in V\right\} \cup\{(s, \varnothing, s)\}\)</span>。处于每个状态的代理都可以选择它希望获取的输出边，并且知道边 <span class="math inline">\(r\)</span> 和目标顶点 <span class="math inline">\(v\)</span> 的标签。</p>
 <p><strong>Transition. </strong> States 结合 Actions 来进行状态转移。转移函数定义为 <span class="math inline">\(\mathcal{S} \times \mathcal{A} \rightarrow \mathcal{S} \text { defined by } \delta(S, A)=\left(v, \mathrm{e}_{1 \mathrm{q} }, \mathrm{r}_{\mathrm{q} }, \mathrm{e}_{2 \mathrm{q} }\right)\)</span>，其中 <span class="math inline">\(S = (e_t,e_{1q},r_q,e_{2q})\)</span> , <span class="math inline">\(A=(e_t，r，v)\)</span>, <span class="math inline">\(\delta : S \times A\)</span>。</p>
-<p><strong>Rewards.</strong> 如果最后的当前位置是正确答案，给 ==+1== 的最终奖励，否则为0。</p>
+<p><strong>Rewards.</strong> 如果最后的当前位置是正确答案，给 1 的最终奖励，否则为0。</p>
 <h3 id="policy-network">Policy Network</h3>
-<p>结合当前历史行为和状态，对当前可执行运动进行概率评估 <span class="math display">\[
-R\left(S_{T}\right)=\mathbb{I}\left\{\mathrm{e}_{\mathrm{t}}=\mathrm{e}_{2 \mathrm{q} }\right\}
-\]</span></p>
-<p>策略 <span class="math inline">\(\pi=\left(\mathbf{d}_{\mathbf{1} }, \mathbf{d}_{\mathbf{2} }, \ldots, \mathbf{d}_{\mathbf{T}-\mathbf{1} }\right),\mathbf{d}_{\mathbf{t} }: H_{t} \rightarrow \mathcal{P}\left(\mathcal{A}_{S_{t} }\right)\)</span>，历史状态 <span class="math inline">\(H_{t}=\left(H_{t-1}, A_{t-1}, O_{t}\right)\)</span> 是观察和采取行动的顺序。</p>
+<p>策略 <span class="math inline">\(\pi=\left(\mathbf{d}_{\mathbf{1} }, \mathbf{d}_{\mathbf{2} }, \ldots, \mathbf{d}_{\mathbf{T}-\mathbf{1} }\right),\mathbf{d}_{\mathbf{t} }: H_{t} \rightarrow \mathcal{P}\left(\mathcal{A}_{S_{t} }\right)\)</span>，历史信息 <span class="math inline">\(H_{t}=\left(H_{t-1}, A_{t-1}, O_{t}\right)\)</span> 是观察和采取行动的顺序。</p>
 <p>Agent 基于 LSTM 对历史行为进行编码，得到历史状态的隐藏表示 <span class="math inline">\(h_t\)</span>： <span class="math display">\[
 \mathbf{h}_{\mathbf{t}}=\operatorname{LSTM}\left(\mathbf{h}_{\mathbf{t}-\mathbf{1} },\left[\mathbf{a}_{\mathbf{t}-\mathbf{1} } ; \mathbf{o}_{\mathbf{t} }\right]\right)
 \]</span> 其中，<span class="math inline">\(\mathbf{a}_{\mathbf{t}-\mathbf{1} }\)</span> 是在 <span class="math inline">\(t-1\)</span> 时刻的 action/relation， <span class="math inline">\(\mathbf{o}_\mathbf{t}\)</span> 是在 <span class="math inline">\(t\)</span> 时刻的 observation/entity ，<span class="math inline">\([;]\)</span> 将两者拼接起来。栗：<span class="math inline">\(\mathbf{a}_{\mathbf{t}-\mathbf{1} }=\mathbf{r}_{A_{t-1} }\)</span> 是 agent 在 <span class="math inline">\(t-1\)</span> 时刻选择的 关系嵌入对应的 edge 的 label，<span class="math inline">\(\mathbf{o}_{\mathbf{t} }=\mathbf{e}_{\mathrm{e} }\)</span> 是 agent 在 <span class="math inline">\(t\)</span> 时刻选择的 实体嵌入对应着的 edge 的 label</p>
@@ -16951,7 +16949,6 @@ A_{t} \sim \text { Categorical }\left(\mathbf{d}_{\mathbf{t} }\right)
         <category>NLP</category>
       </categories>
       <tags>
-        <tag>NLP</tag>
         <tag>KGR</tag>
       </tags>
   </entry>
@@ -16959,15 +16956,12 @@ A_{t} \sim \text { Categorical }\left(\mathbf{d}_{\mathbf{t} }\right)
     <title>Multi-Hop Knowledge Graph Reasoning with Reward Shaping</title>
     <url>/2021/10/11/Multi-Hop%20Knowledge%20Graph%20Reasoning%20with%20Reward%20Shaping/</url>
     <content><![CDATA[<h1 id="multi-hop-knowledge-graph-reasoning-with-reward-shaping">Multi-Hop Knowledge Graph Reasoning with Reward Shaping</h1>
-<p>该论文基于上篇 MINERVA（Das ICLR 2018）指出了强化学习在 incomplete knowledge graph 中进行 reasoning 时存在的两个问题，</p>
+<p><a href="https://aclweb.org/anthology/D18-1362">Multi-Hop KG</a> 是发表在 EMNLP 2018 上的一篇论文。该论文基于上篇 <a href="https://arxiv.org/pdf/1711.05851.pdf">MINERVA</a>（Das ICLR 2018）指出了强化学习在 incomplete knowledge graph 中进行 reasoning 时存在的两个问题：</p>
 <ol type="1">
 <li>虚假负reward：查询出的路径由于知识图谱中的信息缺失导致判定为错误路径</li>
 <li>虚假路径：由假路径导致的偶然正确答案。由于强化学习是一种基于策略的算法，鼓励过去的行动，并反馈回较高的reward，因此会更偏向初期存在的虚假正确的情况。(false positive path)</li>
 </ol>
-<p>针对以上问题,本文提出解决方案：Reward Shaping 和 Action dropout</p>
-<h2 id="background">Background</h2>
-<p>多跳推理是解决 incomplete knowledge graph 问题的一种有效方法。该问题可以在强化学习（RL）设置中表述，其中基于 policy 的代理顺序扩展其推理路径，直到到达目标。然而，在一个不完整的 KG 环境中，代理会收到训练数据中的 false negatives 所破坏造成的低质量奖励，这会损害测试时的泛化。此外，由于没有正确动作序列用于训练，代理可能会被虚假的搜索轨迹误导，从而意外地导致正确答案(false positive path)。</p>
-<p>最近的工作 MINERVA 将多跳推理表述为一个顺序决策问题，并利用强化学习（RL）执行有效的路径搜索。MINERVA 使用强化算法训练多跳 KG query answering 的端到端模型：给定查询关系和源实体，经过训练的代理从源开始搜索 KG，并在不访问任何预计算路径的情况下到达候选答案。</p>
+<p>针对以上问题,本文提出解决方案：<strong>Reward Shaping</strong> 和 <strong>Action dropout</strong></p>
 <h2 id="model">Model</h2>
 <h3 id="rl-formulation">RL Formulation</h3>
 <p>使用马尔科夫随机过程(Markov Decision Process)：</p>
@@ -17023,15 +17017,15 @@ m_{i} \sim \operatorname{Bernoulli}(1-\alpha), i=1, \ldots\left|A_{t}\right|
         <category>NLP</category>
       </categories>
       <tags>
-        <tag>NLP</tag>
         <tag>KGR</tag>
+        <tag>Multi-Hop KG</tag>
       </tags>
   </entry>
   <entry>
     <title>CPL：Collaborative Policy Learning for Open Knowledge Graph Reasoning</title>
     <url>/2021/10/12/CPL%EF%BC%9ACollaborative%20Policy%20Learning%20for%20Open%20Knowledge%20Graph%20Reasoning/</url>
     <content><![CDATA[<h1 id="cplcollaborative-policy-learning-for-open-knowledge-graph-reasoning">CPL：Collaborative Policy Learning for Open Knowledge Graph Reasoning</h1>
-<p>这是一篇发表在 EMNLP 2019 上的文章. 提出了一个强化学习框架 CPL 联合了两个 agent：multi-hop graph reasoner 和 fact extractor.</p>
+<p><a href="https://www.aclweb.org/anthology/D19-1269.pdf">CPL</a> 是一篇发表在 EMNLP 2019 上的文章. 提出了一个强化学习框架 CPL 联合了两个 agent：multi-hop graph reasoner 和 fact extractor.</p>
 <h2 id="basic-idea">Basic Idea</h2>
 <p><u>开放知识图谱推理 OKGR 是一项旨在通过背景文本语料库对图中缺失的事实进行推理的任务。</u>该任务的一个关键挑战是过滤掉从语料库中抽取的“无关”事实，以便在路径推理过程中保持有效的搜索空间。本文提出了一个新的强化学习框架 CPL 来联合训练两个 collaborative agent，即 a multi-hop graph reasoner and a fact extractor。fact extractor agent 从语料库生成事实三元组，以动态地丰富 graph；而 reasoning agent 则向 fact extractor 提供反馈，并引导其提升有助于解释性推理的事实。</p>
 <h2 id="background">Background</h2>
@@ -17119,15 +17113,15 @@ a_{R}^{t}=[r, e],\left(e^{t}, r, e\right) \in G \cup C \\
 <h2 id="summary">Summary</h2>
 <p>本文作者在“开放世界”环境下研究知识图推理，从背景语料库中抽取的新事实可用于促进路径发现。然后，依据此提出了一种新的协作策略学习（CPL）框架，以相互增强的方式联合训练两个RL代理。在CPL中，除了训练用于路径发现的 Reasoner Agent 之外，还引入了Fact Extractor Agent，该代理根据推理过程和语料库的上下文学习从语料库中抽取相关事实的策略。在推理时，事实抽取代理仅使用信息量最大的边动态扩充图，从而使推理代理能够有效地识别正路径。</p>
 <div class="note note-primary">
-            <p>推理代理通过抽取代理的置信度分数进行正反馈，帮助抽取代理学习策略。作者认为推理代理正确到达目标时，认为这条路径是有效的，正确的推理。</p><p>但是我觉着，即使正确到达目标，路径就一定正确吗？作者是如何去衡量这条路径的(我没看源码==)？我只知道PCRA....有没有其他新一点的方法？</p>
+            <p>推理代理通过抽取代理的置信度分数进行正反馈，帮助抽取代理学习策略。作者认为推理代理正确到达目标时，认为这条路径是有效的，正确的推理。</p><p>但是我觉着，即使正确到达目标，路径就一定正确吗？作者是如何去衡量这条路径的(我没看源码==)？我只知道PCRA....有没有其他新一点的方法？</p><p>2021.10.31 有. THU吕欣 提出了衡量多跳路径可解释性得分的 BIMR，包括三个指标：PR、LI 和 GI</p>
           </div>
 ]]></content>
       <categories>
         <category>NLP</category>
       </categories>
       <tags>
-        <tag>NLP</tag>
         <tag>KGR</tag>
+        <tag>CPL</tag>
       </tags>
   </entry>
   <entry>
@@ -17310,7 +17304,7 @@ a_{R}^{t}=[r, e],\left(e^{t}, r, e\right) \in G \cup C \\
     <title>DacKGR：Dynamic Anticipation and Completion for Multi-Hop Reasoning over Sparse Knowledge Graph</title>
     <url>/2021/10/19/DacKGR%EF%BC%9ADynamic%20Anticipation%20and%20Completion%20for%20Multi-Hop%20Reasoning%20over%20Sparse%20Knowledge%20Graph/</url>
     <content><![CDATA[<h1 id="dackgrdynamic-anticipation-and-completion-for-multi-hop-reasoning-over-sparse-knowledge-graph">DacKGR：Dynamic Anticipation and Completion for Multi-Hop Reasoning over Sparse Knowledge Graph</h1>
-<p>这篇文章是 清华大学吕欣 发表在 EMNLP 2020 上的工作，主要思想还是用强化学习做稀疏 KG 的多跳推理，包括动态预测和动态补全两步。</p>
+<p><a href="https://www.aclweb.org/anthology/2020.emnlp-main.459.pdf">DacKGR</a> 是 THU吕欣 发表在 EMNLP 2020 上的工作，主要思想还是用强化学习做稀疏 KG 的多跳推理，包括动态预测和动态补全两步。</p>
 <h2 id="basic-idea">Basic Idea</h2>
 <p>该文针对稀疏知识图谱做多跳推理。可以做多跳推理的模型主要有两类：KGE 模型和专门的多跳推理模型。但 KGE 做补全是计算出来的结果，不能给出推理路径之类的解释。而专门的多跳推理模型作用于稀疏知识图谱时面临两个问题：稀疏 KG 包含的信息少，路径选择困难；路径的缺乏使得预测目标实体变得困难。</p>
 <p>因此，为了解决在<strong>稀疏路径的 KG 进行多跳推理比较困难</strong>的问题，文章提出了 DacKGR，包括动态预测（Dynamic Anticipation）和动态补全（Dynamic Completion）两部分：</p>
@@ -17420,8 +17414,8 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
         <category>NLP</category>
       </categories>
       <tags>
-        <tag>NLP</tag>
         <tag>KGR</tag>
+        <tag>DacKGR</tag>
       </tags>
   </entry>
   <entry>
@@ -17619,6 +17613,198 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
       <tags>
         <tag>Linux</tag>
         <tag>shell</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning Interpretability</title>
+    <url>/2021/10/30/Is%20Multi-Hop%20Reasoning%20Really%20Explainable%20Towards%20Benchmarking%20Reasoning%20%20Interpretability/</url>
+    <content><![CDATA[<h1 id="is-multi-hop-reasoning-really-explainable-towards-benchmarking-reasoning-interpretability">Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning Interpretability</h1>
+<p>这篇论文是今年新出的，在 <a href="https://arxiv.org/pdf/2104.06751.pdf">arxiv</a> 上，但还未公开发表，但根据作者吕欣历年的习惯，八成是要投今年的 EMNLP。</p>
+<p>文章的主要工作是提出了一个 benchmark：<strong>BIMR</strong> (Benchmark to detect the Interpretability of Multi-hop Reasoning)，用于对多跳推理的效果进行评估，并用该 benchmark 对 9 个 baseline 模型进行了测试，验证了 A-benchmark 的有效性 和 R-benchmark 的泛化性。</p>
+<h2 id="problem">Problem</h2>
+<p>以前的 KG 的多跳推理，大多数都关心模型性能，而<strong>忽略了对路径可解释性的评估</strong>。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211030192312525.png"  style="zoom:67%;" /></p>
+<p>很多多跳推理模型给出的路径并不合理，如上图下面的例子，尽管模型预测出了正确的尾实体，但是给出的推理路径完全不合理，目前对多跳推理效果评价的方法只有 case study，很少有人做可解释性的评估，因此<strong>文章提出了量化的评价指标 BIMR，用于评价多跳路径的可解释性。</strong></p>
+<h2 id="benchmark">Benchmark</h2>
+<h3 id="dataset-construction">1. Dataset Construction</h3>
+<p>这里没细看，可以见论文的附录 A.</p>
+<h3 id="evaluation-framework">2. Evaluation Framework</h3>
+<p>计算模型的可解释性分数基于三个指标定义：Path Recall (PR)，Local Interpretability (LI)，Global Interpretability (GI).</p>
+<h4 id="path-recall-pr">2.1 Path Recall (PR)</h4>
+<p>路径召回（PR）表示<strong>测试集中，模型可以通过至少一条从头部实体到尾部实体的路径找到三元组的比例</strong>。 <span class="math display">\[
+\mathrm{PR}=\frac{\sum_{(h, r, t) \in \mathcal{T}^{\text {test }}} \operatorname{Cnt}(h, r, t)}{\left|\mathcal{T}^{\text {test }}\right|}
+\]</span> 其中，<span class="math inline">\(\operatorname{Cnt}(h, r, t)\)</span> 是一个指示函数，表示模型是否可以从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 中找到路径。如果至少可以找到一条路径，则函数值为 1，否则为 0。</p>
+<p>Path Recall 的意义在于：对于大多数模型，不是每个三元组都能找到从头部实体到尾部实体的路径。没有来自 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 的路径，或者可能无法为每个 rule 匹配 KG 上的真实路径。</p>
+<h4 id="local-interpretability-li">2.2 Local Interpretability (LI)</h4>
+<p>局部可解释性（LI）用于<strong>评估模型找到的路径的合理性</strong>。 <span class="math display">\[
+\mathrm{LI}=\frac{\sum_{(h, r, t) \in \mathcal{T}^{\text {test } } } \operatorname{Cnt}(h, r, t) S(p)}{\sum_{(h, r, t) \in \mathcal{T}^{\text {test } } } \operatorname{Cnt}(h, r, t)}
+\]</span> 其中，<span class="math inline">\(p\)</span> 是模型找到的从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 的得分最高的路径，<span class="math inline">\(S(p)\)</span> 是该路径的可解释性得分</p>
+<h4 id="global-interpretability-gi">2.3 Global Interpretability (GI)</h4>
+<p>全局可解释性（GI）<strong>评估模型的整体可解释性</strong>，因为 LI 只能表达由模型发现的路径的合理程度，但是它不能考虑可以找到多少路径。 <span class="math display">\[
+\mathrm{GI} = \mathrm{PR} \cdot \mathrm{LI}
+\]</span> <strong>LI 可以反映可以找到的所有路径的可解释性，而 GI 评估模型的整体可解释性。</strong></p>
+<h3 id="approximate-interpretability-score">3. Approximate Interpretability Score</h3>
+<p>构建 benchmarks 来定量评估解释性。然而，由于路径数量巨大，评估框架中的 <span class="math inline">\(S(p)\)</span> 很难获得。所以在此之前，先进行：路径收集 和 近似策略。</p>
+<h4 id="path-collection">3.1 Path Collection</h4>
+<p>Path Collection 目的是<strong>收集所有从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 可能的路径</strong>，以便评估框架能够覆盖多跳推理模型的各种输出。</p>
+<ol type="1">
+<li>针对训练集中的每个 <span class="math inline">\((h,r,t)\)</span>，添加反向三元组 <span class="math inline">\((t,r^{-1}, h)\)</span></li>
+<li>对测试集的每个 <span class="math inline">\((h,r,t)\)</span>，使用 <strong>BFS</strong> 搜索从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 长度为 3 的所有路径。</li>
+</ol>
+<p>最后生成了包含约1600万条路径的最终路径集，它涵盖了多跳推理模型可能发现的所有路径。</p>
+<h4 id="approximation-optimization">3.2 Approximation Optimization</h4>
+<p>Approximation Optimization 目的是为了避免在大路径集 P（即1600万）上进行不切实际的注释或计算。作者发现路径的可解释性主要来自<strong>规则 rule</strong>，而不是特定的实体。所以<strong>将每个路径 <span class="math inline">\(p\)</span> 抽象为其相应的规则 <span class="math inline">\(f\)</span>，并使用规则的可解释性得分 <span class="math inline">\(S(f)\)</span> 作为路径可解释性得分 <span class="math inline">\(S(p)\)</span>，</strong> <span class="math display">\[
+S(p) \approx S(f)
+\]</span> 对于一条路径 <span class="math inline">\(p\)</span> <span class="math display">\[
+(h,r,t)←(h, r_1, e_1) ∧ (e_1, r_2, e_2) ∧ (e_2, r_3, t)
+\]</span> 根据规则 <span class="math inline">\(f\)</span> 将 <span class="math inline">\(p\)</span> 转换为： <span class="math display">\[
+r(X, Y)←r_1(X, A_1)∧ r_2(A_1, A_2)∧r_3(A_{2}, Y)
+\]</span> 转换之后，将路径集 <span class="math inline">\(\mathcal{P}\)</span> 转换为一组规则集 <span class="math inline">\(\mathcal{F}\)</span>。因为这些规则是独立于实体的，所以规则集 <span class="math inline">\(\mathcal{F}\)</span> 的大小减少到 96019，只需要给出每个规则 <span class="math inline">\(f \in \mathcal{F}\)</span> 的可解释性分数 <span class="math inline">\(S(f)\)</span> 用于构建 benchmark 即可。</p>
+<h3 id="benchmark-with-manual-annotation-a-benchmark">4. Benchmark with Manual Annotation (A-benchmark)</h3>
+<p>作者用可解释性分数手动标记每个规则，以形成手动注释的基准 (A-benchmark)。该基准的具体构建过程可以分为两个步骤，即剪枝优化和手工标注。</p>
+<h4 id="pruning-optimization">4.1 Pruning Optimization</h4>
+<p>为了在不影响最终结果的情况下<u>节省注释成本</u>，作者提出了一种剪枝策略。Rule mining 方法可以在 KG 上自动挖掘规则，并给每个规则一个置信度。作者的剪枝策略基于这样的假设：那些不在 Rule mining 方法所挖掘的规则列表中的规则，或者那些置信度非常低的规则，可解释性分数更低。</p>
+<div class="note note-primary">
+            <p>规则怎么挖掘的？没有看过 Rule mining 的论文...</p>
+          </div>
+<p>作者使用 <a href="https://www.ijcai.org/Proceedings/2019/0435.pdf">AnyBURL</a> 在训练集上挖掘规则，并获得 36065 条 rules 的规则集 <span class="math inline">\(\mathcal{F}^A\)</span> 。根据规则集 <span class="math inline">\(\mathcal{F}^A\)</span> 的 rule 及其置信度得分，将整个规则集 <span class="math inline">\(\mathcal{F}^A\)</span> 分为三组：高置信度规则（H rules）、低置信度规则（L rules）和其他规则（O rules）。每组中随机抽取500条规则，并邀请专家用可解释性分数手动标记它们。规则的分类标准和标签结果如表所示。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211030210219452.png"  /></p>
+<blockquote>
+<p>三类规则的分类标准和统计信息，其中 <span class="math inline">\(C(f)\)</span> 是规则 f 的置信度得分，#Rules 表示规则的数量，#Paths 表示与此类型规则对应的路径数量，Avg Score 表示此类规则的平均可解释性得分。0.01是用于选择低置信度规则的阈值，被规则挖掘方法广泛采用。</p>
+</blockquote>
+<p>从表2可以发现 L rules 的平均解释性得分远低于 H rules。虽然 O rules 的平均分数没有 L rules 的平均分数小，但 O rules 对应的路径太少（0.8M），而规则的数量相对较大（75027）。因此，O rules 可以被视为“长尾”规则。</p>
+<p>为了节省标注成本，并且尽可能不影响最终的评价结果，只手动标注 H rules 的可解释性得分。其他规则，使用此类规则的平均分数作为其可解释性分数，即认为所有 L rules 的可解释性得分为 0.005，所有的 O rules 可解释性得分为 0.069.</p>
+<div class="note note-primary">
+            <p>长尾：大概的意思就是虽然尾部很小，但是关注“尾部”产生的总体效益甚至会超过“头部”。在这里应该是，虽然 O rules 的的路径很少，但是它产生的规则数量很大。</p>
+          </div>
+<h4 id="manual-annotation">4.2 Manual Annotation</h4>
+<p>因为注释者很难直接注释规则的可解释性分数，因此对于每个 H rules，随机抽取最多10条对应的真实路径进行标记，用 与该规则对应的路径的平均可解释性得分 作为该规则的得分： <span class="math display">\[
+S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)
+\]</span></p>
+<p>其中，<span class="math inline">\(|P_{c}(f)|\)</span> 是规则 <span class="math inline">\(f\)</span> 的所有采样路径，<span class="math inline">\(S^{A}(p)\)</span> 是通过手动注释获得的路径的可解释性得分, 因为无法对所有路径的可解释性得分进行注释，对于等式 8 中注释的少数路径，也就是每个 H rules，随机抽取最多的那10条对应的真实路径，可以直接获得它们的 <span class="math inline">\(S(p)=S^{A}(p)\)</span>，而对于大多数其他路径，也就是 H rules 下 没被抽取到的真实路径，用等式 5：<span class="math inline">\(S(p) \approx S(f)\)</span> 获得它们的近似解释性得分。可解释性分数让注释者选择合理、部分合理和不合理 <span class="math inline">\((1，0.5，0)\)</span></p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211031141941326.png" /></p>
+<h3 id="benchmarks-with-mined-rules-r-benchmark">5. Benchmarks with Mined Rules (R-benchmark)</h3>
+<p>R-benchmark：使用 Rule mining 方法来挖掘训练集上的 rules，这些挖掘的规则形成一个规则集 <span class="math inline">\(\mathcal{F}^*\)</span>。可以使用规则的置信度作为可解释性得分。但会有另一个问题：规则的置信度和可解释性得分之间没有校准。</p>
+<p>解决方式：通过两个阈值，使用三个分类来标记规则的可解释性得分： <span class="math display">\[
+\operatorname{Type}(f)=\left\{\begin{array}{l}
+\text { unreasonable, } c(f)&lt;h_{1} \\
+\text { partially reasonable, } h_{1} \leq c(f)&lt;h_{2} \\
+\text { reasonable, } c(f) \geq h_{2}
+\end{array}\right.
+\]</span> 其中，<span class="math inline">\(c(f)\)</span> 是规则的置信度，使用 Micro-F1 分数来找到最佳的 h1 和 h2。</p>
+<h2 id="experiments">Experiments</h2>
+<h3 id="link-prediction">Link prediction</h3>
+<p>作者主要做了链接预测和可解释性评估。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211030222158205.png" style="zoom:67%;" /></p>
+<ol type="1">
+<li><p>在本文更关注的可解释性方面，AnyBURL 取得了几乎最好的结果，PR 值达到 98，这表明几乎测试集中的所有三元组都可以通过 AnyBURL 找到一条真实路径。</p></li>
+<li><p>对于多跳推理模型，在 PR 方面 与 AnyBURL 没有太大的差距。</p></li>
+<li><p>NeuralLP 在所有模型中获得最高的 LI 分数，并且比其他模型高得多，但这并不意味着 NeuralLP是一个高度可解释的模型，因为它的 PR 分数只有 10.2，因为它使用 高置信度的 rule 作为解释。对于大多数三元组，它不能给出与实际路径对应的规则。</p>
+<p>所以必须得有 GI 来反映整体的可解释性。</p></li>
+<li>在所有模型中，AnyBURL 的 GI 得分最高，远远高于第二名。RuleGuider是一种基于多跳的改进模型。它在 reward 中加入了规则（用 AnyBURL 来挖掘）的置信度信息，提高了模型的可解释性。从实验结果来看，这种改进确实是有效的</li>
+<li><p>当前的多跳推理模型确实具有一定的可解释性。然而，与最好的 基于规则的推理模型 AnyBURL 相比，多跳推理模型在可解释性和链路预测性能方面仍然存在一些差距。这表明目前的多跳推理模型存在许多不足，仍然落后于基于规则的最佳推理模型。</p></li>
+</ol>
+<h3 id="manual-annotation-vs.-mined-rules">Manual Annotation vs. Mined Rules</h3>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211031091713802.png"  style="zoom:67%;" /></p>
+<blockquote>
+<p>ABS-DIFF-AVG表示该基准的可解释性得分与 golden score 之间绝对值的平均值。</p>
+</blockquote>
+<p>可以看到，A-benchmark 可以准确地评估模型的可解释性。R-benchmark 无法提供准确的结果。然而，它有自己的一些优势。例如，它可以应用于其他KG，具有更大的通用性。此外，它还可以为不同模型的解释性比较提供参考指标。</p>
+<h2 id="summary">Summary</h2>
+<p>以前的 KG 的多跳推理，大多数都关心模型性能，而<strong>忽略了对路径可解释性的评估</strong>。本文提出了一个定量评估多跳推理模型可解释性的框架。基于这个框架，对一个数据集进行注释，形成一个名为 BIMR 的 benchmark，该基准可以准确地评估可解释性。实验结果表明，A-benchmark 与 golden truth 的结果相似，可以作为评估模型可解释性的指标。R-benchmark 的准确度不高，但是作者解释说它具有通用性，可以推广到大多数KG。</p>
+<p>另外，作者提出了未来的工作可以研究：如何更好地将 <strong>挖掘出的规则 融入到 多跳推理模型</strong> 中，以获得更好的性能和可解释性。</p>
+<p>这篇论文给我感觉，实验效果不好的话，解释的通就行....emm...</p>
+]]></content>
+      <categories>
+        <category>NLP</category>
+      </categories>
+      <tags>
+        <tag>KGR</tag>
+        <tag>BIMR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>KGR_Papers_Summarization</title>
+    <url>/2021/10/31/KGR_Papers_Summarization/</url>
+    <content><![CDATA[<p>这里是 Knowledge Graph Reasoning 方向的论文，主要是在看 <a href="https://github.com/THU-KEG/Knowledge_Graph_Reasoning_Papers#2-Multi-Hop-Reasoning">THU-KEG 的这份 paper list</a>，正在不定期更新中....</p>
+<p>有一些年代久远的没看，其余的正在看，慢慢累积起来，做一个总结，希望不要遗忘太快，并且以后方便查阅。</p>
+<h1 id="小张的奇思妙想">小张的奇思妙想</h1>
+<div class="note note-primary">
+            <ul><li><p>能不能反着想，在嵌入模型中加强化学习？</p></li><li>为什么现在 多跳推理 得基于 强化学习呢？</li><li>其他方向怎么做可解释性的？<ul><li>Learning to explain: Datasets and models for identifying valid reasoning chains in multihop question-answering.</li></ul></li></ul>
+          </div>
+<h1 id="kgr_papers_summarization">KGR_papers_Summarization</h1>
+<p>[toc]</p>
+<h2 id="survey-papers">1. Survey Papers</h2>
+<ol type="1">
+<li><p><strong>A Review: Knowledge Reasoning over Knowledge Graph.</strong> <em>Xiaojun Chen, Shengbin Jia, Yang Xiang.</em> Expert Systems with Applications. <a href="https://www.sciencedirect.com/science/article/pii/S0957417419306669">paper</a></p>
+<p>还没看...太长了 有时间看看</p></li>
+</ol>
+<h2 id="multi-hop-reasoning">2. Multi-Hop Reasoning</h2>
+<h3 id="entity-prediction">2.1 Entity Prediction</h3>
+<p>Predict the missing tail entity and corresponding supporting paths in one triple. <span class="math inline">\((h, r, ?) -&gt; (h, r, t)\)</span></p>
+<h4 id="go-for-a-walk-and-arrive-at-the-answer-reasoning-over-paths-in-knowledge-bases-using-reinforcement-learning">1. Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</h4>
+<ul>
+<li>作者：<em>Rajarshi Das, Shehzaad Dhuliawala</em>，ICLR 2018，<a href="https://arxiv.org/pdf/1711.05851.pdf">paper</a> <a href="https://github.com/shehzaadzd/MINERVA">code</a></li>
+<li>Idea：本文提出了 MINERVA 模型，使用了 Reinforcement Learning 的方法，根据 query 在图谱上游走获得 path，抵达目标节点后停止，该方法可以通过在知识图谱上游走推理 path 获得答案，不需要对所有实体进行枚举。</li>
+<li><a href="https://stuxiaozhang.github.io/2021/10/08/Go%20for%20a%20Walk%20and%20Arrive%20at%20the%20Answer%EF%BC%9AReasoning%20Over%20Paths%20in%20Knowledge%20Bases%20using%20Reinforcement%20Learning/">我的阅读笔记</a></li>
+</ul>
+<h4 id="multi-hop-kgmulti-hop-knowledge-graph-reasoning-with-reward-shaping">2.【Multi-Hop KG】Multi-Hop Knowledge Graph Reasoning with Reward Shaping</h4>
+<ul>
+<li><p>Author：<em>Xi Victoria Lin, Richard Socher, Caiming Xiong</em>，EMNLP 2018，<a href="https://aclweb.org/anthology/D18-1362">paper</a> <a href="https://github.com/salesforce/MultiHopKG">code</a></p></li>
+<li><p>Idea：该论文基于上篇 MINERVA 指出了强化学习在 incomplete knowledge graph 中进行 reasoning 时存在的两个问题，</p>
+<ol type="1">
+<li>虚假负 reward：查询出的路径由于知识图谱中的信息缺失导致判定为错误路径</li>
+<li>虚假路径：由假路径导致的偶然正确答案。由于强化学习是一种基于策略的算法，鼓励过去的行动，并反馈回较高的reward，因此会更偏向初期存在的虚假正确的情况。(false positive path)</li>
+</ol>
+<p>针对以上问题, 本文提出解决方案：Reward Shaping 和 Action dropout：</p>
+<ol type="1">
+<li>Reward Shaping：通过采用 pretrained one-hop embedding model，对任意三元组有一个预期奖励，有效避免训练时 False Negatives 对测试效果造成的影响。</li>
+<li>Action dropout：对每一个路径上的中间实体，随机对其出边进行dropout，以强制有效探索不同的路径集，并稀释虚假路径的负面影响。</li>
+</ol></li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/11/Multi-Hop%20Knowledge%20Graph%20Reasoning%20with%20Reward%20Shaping/">我的阅读笔记</a></p></li>
+</ul>
+<h4 id="cplcollaborative-policy-learning-for-open-knowledge-graph-reasoning.">3.【CPL】Collaborative Policy Learning for Open Knowledge Graph Reasoning.</h4>
+<ul>
+<li>Author：<em>Cong Fu, Tong Chen, Meng Qu, Woojeong Jin, Xiang Ren.</em> EMNLP 2019. <a href="https://www.aclweb.org/anthology/D19-1269.pdf">paper</a> <a href="https://github.com/shanzhenren/CPL">code</a></li>
+<li><p>Idea：作者在“开放世界”环境下研究知识图推理，从背景语料库中抽取的新事实可用于促进路径发现。然后，依据此提出了一种新的协作策略学习（CPL）框架，以相互增强的方式联合训练两个 RL 代理。在 CPL 中，除了训练用于路径发现的 Reasoner Agent 之外，还引入了 Fact Extractor Agent，该代理根据推理过程和语料库的上下文学习从语料库中抽取相关事实的策略。在推理时，事实抽取代理仅使用信息量最大的边动态扩充图，从而使推理代理能够有效地识别正路径。</p></li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/12/CPL%EF%BC%9ACollaborative%20Policy%20Learning%20for%20Open%20Knowledge%20Graph%20Reasoning/">我的阅读笔记</a></p></li>
+</ul>
+<h4 id="dackgrdynamic-anticipation-and-completion-for-multi-hop-reasoning-over-sparse-knowledge-graph">4.【DacKGR】Dynamic Anticipation and Completion for Multi-Hop Reasoning over Sparse Knowledge Graph</h4>
+<ul>
+<li><p>Author：<em>Xin Lv, Xu Han, Lei Hou, Juanzi Li, Zhiyuan Liu....</em> EMNLP 2020. <a href="https://www.aclweb.org/anthology/2020.emnlp-main.459.pdf">paper</a> <a href="https://github.com/THU-KEG/DacKGR">code</a></p></li>
+<li><p>Idea：DacKGR 针对稀疏知识图谱做多跳推理。可以做多跳推理的模型主要有两类：KGE 模型和专门的多跳推理模型。但 KGE 做补全是计算出来的结果，不能给出推理路径之类的解释。而专门的多跳推理模型作用于稀疏知识图谱时面临两个问题：稀疏 KG 包含的信息少，路径选择困难；路径的缺乏使得预测目标实体变得困难。</p>
+<p>因此，为了解决在<strong>稀疏路径的 KG 进行多跳推理比较困难</strong>的问题，文章提出了 DacKGR，包括动态预测（Dynamic Anticipation）和动态补全（Dynamic Completion）两部分：</p>
+<ol type="1">
+<li>Dynamic Anticipation：应用 KGE 模型预测尾实体信息用于 agent 选择正确的 action</li>
+<li>Dynamic Completion：在路径搜索过程中，动态地向 KG 中添加额外的边（关系），缓解 KG 的稀疏性问题。</li>
+</ol></li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/19/DacKGR%EF%BC%9ADynamic%20Anticipation%20and%20Completion%20for%20Multi-Hop%20Reasoning%20over%20Sparse%20Knowledge%20Graph/">我的阅读笔记</a></p></li>
+</ul>
+<h3 id="relation-prediction">2.2 Relation Prediction</h3>
+<p>Given head and tail entity and paths between them, predict the missing relation. <span class="math inline">\((h, ?, t) -&gt; (h, r, t)\)</span></p>
+<h3 id="inductive-reasoning">2.3 Inductive Reasoning</h3>
+<h2 id="reasoning-with-logic-rule">3. Reasoning with Logic Rule</h2>
+<h3 id="rule-mininglearning">3.1 Rule Mining/Learning</h3>
+<h3 id="rule-based-reasoning">3.2 Rule-based Reasoning</h3>
+<h3 id="rule-enhanced-knowledge-graph-embedding">3.3 Rule-enhanced Knowledge Graph Embedding</h3>
+<h2 id="query-based-reasoning">4. Query-based Reasoning</h2>
+<h3 id="path-based-query">4.1 Path-based Query</h3>
+<h3 id="complex-logic-query">4.2 Complex Logic Query</h3>
+<h3 id="complex-natural-language-query">4.3 Complex Natural Language Query</h3>
+<h2 id="benchmark-and-evaluation">5. Benchmark and Evaluation</h2>
+<h4 id="bimris-multi-hop-reasoning-really-explainable-towards-benchmarking-reasoning-interpretability">1.【BIMR】Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning Interpretability</h4>
+<ul>
+<li>Author：<em>Xin Lv, Yixin Cao, Lei Hou, Juanzi Li, Zhiyuan Liu....</em> EMNLP 2021</li>
+<li><p>Idea：针对多跳推理没有量化的评价指标的问题，提出了衡量多跳路径可解释性得分的 BIMR，包括三个指标：PR、LI 和 GI，弥补了多跳推理效果没有量化评价指标的空白。</p>
+<p>作者说未来的工作可以研究：如何更好地将 <strong>挖掘出的规则 融入到 多跳推理模型</strong> 中，以获得更好的性能和可解释性。以后可以看一下 Rule mining 的 KGC.</p></li>
+<li><p>我的阅读笔记</p></li>
+</ul>
+]]></content>
+      <categories>
+        <category>NLP</category>
+      </categories>
+      <tags>
+        <tag>KGR</tag>
       </tags>
   </entry>
 </search>
