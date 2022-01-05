@@ -16903,47 +16903,45 @@ R_{k} &=\left\{\mathbf{x}_{k}^{L M}, \overrightarrow{\mathbf{h}}_{k, j}^{L M}, \
   <entry>
     <title>Go for a Walk and Arrive at the Answer：Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</title>
     <url>/2021/10/08/Go%20for%20a%20Walk%20and%20Arrive%20at%20the%20Answer%EF%BC%9AReasoning%20Over%20Paths%20in%20Knowledge%20Bases%20using%20Reinforcement%20Learning/</url>
-    <content><![CDATA[<h1 id="go-for-a-walk-and-arrive-at-the-answer-reasoning-over-paths-in-knowledge-bases-using-reinforcement-learning">Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</h1>
-<p>这篇是 <a href="https://arxiv.org/pdf/1711.05851.pdf">Go for a Walk and Arrive at the Answer</a> 的论文笔记。</p>
-<p>在知识图谱补全任务中，大多数模型都是依赖低维 representation 对三元组进行打分。本文提出了一种基于输入问题的强化学习（RL）方法，该方法可以有效地在图中搜索答案提供路径。给定一个海量知识图，我们学习一个策略，该策略在给定查询 <code>(entity1,relation,?)</code> 的情况下，从 entity1 开始，通过选择在每一步取一个带标签的关系边，学习走到答案节点，条件是查询关系和整个路径历史。这将查询-应答任务描述为强化学习（RL）问题，其目标是采取最佳决策序列（选择关系边）以最大化预期回报（到达正确的答案节点）。称 RL 代理 MINERVA 为 ”Meandering In Networks of Entities to Reach Verisimilar Answers.”</p>
+    <content><![CDATA[<h1 id="Go-for-a-Walk-and-Arrive-at-the-Answer-Reasoning-Over-Paths-in-Knowledge-Bases-using-Reinforcement-Learning"><a href="#Go-for-a-Walk-and-Arrive-at-the-Answer-Reasoning-Over-Paths-in-Knowledge-Bases-using-Reinforcement-Learning" class="headerlink" title="Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning"></a>Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</h1><p>这篇是 <a href="https://arxiv.org/pdf/1711.05851.pdf">Go for a Walk and Arrive at the Answer</a> 的论文笔记。</p>
+<p>在知识图谱补全任务中，大多数模型都是依赖低维 representation 对三元组进行打分。本文提出了一种基于输入问题的强化学习（RL）方法，该方法可以有效地在图中搜索答案提供路径。给定一个海量知识图，我们学习一个策略，该策略在给定查询 <code>(entity1,relation,?)</code> 的情况下，从 entity1 开始，通过选择在每一步取一个带标签的关系边，学习走到答案节点，条件是查询关系和整个路径历史。这将查询-应答任务描述为强化学习（RL）问题，其目标是采取最佳决策序列（选择关系边）以最大化预期回报（到达正确的答案节点）。称 RL 代理 MINERVA 为  ”Meandering In Networks of Entities to Reach Verisimilar Answers.”</p>
 <p>MINERVA 的特点：</p>
-<ol type="1">
+<ol>
 <li>首先，MINERVA 具有采用可变长度路径的内置灵活性，这对于回答需要复杂推理链的较难问题很重要。</li>
 <li>其次，MINERVA 不需要预先训练，通过强化学习从零开始在知识图上进行训练；无需进行其他监督或微调，这表明 RL 在 NLP 中的先前应用取得了重大进展。</li>
 <li>第三，作者的基于路径的方法在计算上是高效的，因为通过在查询实体周围的一个小邻域中搜索，它避免了像以前的工作一样在KB中对所有实体进行排序。</li>
 <li>最后，模型的代理发现的推理路径自动形成其预测的可解释来源。</li>
 </ol>
-<h2 id="model">Model</h2>
-<h3 id="environment">Environment</h3>
-<p>Reinforcement Learning 在知识图谱上游走 Path，游走终止得到 Answer。整个 KGR 是一个<strong>马尔可夫决策过程</strong>，现指定一个部分的 MDP，它是一个5元组 <span class="math inline">\((S,O,a,δ,R)\)</span></p>
-<p><strong>States.</strong> 当前所在节点 <span class="math inline">\(e_t\)</span>，初始节点 <span class="math inline">\(e_{1q}\)</span>，初始查询关系 <span class="math inline">\(r_q\)</span>，正确答案 <span class="math inline">\(e_{2q}\)</span> 四元组。所以 State 表示为 <span class="math inline">\(S = (e_t,e_{1q},r_q,e_{2q})\)</span></p>
-<p><strong>Observations.</strong> 未观察到环境的完整状态。即 除了正确答案 <span class="math inline">\(e_{2q}\)</span> 无法观测之外 都知道。所以函数定义为 <span class="math inline">\(O(s=(e_t,e_{1q},r_q,e_{2q}))=(e_t,e_{1q},r_q)。\)</span></p>
-<p><strong>Actions.</strong> 由当前节点 <span class="math inline">\(e_t\)</span> 的关联的三元组 <span class="math inline">\(\mathcal{A}_{S}=\left\{\left(e_t, r, v\right) \in E: S=(e_t,e_{1q},r_q,e_{2q}), r \in \mathcal{R}, v \in V\right\} \cup\{(s, \varnothing, s)\}\)</span>。处于每个状态的代理都可以选择它希望获取的输出边，并且知道边 <span class="math inline">\(r\)</span> 和目标顶点 <span class="math inline">\(v\)</span> 的标签。</p>
-<p><strong>Transition. </strong> States 结合 Actions 来进行状态转移。转移函数定义为 <span class="math inline">\(\mathcal{S} \times \mathcal{A} \rightarrow \mathcal{S} \text { defined by } \delta(S, A)=\left(v, \mathrm{e}_{1 \mathrm{q} }, \mathrm{r}_{\mathrm{q} }, \mathrm{e}_{2 \mathrm{q} }\right)\)</span>，其中 <span class="math inline">\(S = (e_t,e_{1q},r_q,e_{2q})\)</span> , <span class="math inline">\(A=(e_t，r，v)\)</span>, <span class="math inline">\(\delta : S \times A\)</span>。</p>
+<h2 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h2><h3 id="Environment"><a href="#Environment" class="headerlink" title="Environment"></a>Environment</h3><p>Reinforcement Learning 在知识图谱上游走 Path，游走终止得到 Answer。整个 KGR 是一个<strong>马尔可夫决策过程</strong>，现指定一个部分的 MDP，它是一个5元组 $(S,O,a,δ,R)$</p>
+<p><strong>States.</strong> 当前所在节点 $e<em>t$，初始节点 $e</em>{1q}$，初始查询关系 $r<em>q$，正确答案 $e</em>{2q}$ 四元组。所以 State 表示为 $S = (e<em>t,e</em>{1q},r<em>q,e</em>{2q})$</p>
+<p><strong>Observations.</strong> 未观察到环境的完整状态。即 除了正确答案 $e<em>{2q}$ 无法观测之外 都知道。所以函数定义为 $O(s=(e_t,e</em>{1q},r<em>q,e</em>{2q}))=(e<em>t,e</em>{1q},r_q)。$</p>
+<p><strong>Actions.</strong> 由当前节点 $e<em>t$ 的关联的三元组 $\mathcal{A}</em>{S}=\left{\left(e<em>t, r, v\right) \in E: S=(e_t,e</em>{1q},r<em>q,e</em>{2q}), r \in \mathcal{R}, v \in V\right} \cup{(s, \varnothing, s)}$。处于每个状态的代理都可以选择它希望获取的输出边，并且知道边 $r$ 和目标顶点 $v$ 的标签。</p>
+<p><strong>Transition. </strong> States 结合 Actions 来进行状态转移。转移函数定义为 $\mathcal{S} \times \mathcal{A} \rightarrow \mathcal{S} \text { defined by } \delta(S, A)=\left(v, \mathrm{e}<em>{1 \mathrm{q} }, \mathrm{r}</em>{\mathrm{q} }, \mathrm{e}<em>{2 \mathrm{q} }\right)$，其中 $S = (e_t,e</em>{1q},r<em>q,e</em>{2q})$ , $A=(e_t，r，v)$, $\delta : S \times A$。</p>
 <p><strong>Rewards.</strong> 如果最后的当前位置是正确答案，给 1 的最终奖励，否则为0。</p>
-<h3 id="policy-network">Policy Network</h3>
-<p>策略 <span class="math inline">\(\pi=\left(\mathbf{d}_{\mathbf{1} }, \mathbf{d}_{\mathbf{2} }, \ldots, \mathbf{d}_{\mathbf{T}-\mathbf{1} }\right),\mathbf{d}_{\mathbf{t} }: H_{t} \rightarrow \mathcal{P}\left(\mathcal{A}_{S_{t} }\right)\)</span>，历史信息 <span class="math inline">\(H_{t}=\left(H_{t-1}, A_{t-1}, O_{t}\right)\)</span> 是观察和采取行动的顺序。</p>
-<p>Agent 基于 LSTM 对历史行为进行编码，得到历史状态的隐藏表示 <span class="math inline">\(h_t\)</span>： <span class="math display">\[
-\mathbf{h}_{\mathbf{t}}=\operatorname{LSTM}\left(\mathbf{h}_{\mathbf{t}-\mathbf{1} },\left[\mathbf{a}_{\mathbf{t}-\mathbf{1} } ; \mathbf{o}_{\mathbf{t} }\right]\right)
-\]</span> 其中，<span class="math inline">\(\mathbf{a}_{\mathbf{t}-\mathbf{1} }\)</span> 是在 <span class="math inline">\(t-1\)</span> 时刻的 action/relation， <span class="math inline">\(\mathbf{o}_\mathbf{t}\)</span> 是在 <span class="math inline">\(t\)</span> 时刻的 observation/entity ，<span class="math inline">\([;]\)</span> 将两者拼接起来。栗：<span class="math inline">\(\mathbf{a}_{\mathbf{t}-\mathbf{1} }=\mathbf{r}_{A_{t-1} }\)</span> 是 agent 在 <span class="math inline">\(t-1\)</span> 时刻选择的 关系嵌入对应的 edge 的 label，<span class="math inline">\(\mathbf{o}_{\mathbf{t} }=\mathbf{e}_{\mathrm{e} }\)</span> 是 agent 在 <span class="math inline">\(t\)</span> 时刻选择的 实体嵌入对应着的 edge 的 label</p>
-<p>根据历史状态的隐藏表示 <span class="math inline">\(h_t\)</span>，当前观测状态即所处节点表示 <span class="math inline">\(o_t\)</span> 和初始查询中所含关系表示 <span class="math inline">\(r_q\)</span> 对下一步的行为做决策 <span class="math inline">\(d_t\)</span>： <span class="math display">\[
+<h3 id="Policy-Network"><a href="#Policy-Network" class="headerlink" title="Policy Network"></a>Policy Network</h3><p>策略 $\pi=\left(\mathbf{d}<em>{\mathbf{1} }, \mathbf{d}</em>{\mathbf{2} }, \ldots, \mathbf{d}<em>{\mathbf{T}-\mathbf{1} }\right),\mathbf{d}</em>{\mathbf{t} }: H<em>{t} \rightarrow \mathcal{P}\left(\mathcal{A}</em>{S<em>{t}  }\right)$，历史信息 $H</em>{t}=\left(H<em>{t-1}, A</em>{t-1}, O_{t}\right)$ 是观察和采取行动的顺序。</p>
+<p>Agent 基于 LSTM 对历史行为进行编码，得到历史状态的隐藏表示 $h_t$：</p>
+<script type="math/tex; mode=display">
+\mathbf{h}_{\mathbf{t}}=\operatorname{LSTM}\left(\mathbf{h}_{\mathbf{t}-\mathbf{1} },\left[\mathbf{a}_{\mathbf{t}-\mathbf{1} } ; \mathbf{o}_{\mathbf{t} }\right]\right)</script><p>其中，$\mathbf{a}<em>{\mathbf{t}-\mathbf{1} }$ 是在 $t-1$ 时刻的 action/relation， $\mathbf{o}</em>\mathbf{t}$ 是在 $t$ 时刻的 observation/entity ，$[;]$ 将两者拼接起来。栗：$\mathbf{a}<em>{\mathbf{t}-\mathbf{1} }=\mathbf{r}</em>{A<em>{t-1} }$ 是 agent 在 $t-1$ 时刻选择的 关系嵌入对应的 edge 的 label，$\mathbf{o}</em>{\mathbf{t} }=\mathbf{e}_{\mathrm{e} }$ 是 agent 在 $t$ 时刻选择的 实体嵌入对应着的 edge 的 label</p>
+<p>根据历史状态的隐藏表示 $h_t$，当前观测状态即所处节点表示 $o_t$ 和初始查询中所含关系表示 $r_q$ 对下一步的行为做决策 $d_t$：</p>
+<script type="math/tex; mode=display">
 \begin{array}{l}
 \mathbf{d}_{\mathbf{t} }=\operatorname{softmax}\left(\mathbf{A}_{\mathbf{t} }\left(\mathbf{W}_{2} \operatorname{ReLU}\left(\mathbf{W}_{\mathbf{1} }\left[\mathbf{h}_{\mathbf{t} } ; \mathbf{o}_{\mathbf{t} } ; \mathbf{r}_{\mathbf{q} }\right]\right)\right)\right) \\
 A_{t} \sim \text { Categorical }\left(\mathbf{d}_{\mathbf{t} }\right)
-\end{array}
-\]</span></p>
-<h2 id="experiments">Experiments</h2>
-<p>做了几个实验，验证了：</p>
-<ol type="1">
-<li><p>MINERVA 在小 KB 和大 KB 的查询回答方面具有竞争力</p></li>
+\end{array}</script><h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>做了几个实验，验证了：</p>
+<ol>
+<li><p>MINERVA 在小 KB 和大 KB 的查询回答方面具有竞争力</p>
+</li>
 <li><p>MINERVA 优于基于路径的模型，该模型不能有效搜索知识库或训练查询特定模型</p>
-<p>MINERVA 的表现明显优于 Path-Baseline。这表明，基于一组随机采样路径进行预测的模型不如 MINERVA，因为它要么在随机行走过程中丢失重要路径，要么无法聚合所有k条路径的预测特征，其中许多路径与回答给定查询无关。后者类似于远程监督问题，即重要证据在大量无关信息中丢失。然而，通过以查询关系为条件采取每一步，MINERVA 可以有效地减少搜索空间，并将重点放在与回答查询相关的路径上。</p></li>
-<li><p>MINERVA 不仅可以用于格式良好的查询，还可以轻松处理部分结构化的自然语言查询</p></li>
-<li><p>MINERVA 具有很强的长链推理能力</p></li>
-<li><p>MINERVA 具有很强的训练能力，并且推理时间更快。</p></li>
+<p>MINERVA 的表现明显优于 Path-Baseline。这表明，基于一组随机采样路径进行预测的模型不如 MINERVA，因为它要么在随机行走过程中丢失重要路径，要么无法聚合所有k条路径的预测特征，其中许多路径与回答给定查询无关。后者类似于远程监督问题，即重要证据在大量无关信息中丢失。然而，通过以查询关系为条件采取每一步，MINERVA 可以有效地减少搜索空间，并将重点放在与回答查询相关的路径上。</p>
+</li>
+<li><p>MINERVA 不仅可以用于格式良好的查询，还可以轻松处理部分结构化的自然语言查询</p>
+</li>
+<li><p>MINERVA 具有很强的长链推理能力</p>
+</li>
+<li><p>MINERVA 具有很强的训练能力，并且推理时间更快。</p>
+</li>
 </ol>
-<h2 id="summary">Summary</h2>
-<p>本文提出了 MINERVA 模型，使用了 Reinforcement Learning 的方法，根据 query 在图谱上游走获得 path，抵达目标节点后停止，该方法可以通过在知识图谱上游走推理 path 获得答案，不需要对所有实体进行枚举。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>本文提出了 MINERVA 模型，使用了 Reinforcement Learning 的方法，根据 query 在图谱上游走获得 path，抵达目标节点后停止，该方法可以通过在知识图谱上游走推理 path 获得答案，不需要对所有实体进行枚举。</p>
 ]]></content>
       <categories>
         <category>NLP</category>
@@ -16955,60 +16953,52 @@ A_{t} \sim \text { Categorical }\left(\mathbf{d}_{\mathbf{t} }\right)
   <entry>
     <title>Multi-Hop Knowledge Graph Reasoning with Reward Shaping</title>
     <url>/2021/10/11/Multi-Hop%20Knowledge%20Graph%20Reasoning%20with%20Reward%20Shaping/</url>
-    <content><![CDATA[<h1 id="multi-hop-knowledge-graph-reasoning-with-reward-shaping">Multi-Hop Knowledge Graph Reasoning with Reward Shaping</h1>
-<p><a href="https://aclweb.org/anthology/D18-1362">Multi-Hop KG</a> 是发表在 EMNLP 2018 上的一篇论文。该论文基于上篇 <a href="https://arxiv.org/pdf/1711.05851.pdf">MINERVA</a>（Das ICLR 2018）指出了强化学习在 incomplete knowledge graph 中进行 reasoning 时存在的两个问题：</p>
-<ol type="1">
+    <content><![CDATA[<h1 id="Multi-Hop-Knowledge-Graph-Reasoning-with-Reward-Shaping"><a href="#Multi-Hop-Knowledge-Graph-Reasoning-with-Reward-Shaping" class="headerlink" title="Multi-Hop Knowledge Graph Reasoning with Reward Shaping"></a>Multi-Hop Knowledge Graph Reasoning with Reward Shaping</h1><p><a href="https://aclweb.org/anthology/D18-1362">Multi-Hop KG</a> 是发表在 EMNLP 2018 上的一篇论文。该论文基于上篇 <a href="https://arxiv.org/pdf/1711.05851.pdf">MINERVA</a>（Das ICLR 2018）指出了强化学习在 incomplete knowledge graph 中进行 reasoning 时存在的两个问题：</p>
+<ol>
 <li>虚假负reward：查询出的路径由于知识图谱中的信息缺失导致判定为错误路径</li>
 <li>虚假路径：由假路径导致的偶然正确答案。由于强化学习是一种基于策略的算法，鼓励过去的行动，并反馈回较高的reward，因此会更偏向初期存在的虚假正确的情况。(false positive path)</li>
 </ol>
 <p>针对以上问题,本文提出解决方案：<strong>Reward Shaping</strong> 和 <strong>Action dropout</strong></p>
-<h2 id="model">Model</h2>
-<h3 id="rl-formulation">RL Formulation</h3>
-<p>使用马尔科夫随机过程(Markov Decision Process)：</p>
+<h2 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h2><h3 id="RL-Formulation"><a href="#RL-Formulation" class="headerlink" title="RL Formulation"></a>RL Formulation</h3><p>使用马尔科夫随机过程(Markov Decision Process)：</p>
 <ul>
-<li><p><strong>States.</strong> <span class="math inline">\(s_{t}=\left(e_{t},\left(e_{s}, r_{q}\right)\right) \in \mathcal{S}\)</span> ，<span class="math inline">\(e_t\)</span> 是 step t 下的实体，<span class="math inline">\((e_{s}, r_{q})\)</span> 是原实体和查询关系。</p></li>
-<li><p><strong>Actions.</strong> <span class="math inline">\(A_{t}=\left\{\left(r^{\prime}, e^{\prime}\right) \mid\left(e_{t}, r^{\prime}, e^{\prime}\right) \in \mathcal{G}\right\}\)</span> ，<span class="math inline">\(e_t\)</span> 的出边</p></li>
-<li><p><strong>Transition.</strong> <span class="math inline">\(\delta\left(s_{t}, A_{t}\right)=\delta\left(e_{t},\left(e_{s}, r_{q}\right), A_{t}\right)\)</span></p></li>
-<li><p><strong>Rewards.</strong> 在默认公式中，如果代理在搜索结束时到达正确的目标实体，则代理将收到1的最终奖励，否则为0。</p></li>
+<li><p><strong>States.</strong> $s<em>{t}=\left(e</em>{t},\left(e<em>{s}, r</em>{q}\right)\right) \in \mathcal{S}$ ，$e<em>t$ 是 step t 下的实体，$(e</em>{s}, r_{q})$ 是原实体和查询关系。</p>
+</li>
+<li><p><strong>Actions.</strong> $A<em>{t}=\left{\left(r^{\prime}, e^{\prime}\right) \mid\left(e</em>{t}, r^{\prime}, e^{\prime}\right) \in \mathcal{G}\right}$ ，$e_t$ 的出边</p>
+</li>
+<li><p><strong>Transition.</strong> $\delta\left(s<em>{t}, A</em>{t}\right)=\delta\left(e<em>{t},\left(e</em>{s}, r<em>{q}\right), A</em>{t}\right)$ </p>
+</li>
+<li><p><strong>Rewards.</strong> 在默认公式中，如果代理在搜索结束时到达正确的目标实体，则代理将收到1的最终奖励，否则为0。</p>
+</li>
 </ul>
-<p><span class="math display">\[
-R_{b}\left(s_{T}\right)=\mathbb{1}\left\{\left(e_{s}, r_{q}, e_{T}\right) \in \mathcal{G}\right\}
-\]</span></p>
-<h3 id="policy-network">Policy Network</h3>
-<p>搜索策略使用 state 信息和 全局上下文 以及 搜索历史记录 <span class="math inline">\(h_t\)</span> 进行参数化.</p>
-<p>搜索历史记录 <span class="math inline">\(h_t\)</span> 由步骤 t 之前采取的行动序列 $ h_t = (e_{s}, r_{1}, e_{1}, , r_{t}, e_{t}) $ 组成，用 LSTM 进行编码: <span class="math display">\[
+<script type="math/tex; mode=display">
+R_{b}\left(s_{T}\right)=\mathbb{1}\left\{\left(e_{s}, r_{q}, e_{T}\right) \in \mathcal{G}\right\}</script><h3 id="Policy-Network"><a href="#Policy-Network" class="headerlink" title="Policy Network"></a>Policy Network</h3><p>搜索策略使用 state 信息和 全局上下文 以及 搜索历史记录 $h_t$ 进行参数化.</p>
+<p>搜索历史记录 $h<em>t$ 由步骤 t 之前采取的行动序列 $ h_t = (e</em>{s}, r<em>{1}, e</em>{1}, \ldots, r<em>{t}, e</em>{t}) \in \mathcal{H}$ 组成，用 LSTM 进行编码:</p>
+<script type="math/tex; mode=display">
 \begin{aligned}
-\mathbf{h}_{0} &amp;=\operatorname{LSTM}\left(\mathbf{0},\left[\mathbf{r}_{0} ; \mathbf{e}_{s}\right]\right) \\
-\mathbf{h}_{t} &amp;=\operatorname{LSTM}\left(\mathbf{h}_{t-1}, \mathbf{a}_{t-1}\right), t&gt;0
-\end{aligned}
-\]</span> 其中，<span class="math inline">\(r_0\)</span> 是从 <span class="math inline">\(e_s\)</span> 开始的关系，<span class="math inline">\(a_t = (t_{t+1}, e_{t+1})\)</span></p>
-<p>Policy Network 定义为： <span class="math display">\[
-\pi_{\theta}\left(a_{t} \mid s_{t}\right)=\sigma\left(\mathbf{A}_{t} \times W_{2} \operatorname{ReLU}\left(W_{1}\left[\mathbf{e}_{t} ; \mathbf{h}_{t} ; \mathbf{r}_{q}\right]\right)\right)
-\]</span> 其中，动作空间 <span class="math inline">\(A_t\)</span> 是通过叠加所有动作的嵌入来编码的。</p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211012135638682.png" /></p>
-<h3 id="knowledge-based-reward-shaping">Knowledge-Based Reward Shaping</h3>
-<p>MINERVA 中的奖励函数就是，正确奖励1，其余为0. 然而 G 本质上是不完整的，这种方法惩罚 false negative 搜索的方式与 true negatives 相同。 <span class="math display">\[
-R\left(s_{T}\right)=R_{b}\left(s_{T}\right)+\left(1-R_{b}\left(s_{T}\right)\right) f\left(e_{s}, r_{q}, e_{T}\right)
-\]</span></p>
-<h3 id="optimization">Optimization</h3>
-<p>Policy Network 通过最大化预期 reward 进行训练。其实我觉得就是目标函数。 <span class="math display">\[
-J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{G}}\left[\mathbb{E}_{a_{1}, \ldots, a_{T} \sim \pi_{\theta}}\left[R\left(s_{T} \mid e_{s}, r\right)\right]\right]
-\]</span> 用 SGD 更新参数 <span class="math inline">\(\theta\)</span>： <span class="math display">\[
-\nabla_{\theta} J(\theta) \approx \nabla_{\theta} \sum_{t=1}^{T} R\left(s_{T} \mid e_{s}, r\right) \log \pi_{\theta}\left(a_{t} \mid s_{t}\right)
-\]</span></p>
-<h3 id="action-dropout">Action dropout</h3>
-<blockquote>
+\mathbf{h}_{0} &=\operatorname{LSTM}\left(\mathbf{0},\left[\mathbf{r}_{0} ; \mathbf{e}_{s}\right]\right) \\
+\mathbf{h}_{t} &=\operatorname{LSTM}\left(\mathbf{h}_{t-1}, \mathbf{a}_{t-1}\right), t>0
+\end{aligned}</script><p>其中，$r<em>0$ 是从 $e_s$ 开始的关系，$a_t = (r</em>{t+1}, e_{t+1})$ </p>
+<p>Policy Network 定义为：</p>
+<script type="math/tex; mode=display">
+\pi_{\theta}\left(a_{t} \mid s_{t}\right)=\sigma\left(\mathbf{A}_{t} \times W_{2} \operatorname{ReLU}\left(W_{1}\left[\mathbf{e}_{t} ; \mathbf{h}_{t} ; \mathbf{r}_{q}\right]\right)\right)</script><p>其中，动作空间 $A_t$ 是通过叠加所有动作的嵌入来编码的。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211012135638682.png" alt=""></p>
+<h3 id="Knowledge-Based-Reward-Shaping"><a href="#Knowledge-Based-Reward-Shaping" class="headerlink" title="Knowledge-Based Reward Shaping"></a>Knowledge-Based Reward Shaping</h3><p>MINERVA 中的奖励函数就是，正确奖励1，其余为0. 然而 G 本质上是不完整的，这种方法惩罚 false negative 搜索的方式与 true negatives 相同。</p>
+<script type="math/tex; mode=display">
+R\left(s_{T}\right)=R_{b}\left(s_{T}\right)+\left(1-R_{b}\left(s_{T}\right)\right) f\left(e_{s}, r_{q}, e_{T}\right)</script><h3 id="Optimization"><a href="#Optimization" class="headerlink" title="Optimization"></a>Optimization</h3><p>Policy Network 通过最大化预期 reward 进行训练。其实我觉得就是目标函数。</p>
+<script type="math/tex; mode=display">
+J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{G}}\left[\mathbb{E}_{a_{1}, \ldots, a_{T} \sim \pi_{\theta}}\left[R\left(s_{T} \mid e_{s}, r\right)\right]\right]</script><p>用 SGD 更新参数 $\theta$：</p>
+<script type="math/tex; mode=display">
+\nabla_{\theta} J(\theta) \approx \nabla_{\theta} \sum_{t=1}^{T} R\left(s_{T} \mid e_{s}, r\right) \log \pi_{\theta}\left(a_{t} \mid s_{t}\right)</script><h3 id="Action-dropout"><a href="#Action-dropout" class="headerlink" title="Action dropout"></a>Action dropout</h3><blockquote>
 <p>一般情况下，虚假路径多于正确路径，因此通常首先发现虚假路径，随后的探索可能会越来越偏向于这些路径。具有较大扇入（入度）和扇出（出度）的实体，这种现象更严重。</p>
 </blockquote>
-<p>为了避免虚假路径误导模型，模型根据状态计算当前动作的概率，加入随机的伯努利分布，从而使得部分动作被屏蔽，公式中用于平滑当动作被屏蔽时的概率分布，使得被误导的模型也能有机会找到正确的滤镜加以训练。 <span class="math display">\[
+<p>为了避免虚假路径误导模型，模型根据状态计算当前动作的概率，加入随机的伯努利分布，从而使得部分动作被屏蔽，公式中用于平滑当动作被屏蔽时的概率分布，使得被误导的模型也能有机会找到正确的路径加以训练。</p>
+<script type="math/tex; mode=display">
 \begin{array}{l}
 \tilde{\pi}_{\theta}\left(a_{t} \mid s_{t}\right) \propto\left(\pi_{\theta}\left(a_{t} \mid s_{t}\right) \cdot \mathbf{m}+\epsilon\right) \\
 m_{i} \sim \operatorname{Bernoulli}(1-\alpha), i=1, \ldots\left|A_{t}\right|
-\end{array}
-\]</span> 其中，<span class="math inline">\(\mathbf{m} \in\{0,1\}^{\left|A_{t}\right|}\)</span> 是一个从伯努利分布中采样的二元变量，参数为 <span class="math inline">\(1-α\)</span>。 在 m=0 的情况下，使用一个小值 <span class="math inline">\(ϵ\)</span> 来平滑分布，其中 <span class="math inline">\(\tilde{\pi}_{\theta}\left(a_{t} \mid s_{t}\right)\)</span> 变得均匀。</p>
-<h2 id="summary">Summary</h2>
-<p>为了解决 MINERVA，作者在其基础上提出了两个 RL 方法进行改进：</p>
-<ol type="1">
+\end{array}</script><p>其中，$\mathbf{m} \in{0,1}^{\left|A<em>{t}\right|}$ 是一个从伯努利分布中采样的二元变量，参数为 $1-α$。 在 m=0 的情况下，使用一个小值 $ϵ$ 来平滑分布，其中 $\tilde{\pi}</em>{\theta}\left(a<em>{t} \mid s</em>{t}\right)$ 变得均匀。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>为了解决 MINERVA，作者在其基础上提出了两个 RL 方法进行改进：</p>
+<ol>
 <li>Reward Shaping：通过采用 pretrained one-hop embedding model，对任意三元组有一个预期奖励，有效避免训练时 False Negatives 对测试效果造成的影响。</li>
 <li>Action dropout：对每一个路径上的中间实体，随机对其出边进行dropout，以强制有效探索不同的路径集，并稀释虚假路径的负面影响。</li>
 </ol>
@@ -17421,9 +17411,7 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
   <entry>
     <title>shell 语法</title>
     <url>/2021/10/17/shell%E8%AF%AD%E6%B3%95/</url>
-    <content><![CDATA[<h1 id="shell-语法">shell 语法</h1>
-<h2 id="概论">1. 概论</h2>
-<p>shell是我们通过命令行与操作系统沟通的语言。</p>
+    <content><![CDATA[<h1 id="shell-语法"><a href="#shell-语法" class="headerlink" title="shell 语法"></a>shell 语法</h1><h2 id="1-概论"><a href="#1-概论" class="headerlink" title="1. 概论"></a>1. 概论</h2><p>shell是我们通过命令行与操作系统沟通的语言。</p>
 <p>shell脚本可以直接在命令行中执行，也可以将一套逻辑组织成一个文件，方便复用。</p>
 <blockquote>
 <p>AC Terminal中的命令行可以看成是一个<strong>“shell脚本在逐行执行”</strong>。</p>
@@ -17442,7 +17430,7 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
 <p><strong>学习技巧</strong></p>
 <p>不要死记硬背，遇到含糊不清的地方，可以在AC Terminal里实际运行一遍。</p>
 <p><strong>脚本示例</strong></p>
-<p>新建一个test.sh文件，内容如下：</p>
+<p>新建一个 test.sh 文件，内容如下：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#! /bin/bash</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hello World!&quot;</span><br></code></pre></td></tr></table></figure>
 <blockquote>
 <p>echo 类似 C++ 里面的 cout</p>
@@ -17452,39 +17440,29 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ chmod +x test.sh  <span class="hljs-comment"># 使脚本具有可执行权限</span><br><br>acs@9e0ebfcd82d7:~$ ./test.sh  <span class="hljs-comment"># 当前路径下执行</span><br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br>acs@9e0ebfcd82d7:~$ /home/acs/test.sh  <span class="hljs-comment"># 绝对路径下执行</span><br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br>acs@9e0ebfcd82d7:~$ ~/test.sh  <span class="hljs-comment"># 家目录路径下执行</span><br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br></code></pre></td></tr></table></figure>
 <p>用解释器执行</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ bash test.sh<br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br></code></pre></td></tr></table></figure>
-<h2 id="注释">2. 注释</h2>
-<h3 id="单行注释">单行注释</h3>
-<p>每行中 <code>#</code> 之后的内容均是注释。</p>
+<h2 id="2-注释"><a href="#2-注释" class="headerlink" title="2. 注释"></a>2. 注释</h2><h3 id="单行注释"><a href="#单行注释" class="headerlink" title="单行注释"></a>单行注释</h3><p>每行中 <code>#</code> 之后的内容均是注释。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 这是一行注释</span><br><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;Hello World&#x27;</span>  <span class="hljs-comment">#  这也是注释</span><br></code></pre></td></tr></table></figure>
-<h3 id="多行注释">多行注释</h3>
-<p>格式：</p>
+<h3 id="多行注释"><a href="#多行注释" class="headerlink" title="多行注释"></a>多行注释</h3><p>格式：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">:&lt;&lt;<span class="hljs-string">EOF</span><br><span class="hljs-string">第一行注释</span><br><span class="hljs-string">第二行注释</span><br><span class="hljs-string">第三行注释</span><br><span class="hljs-string">EOF</span><br></code></pre></td></tr></table></figure>
 <p>其中<code>EOF</code>可以换成其它任意字符串。例如：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">:&lt;&lt;<span class="hljs-string">abc</span><br><span class="hljs-string">第一行注释</span><br><span class="hljs-string">第二行注释</span><br><span class="hljs-string">第三行注释</span><br><span class="hljs-string">abc</span><br><br>:&lt;&lt;!<br>第一行注释<br>第二行注释<br>第三行注释<br>!<br></code></pre></td></tr></table></figure>
-<h2 id="变量">3. 变量</h2>
-<h3 id="定义变量">定义变量</h3>
-<p>定义变量，不需要加<code>$</code>符号，例如：</p>
+<h2 id="3-变量"><a href="#3-变量" class="headerlink" title="3. 变量"></a>3. 变量</h2><h3 id="定义变量"><a href="#定义变量" class="headerlink" title="定义变量"></a>定义变量</h3><p>定义变量，不需要加<code>$</code>符号，例如：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name1=<span class="hljs-string">&#x27;yxc&#x27;</span>  <span class="hljs-comment"># 单引号定义字符串</span><br>name2=<span class="hljs-string">&quot;yxc&quot;</span>  <span class="hljs-comment"># 双引号定义字符串</span><br>name3=yxc    <span class="hljs-comment"># 也可以不加引号，同样表示字符串</span><br></code></pre></td></tr></table></figure>
-<h3 id="使用变量">使用变量</h3>
-<p>使用变量，需要加上<code>$</code>符号，或者<code>$&#123;&#125;</code>符号。花括号是可选的，主要为了帮助解释器识别变量边界。</p>
+<h3 id="使用变量"><a href="#使用变量" class="headerlink" title="使用变量"></a>使用变量</h3><p>使用变量，需要加上<code>$</code>符号，或者<code>$&#123;&#125;</code>符号。花括号是可选的，主要为了帮助解释器识别变量边界。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=yxc<br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$name</span>  <span class="hljs-comment"># 输出yxc</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;name&#125;</span>  <span class="hljs-comment"># 输出yxc</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;name&#125;</span>acwing  <span class="hljs-comment"># 输出yxcacwing</span><br></code></pre></td></tr></table></figure>
-<h3 id="只读变量">只读变量</h3>
-<p>使用<code>readonly</code>或者<code>declare</code>可以将变量变为只读。</p>
+<h3 id="只读变量"><a href="#只读变量" class="headerlink" title="只读变量"></a>只读变量</h3><p>使用<code>readonly</code>或者<code>declare</code>可以将变量变为只读。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=yxc<br><span class="hljs-built_in">readonly</span> name<br><span class="hljs-built_in">declare</span> -r name  <span class="hljs-comment"># 两种写法均可</span><br><br>name=abc  <span class="hljs-comment"># 会报错，因为此时name只读</span><br></code></pre></td></tr></table></figure>
-<h3 id="删除变量">删除变量</h3>
-<p><code>unset</code>可以删除变量。</p>
+<h3 id="删除变量"><a href="#删除变量" class="headerlink" title="删除变量"></a>删除变量</h3><p><code>unset</code>可以删除变量。</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=yxc<br><span class="hljs-built_in">unset</span> name<br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$name</span>  <span class="hljs-comment"># 输出空行</span><br></code></pre></td></tr></table></figure>
-<h3 id="变量类型">变量类型</h3>
-<ol type="1">
-<li>自定义变量（局部变量） 子进程不能访问的变量</li>
-<li>环境变量（全局变量） 子进程可以访问的变量</li>
+<h3 id="变量类型"><a href="#变量类型" class="headerlink" title="变量类型"></a>变量类型</h3><ol>
+<li>自定义变量（局部变量）<br>子进程不能访问的变量</li>
+<li>环境变量（全局变量）<br>子进程可以访问的变量</li>
 </ol>
 <p>自定义变量改成环境变量：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ name=yxc  <span class="hljs-comment"># 定义变量</span><br>acs@9e0ebfcd82d7:~$ <span class="hljs-built_in">export</span> name  <span class="hljs-comment"># 第一种方法</span><br>acs@9e0ebfcd82d7:~$ <span class="hljs-built_in">declare</span> -x name  <span class="hljs-comment"># 第二种方法</span><br></code></pre></td></tr></table></figure>
 <p>环境变量改为自定义变量：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ <span class="hljs-built_in">export</span> name=yxc  <span class="hljs-comment"># 定义环境变量</span><br>acs@9e0ebfcd82d7:~$ <span class="hljs-built_in">declare</span> +x name  <span class="hljs-comment"># 改为自定义变量</span><br></code></pre></td></tr></table></figure>
-<h3 id="字符串">字符串</h3>
-<p>字符串可以用单引号，也可以用双引号，也可以不用引号。</p>
+<h3 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h3><p>字符串可以用单引号，也可以用双引号，也可以不用引号。</p>
 <p>单引号与双引号的区别：</p>
 <ul>
 <li>单引号中的内容会原样输出，不会执行、不会取变量；</li>
@@ -17495,117 +17473,377 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=<span class="hljs-string">&quot;yxc&quot;</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;#name&#125;</span>  <span class="hljs-comment"># 输出3</span><br></code></pre></td></tr></table></figure>
 <p>提取子串</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=<span class="hljs-string">&quot;hello, yxc&quot;</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;name:0:5&#125;</span>  <span class="hljs-comment"># 提取从0开始的5个字符</span><br></code></pre></td></tr></table></figure>
-<h2 id="默认变量">4. 默认变量</h2>
-<h3 id="文件参数变量">文件参数变量</h3>
-<p>在执行shell脚本时，可以向脚本传递参数。<code>$1</code>是第一个参数，<code>$2</code>是第二个参数，以此类推。特殊的，<code>$0</code>是文件名（包含路径）。例如：</p>
+<h2 id="4-默认变量"><a href="#4-默认变量" class="headerlink" title="4. 默认变量"></a>4. 默认变量</h2><h3 id="文件参数变量"><a href="#文件参数变量" class="headerlink" title="文件参数变量"></a>文件参数变量</h3><p>在执行shell脚本时，可以向脚本传递参数。<code>$1</code>是第一个参数，<code>$2</code>是第二个参数，以此类推。特殊的，<code>$0</code>是文件名（包含路径）。例如：</p>
 <p>创建文件<code>test.sh</code>：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#! /bin/bash</span><br><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;文件名：&quot;</span><span class="hljs-variable">$0</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;第一个参数：&quot;</span><span class="hljs-variable">$1</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;第二个参数：&quot;</span><span class="hljs-variable">$2</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;第三个参数：&quot;</span><span class="hljs-variable">$3</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;第四个参数：&quot;</span><span class="hljs-variable">$4</span><br></code></pre></td></tr></table></figure>
 <p>然后执行该脚本：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ chmod +x test.sh <br>acs@9e0ebfcd82d7:~$ ./test.sh 1 2 3 4<br>文件名：./test.sh<br>第一个参数：1<br>第二个参数：2<br>第三个参数：3<br>第四个参数：4<br></code></pre></td></tr></table></figure>
-<h3 id="其它参数相关变量">其它参数相关变量</h3>
+<h3 id="其它参数相关变量"><a href="#其它参数相关变量" class="headerlink" title="其它参数相关变量"></a>其它参数相关变量</h3><div class="table-container">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>参数</th>
 <th>说明</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>$#</code></td>
 <td>代表文件传入的参数个数，如上例中值为4</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$*</code></td>
 <td>由所有参数构成的用空格隔开的字符串，如上例中值为<code>&quot;$1 $2 $3 $4&quot;</code></td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$@</code></td>
 <td>每个参数分别用双引号括起来的字符串，如上例中值为<code>&quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;$4&quot;</code></td>
 </tr>
-<tr class="even">
-<td><code>$$</code></td>
+<tr>
+<td>$$$$</td>
 <td>脚本当前运行的进程ID</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>$?</code></td>
 <td>上一条命令的退出状态（注意不是stdout，而是exit code）。0表示正常退出，其他值表示错误（就像c++的<code>return 0</code>）</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>$(command)</code></td>
 <td>返回<code>command</code>这条命令的stdout（可嵌套）</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>command</code></td>
 <td>返回<code>command</code>这条命令的stdout（不可嵌套）</td>
 </tr>
 </tbody>
 </table>
-<h2 id="数组">5. 数组</h2>
-<p>数组中可以存放多个不同类型的值，只支持一维数组，初始化时不需要指明数组大小。 数组<strong>下标从0开始</strong>。</p>
-<h3 id="定义">定义</h3>
-<p>数组用小括号表示，元素之间用空格隔开。例如：</p>
+</div>
+<h2 id="5-数组"><a href="#5-数组" class="headerlink" title="5. 数组"></a>5. 数组</h2><p>数组中可以存放多个不同类型的值，只支持一维数组，初始化时不需要指明数组大小。<br>数组<strong>下标从0开始</strong>。</p>
+<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>数组用小括号表示，元素之间用空格隔开。例如：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">array=(1 abc <span class="hljs-string">&quot;def&quot;</span> yxc)<br></code></pre></td></tr></table></figure>
 <p>也可以直接定义数组中某个元素的值：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">array[0]=1<br>array[1]=abc<br>array[2]=<span class="hljs-string">&quot;def&quot;</span><br>array[3]=yxc<br></code></pre></td></tr></table></figure>
-<h3 id="读取数组中某个元素的值">读取数组中某个元素的值</h3>
-<p>格式：</p>
+<h3 id="读取数组中某个元素的值"><a href="#读取数组中某个元素的值" class="headerlink" title="读取数组中某个元素的值"></a>读取数组中某个元素的值</h3><p>格式：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-variable">$&#123;array[index]&#125;</span><br></code></pre></td></tr></table></figure>
 <p>例如：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">array=(1 abc <span class="hljs-string">&quot;def&quot;</span> yxc)<br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;array[0]&#125;</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;array[1]&#125;</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;array[2]&#125;</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;array[3]&#125;</span><br></code></pre></td></tr></table></figure>
-<h3 id="读取整个数组">读取整个数组</h3>
-<p>格式：</p>
+<h3 id="读取整个数组"><a href="#读取整个数组" class="headerlink" title="读取整个数组"></a>读取整个数组</h3><p>格式：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-variable">$&#123;array[@]&#125;</span>  <span class="hljs-comment"># 第一种写法</span><br><span class="hljs-variable">$&#123;array[*]&#125;</span>  <span class="hljs-comment"># 第二种写法</span><br></code></pre></td></tr></table></figure>
 <p>例如：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">array=(1 abc <span class="hljs-string">&quot;def&quot;</span> yxc)<br><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;array[@]&#125;</span>  <span class="hljs-comment"># 第一种写法</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;array[*]&#125;</span>  <span class="hljs-comment"># 第二种写法</span><br></code></pre></td></tr></table></figure>
-<h3 id="数组长度">数组长度</h3>
-<p>类似于字符串</p>
+<h3 id="数组长度"><a href="#数组长度" class="headerlink" title="数组长度"></a>数组长度</h3><p>类似于字符串</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-variable">$&#123;#array[@]&#125;</span>  <span class="hljs-comment"># 第一种写法</span><br><span class="hljs-variable">$&#123;#array[*]&#125;</span>  <span class="hljs-comment"># 第二种写法</span><br></code></pre></td></tr></table></figure>
 <p>例如：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">array=(1 abc <span class="hljs-string">&quot;def&quot;</span> yxc)<br><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;#array[@]&#125;</span>  <span class="hljs-comment"># 第一种写法</span><br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;#array[*]&#125;</span>  <span class="hljs-comment"># 第二种写法</span><br></code></pre></td></tr></table></figure>
-<h2 id="expr命令">6. expr命令</h2>
-<p><code>expr</code>命令用户求表达式的值，格式为：</p>
+<h2 id="6-expr命令"><a href="#6-expr命令" class="headerlink" title="6. expr命令"></a>6. expr命令</h2><p><strong><code>expr</code>命令用户求表达式的值</strong>，格式为：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">expr 表达式<br></code></pre></td></tr></table></figure>
-<p>表达式说明：</p>
+<p><strong>表达式说明：</strong></p>
 <ul>
 <li>用空格隔开每一项</li>
 <li>用反斜杠放在shell特定的字符前面（发现表达式运行错误时，可以试试转义）</li>
 <li>对包含空格和其他特殊字符的字符串要用引号括起来</li>
-<li>expr会在<code>stdout</code>中输出结果。如果为逻辑关系表达式，则结果为真，<code>stdout</code>为1，否则为0。</li>
-<li>expr的<code>exit code</code>：如果为逻辑关系表达式，则结果为真，<code>exit code</code>为0，否则为1。</li>
+<li><strong>expr会在<code>stdout</code>中输出结果。</strong>如果为逻辑关系表达式，则结果为真，<code>stdout</code>为1，否则为0。</li>
+<li><strong>expr同时也会在 <code>exit code</code> 中输出结果。</strong>expr的<code>exit code</code>：如果为逻辑关系表达式，则结果为真，<code>exit code</code>为0，否则为1。</li>
 </ul>
-<h3 id="字符串表达式">字符串表达式</h3>
-<ul>
-<li><code>length STRING</code> 返回<code>STRING</code>的长度</li>
-<li><code>index STRING CHARSET</code> <code>CHARSET中</code>任意单个字符在<code>STRING</code>中最前面的字符位置，<strong>下标从1开始</strong>。如果在<code>STRING</code>中完全不存在<code>CHARSET中</code>的字符，则返回0。</li>
-<li><code>substr STRING POSITION LENGTH</code> 返回<code>STRING</code>字符串中从<code>POSITION</code>开始，长度最大为<code>LENGTH</code>的子串。如果<code>POSITION</code>或<code>LENGTH</code>为负数，0或非数值，则返回空字符串。</li>
+<h3 id="字符串表达式"><a href="#字符串表达式" class="headerlink" title="字符串表达式"></a>字符串表达式</h3><ul>
+<li><code>length STRING</code><br>返回<code>STRING</code>的长度</li>
+<li><code>index STRING CHARSET</code><br><code>CHARSET中</code>任意单个字符在<code>STRING</code>中最前面的字符位置，<strong>下标从1开始</strong>。如果在<code>STRING</code>中完全不存在<code>CHARSET中</code>的字符，则返回0。</li>
+<li><code>substr STRING POSITION LENGTH</code><br>返回<code>STRING</code>字符串中从<code>POSITION</code>开始，长度最大为<code>LENGTH</code>的子串。如果<code>POSITION</code>或<code>LENGTH</code>为负数，0或非数值，则返回空字符串。</li>
 </ul>
 <p>示例：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">str=<span class="hljs-string">&quot;Hello World!&quot;</span><br><br><span class="hljs-built_in">echo</span> `expr length <span class="hljs-string">&quot;<span class="hljs-variable">$str</span>&quot;</span>`  <span class="hljs-comment"># ``不是单引号，表示执行该命令，输出12</span><br><span class="hljs-built_in">echo</span> `expr index <span class="hljs-string">&quot;<span class="hljs-variable">$str</span>&quot;</span> aWd`  <span class="hljs-comment"># 输出7，下标从1开始</span><br><span class="hljs-built_in">echo</span> `expr substr <span class="hljs-string">&quot;<span class="hljs-variable">$str</span>&quot;</span> 2 3`  <span class="hljs-comment"># 输出 ell</span><br></code></pre></td></tr></table></figure>
-<h3 id="整数表达式">整数表达式</h3>
-<p><code>expr</code>支持普通的算术操作，算术表达式优先级低于字符串表达式，高于逻辑关系表达式。</p>
+<h3 id="整数表达式"><a href="#整数表达式" class="headerlink" title="整数表达式"></a>整数表达式</h3><p><code>expr</code>支持普通的算术操作，算术表达式优先级低于字符串表达式，高于逻辑关系表达式。</p>
 <ul>
-<li><code>+ -</code> 加减运算。两端参数会转换为整数，如果转换失败则报错。</li>
-<li><code>* / %</code> 乘，除，取模运算。两端参数会转换为整数，如果转换失败则报错。</li>
+<li><code>+ -</code><br>加减运算。两端参数会转换为整数，如果转换失败则报错。</li>
+<li><code>* / %</code><br>乘，除，取模运算。两端参数会转换为整数，如果转换失败则报错。</li>
 <li><code>()</code> 可以该表优先级，但需要用反斜杠转义</li>
 </ul>
 <p>示例：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">a=3<br>b=4<br><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> + <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出7</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> - <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出-1</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> \* <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出12，*需要转义</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> / <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出0，整除</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> % <span class="hljs-variable">$b</span>` <span class="hljs-comment"># 输出3</span><br><span class="hljs-built_in">echo</span> `expr \( <span class="hljs-variable">$a</span> + 1 \) \* \( <span class="hljs-variable">$b</span> + 1 \)`  <span class="hljs-comment"># 输出20，值为(a + 1) * (b + 1)</span><br></code></pre></td></tr></table></figure>
-<h3 id="逻辑关系表达式">逻辑关系表达式</h3>
-<ul>
-<li><p><code>|</code> 如果第一个参数非空且非0，则返回第一个参数的值，否则返回第二个参数的值，但要求第二个参数的值也是非空或非0，否则返回0。如果第一个参数是非空或非0时，不会计算第二个参数。</p>
+<h3 id="逻辑关系表达式"><a href="#逻辑关系表达式" class="headerlink" title="逻辑关系表达式"></a>逻辑关系表达式</h3><ul>
+<li><p><code>|</code><br>如果第一个参数非空且非0，则返回第一个参数的值，否则返回第二个参数的值，但要求第二个参数的值也是非空或非0，否则返回0。如果第一个参数是非空或非0时，不会计算第二个参数。</p>
 <blockquote>
 <p>两个数均非空非0，返回第一个数。</p>
-</blockquote></li>
-<li><p><code>&amp;</code> 如果两个参数都非空且非0，则返回第一个参数，否则返回0。如果第一个参为0或为空，则不会计算第二个参数。</p>
+</blockquote>
+</li>
+<li><p><code>&amp;</code><br>如果两个参数都非空且非0，则返回第一个参数，否则返回0。如果第一个参为0或为空，则不会计算第二个参数。</p>
 <blockquote>
 <p>同样也是，两个数均非空非0，返回第一个数。</p>
-</blockquote></li>
-<li><p><code>&lt; &lt;= = == != &gt;= &gt;</code> 比较两端的参数，如果为true，则返回1，否则返回0。”==”是”=”的同义词。”expr”首先尝试将两端参数转换为整数，并做算术比较，如果转换失败，则按字符集排序规则做字符比较。</p></li>
-<li><p><code>()</code> 可以该表优先级，但需要用反斜杠转义</p></li>
+</blockquote>
+</li>
+<li><p><code>&lt; &lt;= = == != &gt;= &gt;</code><br>比较两端的参数，如果为true，则返回1，否则返回0。”==”是”=”的同义词。”expr”首先尝试将两端参数转换为整数，并做算术比较，如果转换失败，则按字符集排序规则做字符比较。</p>
+</li>
+<li><p><code>()</code> 可以该表优先级，但需要用反斜杠转义</p>
+</li>
 </ul>
 <p>示例：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">a=3<br>b=4<br><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> \&gt; <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出0，&gt;需要转义</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> <span class="hljs-string">&#x27;&lt;&#x27;</span> <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出1，也可以将特殊字符用引号引起来</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> <span class="hljs-string">&#x27;&gt;=&#x27;</span> <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出0</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> \&lt;\= <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出1</span><br><br>c=0<br>d=5<br><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$c</span> \&amp; <span class="hljs-variable">$d</span>`  <span class="hljs-comment"># 输出0</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> \&amp; <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出3</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$c</span> \| <span class="hljs-variable">$d</span>`  <span class="hljs-comment"># 输出5</span><br><span class="hljs-built_in">echo</span> `expr <span class="hljs-variable">$a</span> \| <span class="hljs-variable">$b</span>`  <span class="hljs-comment"># 输出3</span><br></code></pre></td></tr></table></figure>
+<h2 id="7-read命令"><a href="#7-read命令" class="headerlink" title="7. read命令"></a>7. read命令</h2><p><strong><code>read</code> 命令用于从标准输入中读取单行数据。当读到文件结束符时，exit code为1，否则为0。</strong></p>
+<p>参数说明</p>
+<ul>
+<li>p：后面可以接提示信息</li>
+<li>t：后面跟秒数，定义输入字符的等待时间，超过等待时间后会自动忽略此命令</li>
+</ul>
+<p>栗：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># /bin/bash</span><br><br><span class="hljs-built_in">read</span> -p <span class="hljs-string">&quot;whats your name? &quot;</span> -t 5 name<br> <br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;good aftername, &quot;</span> <span class="hljs-variable">$name</span><br></code></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211102145505447.png" alt=""></p>
+<h2 id="8-echo命令"><a href="#8-echo命令" class="headerlink" title="8. echo命令"></a>8. echo命令</h2><p><strong><code>echo</code>用于输出字符串。</strong>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> STRING<br></code></pre></td></tr></table></figure>
+<h3 id="显示普通字符串"><a href="#显示普通字符串" class="headerlink" title="显示普通字符串"></a>显示普通字符串</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hello AC Terminal&quot;</span><br><span class="hljs-built_in">echo</span> Hello AC Terminal  <span class="hljs-comment"># 引号可以省略</span><br></code></pre></td></tr></table></figure>
+<h3 id="显示转义字符"><a href="#显示转义字符" class="headerlink" title="显示转义字符"></a>显示转义字符</h3><p>双引号写在要转义的字符的后面….</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;\&quot;Hello AC Terminal\&quot;&quot;</span>  <span class="hljs-comment"># 注意只能使用双引号，如果使用单引号，则不转义</span><br><span class="hljs-built_in">echo</span> \&quot;Hello AC Terminal\&quot;  <span class="hljs-comment"># 也可以省略双引号</span><br></code></pre></td></tr></table></figure>
+<h3 id="显示变量"><a href="#显示变量" class="headerlink" title="显示变量"></a>显示变量</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=yxc<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;My name is <span class="hljs-variable">$name</span>&quot;</span>  <span class="hljs-comment"># 输出 My name is yxc</span><br></code></pre></td></tr></table></figure>
+<p><strong>注意一定要双引号！</strong></p>
+<h3 id="显示换行"><a href="#显示换行" class="headerlink" title="显示换行"></a>显示换行</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> -e <span class="hljs-string">&quot;Hi\n&quot;</span>  <span class="hljs-comment"># -e 开启转义</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;acwing&quot;</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">Hi<br><br>acwing<br></code></pre></td></tr></table></figure>
+<h3 id="显示不换行"><a href="#显示不换行" class="headerlink" title="显示不换行"></a>显示不换行</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> -e <span class="hljs-string">&quot;Hi \c&quot;</span> <span class="hljs-comment"># -e 开启转义 \c 不换行</span><br><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;acwing&quot;</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">Hi acwing<br></code></pre></td></tr></table></figure>
+<h3 id="显示结果定向至文件"><a href="#显示结果定向至文件" class="headerlink" title="显示结果定向至文件"></a>显示结果定向至文件</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Hello World&quot;</span> &gt; output.txt  <span class="hljs-comment"># 将内容以覆盖的方式输出到output.txt中</span><br></code></pre></td></tr></table></figure>
+<h3 id="原样输出字符串，不进行转义或取变量-用单引号"><a href="#原样输出字符串，不进行转义或取变量-用单引号" class="headerlink" title="原样输出字符串，不进行转义或取变量(用单引号)"></a>原样输出字符串，不进行转义或取变量(用单引号)</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=acwing<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;$name\&quot;&#x27;</span><br></code></pre></td></tr></table></figure>
+<p>输出结果</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-variable">$name</span>\&quot;<br></code></pre></td></tr></table></figure>
+<h3 id="显示命令的执行结果"><a href="#显示命令的执行结果" class="headerlink" title="显示命令的执行结果"></a>显示命令的执行结果</h3><figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> `date`<br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">Tue Nov 2 15:40:46 CST 2021<br></code></pre></td></tr></table></figure>
+<h2 id="9-printf命令"><a href="#9-printf命令" class="headerlink" title="9. printf命令"></a>9. printf命令</h2><p><strong><code>printf</code>命令用于格式化输出，类似于C/C++中的printf函数。</strong></p>
+<p><strong>默认不会在字符串末尾添加换行符。</strong></p>
+<p>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">printf</span> format-string [arguments...]<br></code></pre></td></tr></table></figure>
+<p>用法示例</p>
+<p>脚本内容：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">printf</span> <span class="hljs-string">&quot;%10d.\n&quot;</span> 123  <span class="hljs-comment"># 占10位，右对齐</span><br><span class="hljs-built_in">printf</span> <span class="hljs-string">&quot;%-10.2f.\n&quot;</span> 123.123321  <span class="hljs-comment"># 占10位，保留2位小数，左对齐</span><br><span class="hljs-built_in">printf</span> <span class="hljs-string">&quot;My name is %s\n&quot;</span> <span class="hljs-string">&quot;yxc&quot;</span>  <span class="hljs-comment"># 格式化输出字符串</span><br><span class="hljs-built_in">printf</span> <span class="hljs-string">&quot;%d * %d = %d\n&quot;</span>  2 3 `expr 2 \* 3` <span class="hljs-comment"># 表达式的值作为参数</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">       123.<br>123.12    .<br>My name is yxc<br>2 * 3 = 6<br></code></pre></td></tr></table></figure>
+<h2 id="10-test命令与判断符号"><a href="#10-test命令与判断符号" class="headerlink" title="10. test命令与判断符号[]"></a>10. test命令与判断符号[]</h2><h3 id="逻辑运算符-amp-amp-和"><a href="#逻辑运算符-amp-amp-和" class="headerlink" title="逻辑运算符 &amp;&amp; 和||"></a>逻辑运算符 &amp;&amp; 和||</h3><ul>
+<li><code>&amp;&amp;</code> 表示与，<code>||</code> 表示或</li>
+<li>二者具有短路原则：<br><code>expr1 &amp;&amp; expr2</code>：当<code>expr1</code>为假时，直接忽略<code>expr2</code>。左边为真，就会执行右边~<br><code>expr1 || expr2</code>：当<code>expr1</code>为真时，直接忽略<code>expr2</code>。左边是假，就会执行右边~</li>
+<li>表达式的<code>exit code</code>为0，表示真；为非零，表示假。（<strong>与<code>C/C++</code>中的定义相反</strong>）</li>
+</ul>
+<p>栗：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ ls  <span class="hljs-comment"># 列出当前目录下的所有文件</span><br>homework  output.txt  test.sh  tmp<br>acs@9e0ebfcd82d7:~$ <span class="hljs-built_in">test</span> -e test.sh &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;exist&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Not exist&quot;</span><br>exist  <span class="hljs-comment"># test.sh 文件存在</span><br>acs@9e0ebfcd82d7:~$ <span class="hljs-built_in">test</span> -e test2.sh &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;exist&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Not exist&quot;</span><br>Not exist  <span class="hljs-comment"># testh2.sh 文件不存在</span><br></code></pre></td></tr></table></figure>
+<p>我的说明：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">test</span> -e test.sh &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;exist&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Not exist&quot;</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li><code>test.sh</code> 存在，所以为真，<code>&amp;&amp;</code> 左边为真。这样整个左边就是对的，<code>||</code> 左边为真，右边不执行，输出 <code>exist</code></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">$ <span class="hljs-built_in">test</span> -e test2.sh &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;exist&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Not exist&quot;</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li><code>test2.sh</code> 不存在，所以为假，直接忽略右边即 <code>echo &quot;exist&quot;</code>，左大边是假，<code>||</code>左边为假，就执行右边，输出 <code>Not exist</code></li>
+</ul>
+<h3 id="test-命令"><a href="#test-命令" class="headerlink" title="test 命令"></a>test 命令</h3><p>在命令行中输入<code>man test</code>，可以查看<code>test</code>命令的用法。</p>
+<p><code>test</code>命令用于判断文件类型，以及对变量做比较。</p>
+<p><code>test</code>命令用<code>exit code</code>返回结果，而不是使用<code>stdout</code>。0表示真，非0表示假。</p>
+<blockquote>
+<p>y总：“凡是用进程状态表示结果的，0表示真，非0表示假。凡是输出表示结果的，1表示真，0表示假。”</p>
+</blockquote>
+<p>例如：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">test</span> 2 -lt 3  <span class="hljs-comment"># 为真，返回值为0</span><br><span class="hljs-built_in">echo</span> $?  <span class="hljs-comment"># 输出上个命令的返回值，输出0</span><br></code></pre></td></tr></table></figure>
+<h4 id="文件类型判断"><a href="#文件类型判断" class="headerlink" title="文件类型判断"></a>文件类型判断</h4><p>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">test</span> -e filename  <span class="hljs-comment"># 判断文件是否存在</span><br></code></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">测试参数</th>
+<th style="text-align:left">代表意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-e</td>
+<td style="text-align:left">文件是否存在</td>
+</tr>
+<tr>
+<td style="text-align:left">-f</td>
+<td style="text-align:left">是否为文件</td>
+</tr>
+<tr>
+<td style="text-align:left">-d</td>
+<td style="text-align:left">是否为目录</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="文件权限判断"><a href="#文件权限判断" class="headerlink" title="文件权限判断"></a>文件权限判断</h4><p>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">test</span> -r filename  <span class="hljs-comment"># 判断文件是否可读</span><br></code></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">测试参数</th>
+<th style="text-align:left">代表意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-r</td>
+<td style="text-align:left">文件是否可读</td>
+</tr>
+<tr>
+<td style="text-align:left">-w</td>
+<td style="text-align:left">文件是否可写</td>
+</tr>
+<tr>
+<td style="text-align:left">-x</td>
+<td style="text-align:left">文件是否可执行</td>
+</tr>
+<tr>
+<td style="text-align:left">-s</td>
+<td style="text-align:left">是否为非空文件</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="整数间的比较"><a href="#整数间的比较" class="headerlink" title="整数间的比较"></a>整数间的比较</h4><p>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">test</span> <span class="hljs-variable">$a</span> -eq <span class="hljs-variable">$b</span>  <span class="hljs-comment"># a是否等于b</span><br></code></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">测试参数</th>
+<th style="text-align:left">代表意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-eq</td>
+<td style="text-align:left">a是否等于b</td>
+</tr>
+<tr>
+<td style="text-align:left">-ne</td>
+<td style="text-align:left">a是否不等于b</td>
+</tr>
+<tr>
+<td style="text-align:left">-gt</td>
+<td style="text-align:left">a是否大于b</td>
+</tr>
+<tr>
+<td style="text-align:left">-lt</td>
+<td style="text-align:left">a是否小于b</td>
+</tr>
+<tr>
+<td style="text-align:left">-ge</td>
+<td style="text-align:left">a是否大于等于b</td>
+</tr>
+<tr>
+<td style="text-align:left">-le</td>
+<td style="text-align:left">a是否小于等于b</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="字符串比较"><a href="#字符串比较" class="headerlink" title="字符串比较"></a>字符串比较</h4><div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">测试参数</th>
+<th style="text-align:left">代表意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">test -z STRING</td>
+<td style="text-align:left">判断STRING是否为空，如果为空，则返回true</td>
+</tr>
+<tr>
+<td style="text-align:left">test -n STRING</td>
+<td style="text-align:left">判断STRING是否非空，如果非空，则返回true（-n可以省略）</td>
+</tr>
+<tr>
+<td style="text-align:left">test str1 == str2</td>
+<td style="text-align:left">判断str1是否等于str2</td>
+</tr>
+<tr>
+<td style="text-align:left">test str1 != str2</td>
+<td style="text-align:left">判断str1是否不等于str2</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="多重条件判定"><a href="#多重条件判定" class="headerlink" title="多重条件判定"></a>多重条件判定</h4><p>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">test</span> -r filename -a -x filename<br></code></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">测试参数</th>
+<th style="text-align:left">代表意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">-a</td>
+<td style="text-align:left">两条件是否同时成立 (与..)</td>
+</tr>
+<tr>
+<td style="text-align:left">-b</td>
+<td style="text-align:left">（或..）</td>
+</tr>
+<tr>
+<td style="text-align:left">-o</td>
+<td style="text-align:left">两条件是否至少一个成立</td>
+</tr>
+<tr>
+<td style="text-align:left">!</td>
+<td style="text-align:left">取反。如 test ! -x file，当file不可执行时，返回true</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211102174817669.png" alt=""></p>
+<h3 id="判断符号"><a href="#判断符号" class="headerlink" title="判断符号 []"></a>判断符号 []</h3><p><code>[]</code>与<code>test</code>用法几乎一模一样，更常用于<code>if</code>语句中。另外<code>[[]]</code>是<code>[]</code>的加强版，支持的特性更多。</p>
+<p>例如：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">[ 2 -lt 3 ]  <span class="hljs-comment"># 为真，返回值为0</span><br><span class="hljs-built_in">echo</span> $?  <span class="hljs-comment"># 输出上个命令的返回值，输出0</span><br>acs@9e0ebfcd82d7:~$ ls  <span class="hljs-comment"># 列出当前目录下的所有文件</span><br>homework  output.txt  test.sh  tmp<br>acs@9e0ebfcd82d7:~$ [ -e test.sh ] &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;exist&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Not exist&quot;</span><br>exist  <span class="hljs-comment"># test.sh 文件存在</span><br>acs@9e0ebfcd82d7:~$ [ -e test2.sh ] &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;exist&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Not exist&quot;</span><br>Not exist  <span class="hljs-comment"># testh2.sh 文件不存在</span><br></code></pre></td></tr></table></figure>
+<p>注意：</p>
+<ul>
+<li><code>[]</code>内的<strong>每一项都要用空格隔开</strong></li>
+<li>中括号内的变量，最好用双引号括起来</li>
+<li>中括号内的常数，最好用单或双引号括起来</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">name=<span class="hljs-string">&quot;acwing yxc&quot;</span><br>[ <span class="hljs-variable">$name</span> == <span class="hljs-string">&quot;acwing yxc&quot;</span> ]  <span class="hljs-comment"># 错误，等价于 [ acwing yxc == &quot;acwing yxc&quot; ]，参数太多</span><br>[ <span class="hljs-string">&quot;<span class="hljs-variable">$name</span>&quot;</span> == <span class="hljs-string">&quot;acwing yxc&quot;</span> ]  <span class="hljs-comment"># 正确</span><br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>我试了一下短的字符串比如 “yxc”，不会报错。但最好还是听老师的，变量用双引号括起来吧！</p>
+</blockquote>
+<h2 id="11-判断语句"><a href="#11-判断语句" class="headerlink" title="11. 判断语句"></a>11. 判断语句</h2><h3 id="if…then-形式"><a href="#if…then-形式" class="headerlink" title="if…then 形式"></a>if…then 形式</h3><p>类似于<code>C/C++</code>中的<code>if-else</code>语句。</p>
+<p>判断的是 condition 的 <code>exit code</code></p>
+<h4 id="单层-if"><a href="#单层-if" class="headerlink" title="单层 if"></a>单层 if</h4><p>命令格式：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">if</span> condition<br><span class="hljs-keyword">then</span><br>    语句1<br>    语句2<br>    ...<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">a=3<br>b=4<br><br><span class="hljs-keyword">if</span> [ <span class="hljs-string">&quot;<span class="hljs-variable">$a</span>&quot;</span> -lt <span class="hljs-string">&quot;<span class="hljs-variable">$b</span>&quot;</span> ] &amp;&amp; [ <span class="hljs-string">&quot;<span class="hljs-variable">$a</span>&quot;</span> -gt 2 ]<br><span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>在范围内<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><code class="hljs plain">3在范围内<br></code></pre></td></tr></table></figure>
+<p>强调一下 <code>expr</code>：·</p>
+<ul>
+<li><strong>expr会在<code>stdout</code>中输出结果。</strong>如果为逻辑关系表达式，则结果为真，<code>stdout</code>为1，否则为0。</li>
+<li><strong>expr同时也会在 <code>exit code</code> 中输出结果。</strong>expr的<code>exit code</code>：如果为逻辑关系表达式，则结果为真，<code>exit code</code>为0，否则为1。</li>
+</ul>
+<p>栗：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#! /bin/bash</span><br><br><span class="hljs-keyword">if</span> expr 3 + 3<br><span class="hljs-keyword">then</span><br>	<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;hhh&quot;</span><br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>结果输出 “hhh”。因为 expr 后是逻辑关系表达式，返回 0（真）</p>
+<h4 id="单层-if-else"><a href="#单层-if-else" class="headerlink" title="单层 if-else"></a>单层 if-else</h4><p>命令格式</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">if</span> condition<br><span class="hljs-keyword">then</span><br>    语句1<br>    语句2<br>    ...<br><span class="hljs-keyword">else</span><br>    语句1<br>    语句2<br>    ...<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">a=3<br>b=4<br><br><span class="hljs-keyword">if</span> ! [ <span class="hljs-string">&quot;<span class="hljs-variable">$a</span>&quot;</span> -lt <span class="hljs-string">&quot;<span class="hljs-variable">$b</span>&quot;</span> ]<br><span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>不小于<span class="hljs-variable">$&#123;b&#125;</span><br><span class="hljs-keyword">else</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>小于<span class="hljs-variable">$&#123;b&#125;</span><br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">3</span>小于<span class="hljs-number">4</span><br></code></pre></td></tr></table></figure>
+<h4 id="多层if-elif-elif-else"><a href="#多层if-elif-elif-else" class="headerlink" title="多层if-elif-elif-else"></a>多层if-elif-elif-else</h4><p>命令格式</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">if</span> condition<br><span class="hljs-keyword">then</span><br>    语句1<br>    语句2<br>    ...<br><span class="hljs-keyword">elif</span> condition<br><span class="hljs-keyword">then</span><br>    语句1<br>    语句2<br>    ...<br><span class="hljs-keyword">elif</span> condition<br><span class="hljs-keyword">then</span><br>    语句1<br>    语句2<br><span class="hljs-keyword">else</span><br>    语句1<br>    语句2<br>    ...<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">a=4<br><br><span class="hljs-keyword">if</span> [ <span class="hljs-variable">$a</span> -eq 1 ]<br><span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>等于1<br><span class="hljs-keyword">elif</span> [ <span class="hljs-variable">$a</span> -eq 2 ]<br><span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>等于2<br><span class="hljs-keyword">elif</span> [ <span class="hljs-variable">$a</span> -eq 3 ]<br><span class="hljs-keyword">then</span><br>    <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>等于3<br><span class="hljs-keyword">else</span><br>    <span class="hljs-built_in">echo</span> 其他<br><span class="hljs-keyword">fi</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><code class="hljs plain">其他<br></code></pre></td></tr></table></figure>
+<h3 id="case…esac-形式"><a href="#case…esac-形式" class="headerlink" title="case…esac 形式"></a>case…esac 形式</h3><p>类似于<code>C/C++</code>中的<code>switch</code>语句。</p>
+<p>命令格式</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">case</span> $变量名称 <span class="hljs-keyword">in</span><br>    值1)<br>        语句1<br>        语句2<br>        ...<br>        ;;  <span class="hljs-comment"># 类似于C/C++中的break</span><br>    值2)<br>        语句1<br>        语句2<br>        ...<br>        ;;<br>    *)  <span class="hljs-comment"># 类似于C/C++中的default</span><br>        语句1<br>        语句2<br>        ...<br>        ;;<br><span class="hljs-keyword">esac</span><br></code></pre></td></tr></table></figure>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">a=4<br><br><span class="hljs-keyword">case</span> <span class="hljs-variable">$a</span> <span class="hljs-keyword">in</span><br>    1)<br>        <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>等于1<br>        ;;  <br>    2)<br>        <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>等于2<br>        ;;  <br>    3)                                                <br>        <span class="hljs-built_in">echo</span> <span class="hljs-variable">$&#123;a&#125;</span>等于3<br>        ;;  <br>    *)<br>        <span class="hljs-built_in">echo</span> 其他<br>        ;;  <br><span class="hljs-keyword">esac</span><br></code></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><code class="hljs plain">其他<br></code></pre></td></tr></table></figure>
+<h2 id="12-循环语句"><a href="#12-循环语句" class="headerlink" title="12. 循环语句"></a>12. 循环语句</h2><h3 id="for…in…do…done"><a href="#for…in…do…done" class="headerlink" title="for…in…do…done"></a>for…in…do…done</h3><p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">for var in val1 val2 val3<br>do<br>    语句1<br>    语句2<br>    ...<br>done<br></code></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>编程语言</category>
@@ -17726,78 +17964,117 @@ S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)
   <entry>
     <title>KGR_Papers_Summarization</title>
     <url>/2021/10/31/KGR_Papers_Summarization/</url>
-    <content><![CDATA[<p>这里是 Knowledge Graph Reasoning 方向的论文，主要是在看 <a href="https://github.com/THU-KEG/Knowledge_Graph_Reasoning_Papers#2-Multi-Hop-Reasoning">THU-KEG 的这份 paper list</a>，正在不定期更新中....</p>
+    <content><![CDATA[<p>这里是 Knowledge Graph Reasoning 方向的论文，主要是在看 <a href="https://github.com/THU-KEG/Knowledge_Graph_Reasoning_Papers#2-Multi-Hop-Reasoning">THU-KEG 的这份 paper list</a>，正在不定期更新中….</p>
 <p>有一些年代久远的没看，其余的正在看，慢慢累积起来，做一个总结，希望不要遗忘太快，并且以后方便查阅。</p>
 <a id="more"></a>
-<h1 id="小张的奇思妙想">小张的奇思妙想</h1>
-<div class="note note-primary">
-            <ul><li><p>能不能反着想，在嵌入模型中加强化学习？</p></li><li>为什么现在 多跳推理 得基于 强化学习呢？</li><li>其他方向怎么做可解释性的？<ul><li>Learning to explain: Datasets and models for identifying valid reasoning chains in multihop question-answering.</li></ul></li></ul>
+<h1 id="小张的奇思妙想"><a href="#小张的奇思妙想" class="headerlink" title="小张的奇思妙想"></a>小张的奇思妙想</h1><div class="note note-primary">
+            <ul><li><p>能不能反着想，在嵌入模型中加强化学习？</p></li><li><p>为什么现在 多跳推理 得基于 强化学习呢？</p></li><li>其他方向怎么做可解释性的？<ul><li>Learning to explain: Datasets and models for identifying valid reasoning chains in multihop question-answering. </li></ul></li></ul>
           </div>
-<h1 id="kgr_papers_summarization">KGR_papers_Summarization</h1>
-<h2 id="survey-papers">1. Survey Papers</h2>
-<ol type="1">
+<h1 id="KGR-papers-Summarization"><a href="#KGR-papers-Summarization" class="headerlink" title="KGR_papers_Summarization"></a>KGR_papers_Summarization</h1><h2 id="1-Survey-Papers"><a href="#1-Survey-Papers" class="headerlink" title="1. Survey Papers"></a>1. Survey Papers</h2><ol>
 <li><p><strong>A Review: Knowledge Reasoning over Knowledge Graph.</strong> <em>Xiaojun Chen, Shengbin Jia, Yang Xiang.</em> Expert Systems with Applications. <a href="https://www.sciencedirect.com/science/article/pii/S0957417419306669">paper</a></p>
-<p>还没看...太长了 有时间看看</p></li>
+<p>还没看…太长了 有时间看看</p>
+</li>
 </ol>
-<h2 id="multi-hop-reasoning">2. Multi-Hop Reasoning</h2>
-<h3 id="entity-prediction">2.1 Entity Prediction</h3>
-<p>Predict the missing tail entity and corresponding supporting paths in one triple. <span class="math inline">\((h, r, ?) -&gt; (h, r, t)\)</span></p>
-<h4 id="go-for-a-walk-and-arrive-at-the-answer-reasoning-over-paths-in-knowledge-bases-using-reinforcement-learning">1. Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</h4>
-<ul>
+<h2 id="2-Multi-Hop-Reasoning"><a href="#2-Multi-Hop-Reasoning" class="headerlink" title="2. Multi-Hop Reasoning"></a>2. Multi-Hop Reasoning</h2><h3 id="2-1-Entity-Prediction"><a href="#2-1-Entity-Prediction" class="headerlink" title="2.1 Entity Prediction"></a>2.1 Entity Prediction</h3><p>Predict the missing tail entity and corresponding supporting paths in one triple. $(h, r, ?) -&gt; (h, r, t)$</p>
+<h4 id="1-Go-for-a-Walk-and-Arrive-at-the-Answer-Reasoning-Over-Paths-in-Knowledge-Bases-using-Reinforcement-Learning"><a href="#1-Go-for-a-Walk-and-Arrive-at-the-Answer-Reasoning-Over-Paths-in-Knowledge-Bases-using-Reinforcement-Learning" class="headerlink" title="1. Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning"></a>1. Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning</h4><ul>
 <li>作者：<em>Rajarshi Das, Shehzaad Dhuliawala</em>，ICLR 2018，<a href="https://arxiv.org/pdf/1711.05851.pdf">paper</a> <a href="https://github.com/shehzaadzd/MINERVA">code</a></li>
 <li>Idea：本文提出了 MINERVA 模型，使用了 Reinforcement Learning 的方法，根据 query 在图谱上游走获得 path，抵达目标节点后停止，该方法可以通过在知识图谱上游走推理 path 获得答案，不需要对所有实体进行枚举。</li>
 <li><a href="https://stuxiaozhang.github.io/2021/10/08/Go%20for%20a%20Walk%20and%20Arrive%20at%20the%20Answer%EF%BC%9AReasoning%20Over%20Paths%20in%20Knowledge%20Bases%20using%20Reinforcement%20Learning/">我的阅读笔记</a></li>
 </ul>
-<h4 id="multi-hop-kgmulti-hop-knowledge-graph-reasoning-with-reward-shaping">2.【Multi-Hop KG】Multi-Hop Knowledge Graph Reasoning with Reward Shaping</h4>
-<ul>
-<li><p>Author：<em>Xi Victoria Lin, Richard Socher, Caiming Xiong</em>，EMNLP 2018，<a href="https://aclweb.org/anthology/D18-1362">paper</a> <a href="https://github.com/salesforce/MultiHopKG">code</a></p></li>
+<h4 id="2-【Multi-Hop-KG】Multi-Hop-Knowledge-Graph-Reasoning-with-Reward-Shaping"><a href="#2-【Multi-Hop-KG】Multi-Hop-Knowledge-Graph-Reasoning-with-Reward-Shaping" class="headerlink" title="2.【Multi-Hop KG】Multi-Hop Knowledge Graph Reasoning with Reward Shaping"></a>2.【Multi-Hop KG】Multi-Hop Knowledge Graph Reasoning with Reward Shaping</h4><ul>
+<li><p>Author：<em>Xi Victoria Lin, Richard Socher, Caiming Xiong</em>，EMNLP 2018，<a href="https://aclweb.org/anthology/D18-1362">paper</a> <a href="https://github.com/salesforce/MultiHopKG">code</a></p>
+</li>
 <li><p>Idea：该论文基于上篇 MINERVA 指出了强化学习在 incomplete knowledge graph 中进行 reasoning 时存在的两个问题，</p>
-<ol type="1">
+<ol>
 <li>虚假负 reward：查询出的路径由于知识图谱中的信息缺失导致判定为错误路径</li>
 <li>虚假路径：由假路径导致的偶然正确答案。由于强化学习是一种基于策略的算法，鼓励过去的行动，并反馈回较高的reward，因此会更偏向初期存在的虚假正确的情况。(false positive path)</li>
 </ol>
 <p>针对以上问题, 本文提出解决方案：Reward Shaping 和 Action dropout：</p>
-<ol type="1">
+<ol>
 <li>Reward Shaping：通过采用 pretrained one-hop embedding model，对任意三元组有一个预期奖励，有效避免训练时 False Negatives 对测试效果造成的影响。</li>
 <li>Action dropout：对每一个路径上的中间实体，随机对其出边进行dropout，以强制有效探索不同的路径集，并稀释虚假路径的负面影响。</li>
-</ol></li>
-<li><p><a href="https://stuxiaozhang.github.io/2021/10/11/Multi-Hop%20Knowledge%20Graph%20Reasoning%20with%20Reward%20Shaping/">我的阅读笔记</a></p></li>
+</ol>
+</li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/11/Multi-Hop%20Knowledge%20Graph%20Reasoning%20with%20Reward%20Shaping/">我的阅读笔记</a></p>
+</li>
 </ul>
-<h4 id="cplcollaborative-policy-learning-for-open-knowledge-graph-reasoning.">3.【CPL】Collaborative Policy Learning for Open Knowledge Graph Reasoning.</h4>
-<ul>
+<h4 id="【DIVINE】A-Generative-Adversarial-Imitation-Learning-Framework-for-Knowledge-Graph-Reasoning"><a href="#【DIVINE】A-Generative-Adversarial-Imitation-Learning-Framework-for-Knowledge-Graph-Reasoning" class="headerlink" title="==【DIVINE】A Generative Adversarial Imitation Learning Framework for Knowledge Graph Reasoning=="></a>==【DIVINE】A Generative Adversarial Imitation Learning Framework for Knowledge Graph Reasoning==</h4><ul>
+<li><p>Author：<em>Ruiping Li, Xiang Cheng.</em> EMNLP 2019. <a href="https://www.aclweb.org/anthology/D19-1266.pdf">paper</a> <a href="https://github.com/BUPT-Data-Intelligence-Lab/DIVINE">code</a></p>
+</li>
+<li><p>11月</p>
+</li>
+</ul>
+<h4 id="3-【CPL】Collaborative-Policy-Learning-for-Open-Knowledge-Graph-Reasoning"><a href="#3-【CPL】Collaborative-Policy-Learning-for-Open-Knowledge-Graph-Reasoning" class="headerlink" title="3.【CPL】Collaborative Policy Learning for Open Knowledge Graph Reasoning."></a>3.【CPL】Collaborative Policy Learning for Open Knowledge Graph Reasoning.</h4><ul>
 <li>Author：<em>Cong Fu, Tong Chen, Meng Qu, Woojeong Jin, Xiang Ren.</em> EMNLP 2019. <a href="https://www.aclweb.org/anthology/D19-1269.pdf">paper</a> <a href="https://github.com/shanzhenren/CPL">code</a></li>
-<li><p>Idea：作者在“开放世界”环境下研究知识图推理，从背景语料库中抽取的新事实可用于促进路径发现。然后，依据此提出了一种新的协作策略学习（CPL）框架，以相互增强的方式联合训练两个 RL 代理。在 CPL 中，除了训练用于路径发现的 Reasoner Agent 之外，还引入了 Fact Extractor Agent，该代理根据推理过程和语料库的上下文学习从语料库中抽取相关事实的策略。在推理时，事实抽取代理仅使用信息量最大的边动态扩充图，从而使推理代理能够有效地识别正路径。</p></li>
-<li><p><a href="https://stuxiaozhang.github.io/2021/10/12/CPL%EF%BC%9ACollaborative%20Policy%20Learning%20for%20Open%20Knowledge%20Graph%20Reasoning/">我的阅读笔记</a></p></li>
+<li><p>Idea：作者在“开放世界”环境下研究知识图推理，从背景语料库中抽取的新事实可用于促进路径发现。然后，依据此提出了一种新的协作策略学习（CPL）框架，以相互增强的方式联合训练两个 RL 代理。在 CPL 中，除了训练用于路径发现的 Reasoner Agent 之外，还引入了 Fact Extractor Agent，该代理根据推理过程和语料库的上下文学习从语料库中抽取相关事实的策略。在推理时，事实抽取代理仅使用信息量最大的边动态扩充图，从而使推理代理能够有效地识别正路径。</p>
+</li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/12/CPL%EF%BC%9ACollaborative%20Policy%20Learning%20for%20Open%20Knowledge%20Graph%20Reasoning/">我的阅读笔记</a></p>
+</li>
 </ul>
-<h4 id="dackgrdynamic-anticipation-and-completion-for-multi-hop-reasoning-over-sparse-knowledge-graph">4.【DacKGR】Dynamic Anticipation and Completion for Multi-Hop Reasoning over Sparse Knowledge Graph</h4>
-<ul>
-<li><p>Author：<em>Xin Lv, Xu Han, Lei Hou, Juanzi Li, Zhiyuan Liu....</em> EMNLP 2020. <a href="https://www.aclweb.org/anthology/2020.emnlp-main.459.pdf">paper</a> <a href="https://github.com/THU-KEG/DacKGR">code</a></p></li>
+<h4 id="Reasoning-on-Knowledge-Graphs-with-Debate-Dynamics"><a href="#Reasoning-on-Knowledge-Graphs-with-Debate-Dynamics" class="headerlink" title="==Reasoning on Knowledge Graphs with Debate Dynamics.=="></a>==Reasoning on Knowledge Graphs with Debate Dynamics.==</h4><ul>
+<li><p>Author：<em>Marcel Hildebrandt, Jorge Andres Quintero Serna, Yunpu Ma,</em>AAAI 2020. <a href="https://ojs.aaai.org/index.php/AAAI/article/download/6600/6454">paper</a> <a href="https://github.com/m-hildebrandt/R2D2">code</a></p>
+</li>
+<li><p>11月</p>
+</li>
+</ul>
+<h4 id="【RLH】Reasoning-Like-Human-Hierarchical-Reinforcement-Learning-for-Knowledge-Graph-Reasoning"><a href="#【RLH】Reasoning-Like-Human-Hierarchical-Reinforcement-Learning-for-Knowledge-Graph-Reasoning" class="headerlink" title="==【RLH】Reasoning Like Human: Hierarchical Reinforcement Learning for Knowledge Graph Reasoning=="></a>==【RLH】Reasoning Like Human: Hierarchical Reinforcement Learning for Knowledge Graph Reasoning==</h4><ul>
+<li><p>Author：<em>Guojia Wan, Shirui Pan, Chen Gong, Chuan Zhou, Gholamreza Haffari.</em> IJCAI 2020. <a href="https://www.ijcai.org/Proceedings/2020/0267.pdf">paper</a></p>
+</li>
+<li><p>11月</p>
+</li>
+</ul>
+<h4 id="Learning-Collaborative-Agents-with-Rule-Guidance-for-Knowledge-Graph-Reasoning"><a href="#Learning-Collaborative-Agents-with-Rule-Guidance-for-Knowledge-Graph-Reasoning" class="headerlink" title="==Learning Collaborative Agents with Rule Guidance for Knowledge Graph Reasoning=="></a>==Learning Collaborative Agents with Rule Guidance for Knowledge Graph Reasoning==</h4><ul>
+<li><p>Author：<em>Deren Lei, Gangrong Jiang, Xiaotao Gu, Kexuan Sun, Yuning Mao, Xiang Ren.</em>  EMNLP 2020. <a href="https://www.aclweb.org/anthology/2020.emnlp-main.688.pdf">paper</a> <a href="https://github.com/derenlei/KG-RuleGuider">code</a></p>
+</li>
+<li><p>12月</p>
+</li>
+</ul>
+<h4 id="4-【DacKGR】Dynamic-Anticipation-and-Completion-for-Multi-Hop-Reasoning-over-Sparse-Knowledge-Graph"><a href="#4-【DacKGR】Dynamic-Anticipation-and-Completion-for-Multi-Hop-Reasoning-over-Sparse-Knowledge-Graph" class="headerlink" title="4.【DacKGR】Dynamic Anticipation and Completion for Multi-Hop Reasoning over Sparse Knowledge Graph"></a>4.【DacKGR】Dynamic Anticipation and Completion for Multi-Hop Reasoning over Sparse Knowledge Graph</h4><ul>
+<li><p>Author：<em>Xin Lv, Xu Han, Lei Hou, Juanzi Li, Zhiyuan Liu….</em> EMNLP 2020. <a href="https://www.aclweb.org/anthology/2020.emnlp-main.459.pdf">paper</a> <a href="https://github.com/THU-KEG/DacKGR">code</a></p>
+</li>
 <li><p>Idea：DacKGR 针对稀疏知识图谱做多跳推理。可以做多跳推理的模型主要有两类：KGE 模型和专门的多跳推理模型。但 KGE 做补全是计算出来的结果，不能给出推理路径之类的解释。而专门的多跳推理模型作用于稀疏知识图谱时面临两个问题：稀疏 KG 包含的信息少，路径选择困难；路径的缺乏使得预测目标实体变得困难。</p>
 <p>因此，为了解决在<strong>稀疏路径的 KG 进行多跳推理比较困难</strong>的问题，文章提出了 DacKGR，包括动态预测（Dynamic Anticipation）和动态补全（Dynamic Completion）两部分：</p>
-<ol type="1">
+<ol>
 <li>Dynamic Anticipation：应用 KGE 模型预测尾实体信息用于 agent 选择正确的 action</li>
 <li>Dynamic Completion：在路径搜索过程中，动态地向 KG 中添加额外的边（关系），缓解 KG 的稀疏性问题。</li>
-</ol></li>
-<li><p><a href="https://stuxiaozhang.github.io/2021/10/19/DacKGR%EF%BC%9ADynamic%20Anticipation%20and%20Completion%20for%20Multi-Hop%20Reasoning%20over%20Sparse%20Knowledge%20Graph/">我的阅读笔记</a></p></li>
+</ol>
+</li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/19/DacKGR%EF%BC%9ADynamic%20Anticipation%20and%20Completion%20for%20Multi-Hop%20Reasoning%20over%20Sparse%20Knowledge%20Graph/">我的阅读笔记</a></p>
+</li>
 </ul>
-<h3 id="relation-prediction">2.2 Relation Prediction</h3>
-<p>Given head and tail entity and paths between them, predict the missing relation. <span class="math inline">\((h, ?, t) -&gt; (h, r, t)\)</span></p>
-<h3 id="inductive-reasoning">2.3 Inductive Reasoning</h3>
-<h2 id="reasoning-with-logic-rule">3. Reasoning with Logic Rule</h2>
-<h3 id="rule-mininglearning">3.1 Rule Mining/Learning</h3>
-<h3 id="rule-based-reasoning">3.2 Rule-based Reasoning</h3>
-<h3 id="rule-enhanced-knowledge-graph-embedding">3.3 Rule-enhanced Knowledge Graph Embedding</h3>
-<h2 id="query-based-reasoning">4. Query-based Reasoning</h2>
-<h3 id="path-based-query">4.1 Path-based Query</h3>
-<h3 id="complex-logic-query">4.2 Complex Logic Query</h3>
-<h3 id="complex-natural-language-query">4.3 Complex Natural Language Query</h3>
-<h2 id="benchmark-and-evaluation">5. Benchmark and Evaluation</h2>
-<h4 id="bimris-multi-hop-reasoning-really-explainable-towards-benchmarking-reasoning-interpretability">1.【BIMR】Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning Interpretability</h4>
-<ul>
-<li>Author：<em>Xin Lv, Yixin Cao, Lei Hou, Juanzi Li, Zhiyuan Liu....</em> EMNLP 2021</li>
+<h4 id="GaussianPath-A-Bayesian-Multi-Hop-Reasoning-Framework-for-Knowledge-Graph-Reasoning"><a href="#GaussianPath-A-Bayesian-Multi-Hop-Reasoning-Framework-for-Knowledge-Graph-Reasoning" class="headerlink" title="==GaussianPath:A Bayesian Multi-Hop Reasoning Framework for Knowledge Graph Reasoning=="></a>==GaussianPath:A Bayesian Multi-Hop Reasoning Framework for Knowledge Graph Reasoning==</h4><ul>
+<li>Author：<em>Guojia Wan, Bo Du.</em> AAAI 2021. <a href="https://www.aaai.org/AAAI21Papers/AAAI-5131.WanG.pdf">paper</a> <a href="https://github.com/BromothymolBlue/Gaupa">code</a></li>
+</ul>
+<h4 id="RGCN"><a href="#RGCN" class="headerlink" title="==RGCN=="></a>==RGCN==</h4><h3 id="2-2-Relation-Prediction"><a href="#2-2-Relation-Prediction" class="headerlink" title="2.2 Relation Prediction"></a>2.2 Relation Prediction</h3><p>Given head and tail entity and paths between them, predict the missing relation. $(h, ?, t) -&gt; (h, r, t)$</p>
+<h4 id="DeepPath-A-Reinforcement-Learning-Method-for-Knowledge-Graph-Reasoning"><a href="#DeepPath-A-Reinforcement-Learning-Method-for-Knowledge-Graph-Reasoning" class="headerlink" title="==DeepPath: A Reinforcement Learning Method for Knowledge Graph Reasoning=="></a>==DeepPath: A Reinforcement Learning Method for Knowledge Graph Reasoning==</h4><ul>
+<li><p>Author：<em>Wenhan Xiong, Thien Hoang, William Yang Wang.</em> EMNLP 2017. <a href="https://www.aclweb.org/anthology/D17-1060">paper</a> <a href="https://github.com/xwhan/DeepPath">code</a></p>
+</li>
+<li><p>11月</p>
+</li>
+</ul>
+<h4 id="Variational-Knowledge-Graph-Reasoning"><a href="#Variational-Knowledge-Graph-Reasoning" class="headerlink" title="==Variational Knowledge Graph Reasoning=="></a>==Variational Knowledge Graph Reasoning==</h4><ul>
+<li>Author：<em>Wenhu Chen, Wenhan Xiong, Xifeng Yan, William Yang Wang.</em> NAACL 2018. <a href="https://aclweb.org/anthology/N18-1165">paper</a></li>
+<li>12</li>
+</ul>
+<h4 id="Incorporating-Graph-Attention-Mechanism-into-Knowledge-Graph-Reasoning-Based-on-Deep-Reinforcement-Learning"><a href="#Incorporating-Graph-Attention-Mechanism-into-Knowledge-Graph-Reasoning-Based-on-Deep-Reinforcement-Learning" class="headerlink" title="==Incorporating Graph Attention Mechanism into Knowledge Graph Reasoning Based on Deep Reinforcement Learning.=="></a>==Incorporating Graph Attention Mechanism into Knowledge Graph Reasoning Based on Deep Reinforcement Learning.==</h4><ul>
+<li><p>Author：<em>Heng Wang, Shuangyin Li, Rong Pan, Mingzhi Mao.</em> EMNLP 2019. <a href="https://www.aclweb.org/anthology/D19-1264/">paper</a> <a href="https://github.com/jimmywangheng/AttnPath">code</a></p>
+</li>
+<li><p>12</p>
+</li>
+</ul>
+<h3 id="2-3-Inductive-Reasoning"><a href="#2-3-Inductive-Reasoning" class="headerlink" title="2.3 Inductive Reasoning"></a>2.3 Inductive Reasoning</h3><h2 id="3-Reasoning-with-Logic-Rule"><a href="#3-Reasoning-with-Logic-Rule" class="headerlink" title="3. Reasoning with Logic Rule"></a>3. Reasoning with Logic Rule</h2><h3 id="3-1-Rule-Mining-Learning"><a href="#3-1-Rule-Mining-Learning" class="headerlink" title="3.1 Rule Mining/Learning"></a>3.1 Rule Mining/Learning</h3><h3 id="3-2-Rule-based-Reasoning"><a href="#3-2-Rule-based-Reasoning" class="headerlink" title="3.2 Rule-based Reasoning"></a>3.2 Rule-based Reasoning</h3><h3 id="3-3-Rule-enhanced-Knowledge-Graph-Embedding"><a href="#3-3-Rule-enhanced-Knowledge-Graph-Embedding" class="headerlink" title="3.3 Rule-enhanced Knowledge Graph Embedding"></a>3.3 Rule-enhanced Knowledge Graph Embedding</h3><h2 id="4-Query-based-Reasoning"><a href="#4-Query-based-Reasoning" class="headerlink" title="4. Query-based Reasoning"></a>4. Query-based Reasoning</h2><h3 id="4-1-Path-based-Query"><a href="#4-1-Path-based-Query" class="headerlink" title="4.1 Path-based Query"></a>4.1 Path-based Query</h3><h4 id="CoKE-Contextualized-Knowledge-Graph-Embedding"><a href="#CoKE-Contextualized-Knowledge-Graph-Embedding" class="headerlink" title="==CoKE: Contextualized Knowledge Graph Embedding=="></a>==CoKE: Contextualized Knowledge Graph Embedding==</h4><ul>
+<li><p>Author：<em>Quan Wang, Pingping Huang, Haifeng Wang, Songtai Dai, Wenbin Jiang, Jing Liu, Yajuan Lyu, Yong Zhu, Hua Wu.</em> Arxiv 2019. <a href="https://arxiv.org/pdf/1911.02168.pdf">paper</a> <a href="https://github.com/PaddlePaddle/Research/tree/master/KG/CoKE">code</a></p>
+</li>
+<li><p>12</p>
+</li>
+</ul>
+<h3 id="4-2-Complex-Logic-Query"><a href="#4-2-Complex-Logic-Query" class="headerlink" title="4.2 Complex Logic Query"></a>4.2 Complex Logic Query</h3><h3 id="4-3-Complex-Natural-Language-Query"><a href="#4-3-Complex-Natural-Language-Query" class="headerlink" title="4.3 Complex Natural Language Query"></a>4.3 Complex Natural Language Query</h3><h2 id="5-Benchmark-and-Evaluation"><a href="#5-Benchmark-and-Evaluation" class="headerlink" title="5. Benchmark and Evaluation"></a>5. Benchmark and Evaluation</h2><h4 id="1-【BIMR】Is-Multi-Hop-Reasoning-Really-Explainable-Towards-Benchmarking-Reasoning-Interpretability"><a href="#1-【BIMR】Is-Multi-Hop-Reasoning-Really-Explainable-Towards-Benchmarking-Reasoning-Interpretability" class="headerlink" title="1.【BIMR】Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning  Interpretability"></a>1.【BIMR】Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning  Interpretability</h4><ul>
+<li>Author：<em>Xin Lv, Yixin Cao, Lei Hou, Juanzi Li, Zhiyuan Liu….</em>  EMNLP 2021</li>
 <li><p>Idea：针对多跳推理没有量化的评价指标的问题，提出了衡量多跳路径可解释性得分的 BIMR，包括三个指标：PR、LI 和 GI，弥补了多跳推理效果没有量化评价指标的空白。</p>
-<p>作者说未来的工作可以研究：如何更好地将 <strong>挖掘出的规则 融入到 多跳推理模型</strong> 中，以获得更好的性能和可解释性。以后可以看一下 Rule mining 的 KGC.</p></li>
-<li><p><a href="https://stuxiaozhang.github.io/2021/10/30/Is%20Multi-Hop%20Reasoning%20Really%20Explainable%20Towards%20Benchmarking%20Reasoning%20%20Interpretability/">我的阅读笔记</a></p></li>
+<p>作者说未来的工作可以研究：如何更好地将 <strong>挖掘出的规则 融入到 多跳推理模型</strong> 中，以获得更好的性能和可解释性。以后可以看一下 Rule mining 的 KGC.</p>
+</li>
+<li><p><a href="https://stuxiaozhang.github.io/2021/10/30/Is%20Multi-Hop%20Reasoning%20Really%20Explainable%20Towards%20Benchmarking%20Reasoning%20%20Interpretability/">我的阅读笔记</a></p>
+</li>
 </ul>
 ]]></content>
       <categories>
@@ -17805,6 +18082,357 @@ S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)
       </categories>
       <tags>
         <tag>KGR</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【R-GCN】Modeling Relational Data with Graph Convolutional Networks</title>
+    <url>/2021/12/29/R-GCN%EF%BC%9AModeling%20Relational%20Data%20with%20Graph%20Convolutional%20Networks/</url>
+    <content><![CDATA[<h1 id="【R-GCN】Modeling-Relational-Data-with-Graph-Convolutional-Networks"><a href="#【R-GCN】Modeling-Relational-Data-with-Graph-Convolutional-Networks" class="headerlink" title="【R-GCN】Modeling Relational Data with Graph Convolutional Networks"></a>【R-GCN】Modeling Relational Data with Graph Convolutional Networks</h1><h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><p>目前大规模知识图谱仍然不完整，并且知识图谱中还没有针对<strong>图结构</strong>建模的方法。许多缺失的信息，而节点缺失的信息经常可以由邻居节点<strong>编码</strong>而来。</p>
+<p>在 KG 中, 经常用 Entity Classification 和 Link Prediction 作为任务来衡量模型对KG补全的能力:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220102214203959.png" style="zoom: 67%;" /></p>
+<p>图中红色字体为缺失信息, 对应着实体类型和关系。</p>
+<p>在大规模知识图谱中，<strong>多关系数据</strong>特性十分显著，作者希望针对多关系数据，提出一种基于图的方法进行知识图谱补全。</p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220101182159046.png" style="zoom: 80%;" /></p>
+<ul>
+<li><p>同构图：点类型 + 边类型=2(也就是不区分点与边类型)</p>
+</li>
+<li><p>异构图：点类型 + 边类型&gt;2</p>
+</li>
+</ul>
+<p>从同构图模型到异构图模型，这其中的差别就是多关系，点多类型的差别。像 GCN，GAT，GraphSAGE 都是以同构图进行研究，沿着这个同构图模型的思想出发，大胆假设一下，将异构图分成多个含单一关系的同构图，那么会发现，其实只需要解决不同关系之间的交互，就可以套用同构图的思想解决异构图的问题。</p>
+<p>于是 R-GCN 就来了（其实 R-GCN 就是这么想的。）</p>
+<h2 id="Relational-Graph-Convolutional-Network"><a href="#Relational-Graph-Convolutional-Network" class="headerlink" title="Relational Graph Convolutional Network"></a>Relational Graph Convolutional Network</h2><p>有向且有标签的多图被表示为 $G=(V,E,R)$，其中节点 $v_i \in V$，边 $(v_i,r,v_j) \in E$, 关系类型 $r \in R$ 。</p>
+<h3 id="GCN"><a href="#GCN" class="headerlink" title="GCN"></a>GCN</h3><p>R-GCN 和 GCN 都是利用图卷积模型来模拟信息在网络结构中的传递。R-GCN 是一种 GCN 的扩展形式，GCN 能够聚合周围邻居的信息。</p>
+<p>GCN 遵循<strong>消息传递</strong>机制：</p>
+<script type="math/tex; mode=display">
+h_{i}^{(l+1)}=\sigma\left(\sum_{m \in \mathcal{M}_{i}} g_{m}\left(h_{i}^{(l)}, h_{j}^{(l)}\right)\right)</script><p>其中 $h<em>{i}^{(l)}$ 是节点 $v_i$ 第 $l$ 层的节点表示(隐藏状态)， $h</em>{j}^{(l)}$ 是节点 $v_i$ 第 $l$ 层的邻居节点，$\mathcal{M_i}$ 为节点 $v_i$ 的<strong>入边</strong>集合。$\sigma$ 为非线性激活函数，例如 $\operatorname{ReLU}$ </p>
+<p>$g_m(\cdot, \cdot)$ 为邻居节点的<strong>聚合方式</strong>，一般只用简单的线性变换作为替代，即 $g_m(h_i, h_j) = Wh_j$ 。</p>
+<h3 id="R-GCN"><a href="#R-GCN" class="headerlink" title="R-GCN"></a>R-GCN</h3><p>RGCN 应该说是 GCN 在多关系图场景上的一个简单尝试。<strong>从同构图到异构图，RGCN要解决的核心问题就一个，就是多关系间怎么交互。</strong></p>
+<p>RGCN 的 结构图如下，每一种关系下（可理解为就是同构图），指向内与指向外的都作为它的邻居点，同时加自循环特征，进行特征融合，参与更新中心节点。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211229233418337.png" style="zoom:55%;" /></p>
+<p>每种关系分别经过变换求和得到绿色块，对所有关系的绿色块求和并激活，得到红色中心节点的新表示。</p>
+<p>可以看到：同一关系，有 in 和 out 的区别，也就是方向的不同决定了关系也是不同的，可以理解为有向图。</p>
+<p>针对不同种类的关系，R-GCN 采用<strong>不同的聚合方式</strong>，在这里是使用了不同的线性变换矩阵 $W_r$，其更新方程为:</p>
+<script type="math/tex; mode=display">
+h_{i}^{(l+1)}=\sigma\left(\sum_{r \in \mathcal{R}} \sum_{j \in \mathcal{N}_{i}^{r}} \frac{1}{c_{i, r}} W_{r}^{(l)} h_{j}^{(l)}+W_{0}^{(l)} h_{i}^{(l)}\right)</script><p>其中 $h<em>i$ 就是 $l$ 层节点本身，$W_r$ 是 关系 $r$ 下的权重矩阵，$h_j$ 是关系 $r$ 下的邻居节点，也就是说，不同关系下分开来算。 $c</em>{i,r}$ 代表归一化因子, 可以由学习得来, 或规定 $c_{i, r} = |\mathcal{N}_i^r|$。$W_0$ 代表节点自身闭环所对应的变换矩阵。</p>
+<p>针对节点 $v_i$ 及其所有邻居 $N_i$, 分别考虑 $v_i$ 与邻居 $v_j$ 二者之间的关系 $r$，施加以不同的关系变换 $W_r$，再将它们求和并归一化，加上自身的闭环影响，在激活函数的影响下获得下一层的节点表示。</p>
+<p>对比一下 GCN : $H^{(l+1)}=\sigma(\tilde{D}^{-\frac{1}{2}}\tilde{A}\tilde{D}^{-\frac{1}{2}}H^{(l)}W^{(l)})$ 看得到，W在两边皆为模型待学参数，而 GCN 是采用度矩阵D及邻接矩阵A作为一个加权求和的特征融合，而 R-GCN 的参数都在模型参数 $W_r$ 中，它没有用度矩阵D及邻接矩阵A作为边的权重的，而是在模型中参数自学.</p>
+<h3 id="Regularization-规则化"><a href="#Regularization-规则化" class="headerlink" title="Regularization 规则化"></a>Regularization 规则化</h3><p>由于 R-GCN 模型应用于多关系数据，因此一个核心的问题就是当图中关系与参数数目增长时，会产生对罕见关系过拟合的问题。文中对此提出了两种独立的方法对 R-GCN 层进行规则化：基函数分解 和 块对角分解。</p>
+<h4 id="Basic-Decomposition"><a href="#Basic-Decomposition" class="headerlink" title="Basic Decomposition"></a>Basic Decomposition</h4><p>基函数分解将所有关系的权重矩阵 $W_{r}^{(l)}$ 视为不同系数和基的<strong>线性组合</strong>:</p>
+<script type="math/tex; mode=display">
+W_{r}^{(l)}=\sum_{b=1}^{B} a_{r b}^{(l)} V_{b}^{(l)}</script><p>其中 $B$ 为基的数量，$a_{rb}$ 是不同关系 $r$ 下的系数，$V_b$ 是分解的参数关系矩阵，二者都与关系类型 $r$ 相关，<strong>这里不同关系是共享 $V_b$  参数的</strong>。</p>
+<p>这种表示方法可以被视为是不同关系下的<strong>权重共享</strong>，对于少关系的情况能够缓解过拟合现象，因为关系之间的基是相互共享的，基总会被其他关系所频繁更新。</p>
+<h4 id="Block-Diagonal-Decomposition"><a href="#Block-Diagonal-Decomposition" class="headerlink" title="Block - Diagonal Decomposition"></a>Block - Diagonal Decomposition</h4><p>块对角分解将变换矩阵 $W_r$ 拆分为 $B$ 个大小<strong>相同</strong>的块:</p>
+<script type="math/tex; mode=display">
+W_{r}^{(l)}=\bigoplus_{b=1}^{B} Q_{b r}^{(l)}=diag(Q_{1r}^{(l)}......Q_{Br}^{(l)})</script><p>其中 $Q<em>{b r}^{(l)} \in \mathbb{R}^{\left(d^{(l+1)} / B\right) \times\left(d^{(l)} / B\right)}$，$\bigoplus$ 为生成一系列低维矩阵 $Q</em>{Br}$ 的求和。</p>
+<p>对角块分解又可以视为是一种 $W_r$ 的一种<strong>稀疏性约束</strong>，除去块的位置其余位置都是0，与未分解时相比更为稀疏。而且由于分块的影响，在每个块内部，隐特征的联系将比块与块之间更加<strong>紧密</strong>。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103212837251.png" style="zoom:90%;" /></p>
+<p>至此，R-GCN 已经能够作为一个单独的层，按照层级结构堆叠获得 $L$ 层的多层输出。如果没有节点的初始特征，可以采用 <strong>Embedding</strong> 的方式获取。</p>
+<h3 id="Entity-Classification"><a href="#Entity-Classification" class="headerlink" title="Entity Classification"></a>Entity Classification</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103213601424.png" style="zoom:80%;" /></p>
+<p>对于实体分类任务，R-GCN 进行堆叠作为 Encoder，通过 R-GCN 的卷积，可以得到每个节点的向量表示，然后再最后一层使用 softmax 激活函数，得到每个节点的预测类别。最后通过有标签的节点来学习模型的参数，具体是通过最小化交叉熵损失函数</p>
+<script type="math/tex; mode=display">
+\mathcal{L}=-\sum_{i \in \mathcal{Y}} \sum_{k=1}^{K} t_{i k} \ln h_{i k}^{(L)}</script><p>其中 $\mathcal{Y}$ 为有标签的节点集合，$K$ 为类别总数</p>
+<h3 id="Link-Prediction"><a href="#Link-Prediction" class="headerlink" title="Link Prediction"></a>Link Prediction</h3><p>对于链接预测问题，通常在三元组 $(s,r,o)$ 上(也就是边 $\mathcal{E}$ ) 预测缺失的尾实体 $o$，但 R-GCN 只能根据某节点不同关系的邻居获得自身的表示，并不能结合关系信息做尾实体的预测.</p>
+<p>因此, 作者将 R-GCN 集成进 <strong>Encoder-Decoder</strong> 的框架，将 R-GCN 视为一个获取所有节点编码的 <strong>Encoder</strong>，再用其他的 KGE 模型对节点(实体)表示<strong>打分</strong>, 以完成链接预测任务:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103213941559.png" style="zoom: 70%;" /></p>
+<p>在这里, 作者选用 DistMult 作为Decoder，其得分函数如下:</p>
+<script type="math/tex; mode=display">
+f(s, r, o)=e_{s}^{T} R_{r} e_{o}</script><p>DistMult 是基于<strong>语义匹配</strong>的模型，对每个不同的关系，DistMult 都有不同的对角矩阵 $R_r$ 来变换头实体 $e_s$，然后与尾实体 $e_o$ 做<strong>相似度匹配</strong>。所有的 Embedding, $e_s, e_o$ 都来源于 R-GCN。</p>
+<p>然后用 <strong>BCE</strong> 作为损失函数优化:</p>
+<script type="math/tex; mode=display">
+\mathcal{L}=-\frac{1}{(1+\omega)|\hat{\mathcal{E}}|} \sum_{(s, r, o, y) \in \mathcal{T}} y \log l(f(s, r, o))+
+(1-y) \log (1-l(f(s, r, o)))</script><p>其中 $ω$ 代表每个正样本采样多少个负样本，$l$ 为 sigmoid 函数。</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>详细的超参数设置和Trick请参照原论文.</p>
+<h3 id="Entity-Classification-Experiments"><a href="#Entity-Classification-Experiments" class="headerlink" title="Entity Classification Experiments"></a>Entity Classification Experiments</h3><p>作者分别在四个实体分类数据集AIFB, MUTAG, BGS, AM上进行了实体分类任务, 数据集的统计信息如下:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103214401776.png"  style="zoom:67%;" /></p>
+<p>实验结果如下:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103214425487.png"  style="zoom: 67%;" /></p>
+<p>在 AIFB 和 AM 上的效果都要高于其他模型, 而 MUTAG 和 BGS 是<strong>特定领域</strong>的数据集, 与其他两个数据集都不太一样, 导致了 R-GCN 的性能差距.</p>
+<div class="note note-info">
+            <p>作者提到, 对所有邻居都采用<strong>相同权重</strong>的归一化方式可能会有损性能, 一种潜在的解决方案是采用<strong>注意力机制</strong>, 通过学习分配给周围邻居不同的权重.</p><p>其实就是同年10月份提出的 GAT, 而 R-GCN 发布于同年3月份.</p>
+          </div>
+<h3 id="Link-Prediction-Experiments"><a href="#Link-Prediction-Experiments" class="headerlink" title="Link Prediction Experiments"></a>Link Prediction Experiments</h3><p>作者主要在 FB15k, WN18, FB15k-237上做了链接预测的实验。</p>
+<p>同样是针对关系特化的模型，作者做出了在 FB15k 的验证集中不同度对 MRR 的影响曲线:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103215614859.png" style="zoom:90%;" /></p>
+<p>作者认为 R-GCN 在度比较高, 即上下文信息比较多时处理很占优势, 而 DistMult 在度比较低时占优势.</p>
+<div class="note note-info">
+            <p>可能也只是作者的一个推测，DistMult 在度比较低的时候并没有比 R-GCN 好特别多.</p>
+          </div>
+<p>观察到 R-GCN 和 DistMult 上的<strong>互补</strong>优势, 作者尝试将两种模型融合, 仍然采用 DistMult 的打分函数, 但 Embedding 分别来自于已经训练好的不同模型:</p>
+<script type="math/tex; mode=display">
+f(s, r, t)_{\mathrm{R}-\mathrm{GCN}+}=\alpha f(s, r, t)_{\mathrm{R}-\mathrm{GCN}}+(1-\alpha) f(s, r, t)_{\text {DistMult }}</script><p>$\alpha$ 为选择模型得分的权重。在 FB15k 中设置为 $\alpha=0.4$，即来自 DistMult 的打分要多一些，R-GCN 少一些，因为作者不希望改进后的模型性能显著高于纯 R-GCN。</p>
+<p>在 FB15k, WN18 上结果如下:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103215220624.png" alt=""></p>
+<p>在关系比较少的 WN18 上, R - GCN 并不占优势, 但在FB15k上的表现十分不错. DistMult作为关系特化的模型也在 FB15k 上显示出一些优势, 但仍不及能够对对称, 反对称, 逆关系同时建模的 ComplEx.</p>
+<p>在 FB15k-237 上结果如下:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103220328750.png"  style="zoom:67%;" /></p>
+<p>R-GCN 比其他方法效果要好特别多, 因为把 DistMult 也塞进去了, 所以比 DistMult 也显著的好。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>R-GCN 是一篇比较早的 GNN 论文，已经作为一种 KGE 中常用的图方法 Baseline 出现，也正是 R-GCN 使得大家对图方法在 KG 上的应用提起了注意.</p>
+<p>R-GCN 的两个创新点：</p>
+<ol>
+<li>提出了一个异构图中多关系融合的一个方式（就是不同关系分别做融合，然后叠加处理，得到 node 表示）</li>
+<li>针对图神经网络的<strong>过拟合</strong>问题，提出了因子分解以及多关系参数共享的方式，降低多关系引起的参数剧增。</li>
+<li>也提出了图神经网络在处理 Entity Classification 和 Link Prediction 问题上的框架，其实主要还是把 R-GCN 的输出作为一种<strong>Node Embedding</strong>的方法来使用。</li>
+</ol>
+<p>对比一下 GCN，GCN 是采用度矩阵 D 及邻接矩阵 A 作为一个加权求和的特征融合，R-GCN 并没有用度矩阵D及邻接矩阵A作为边的权重的，而是把这部分都放在模型中参数自学。</p>
+<p>作者在文中还提出了两种可以优化的地方:</p>
+<ol>
+<li>Decoder 还可以替换为任意的 KGE 模型, 例如能对更多关系建模的 ComplEx.</li>
+<li>对邻居节点的权重分配可以通过 <strong>Attention</strong> 学习得来.</li>
+</ol>
+]]></content>
+      <categories>
+        <category>NLP</category>
+      </categories>
+      <tags>
+        <tag>R-GCN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>奇奇怪怪的问题记录</title>
+    <url>/2021/11/18/%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="奇奇怪怪的问题记录"><a href="#奇奇怪怪的问题记录" class="headerlink" title="奇奇怪怪的问题记录"></a>奇奇怪怪的问题记录</h1><p>记录出现的一些问题</p>
+<p>生成配置文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">jupyter notebook --generate-config --allow-root<br></code></pre></td></tr></table></figure>
+<p>后台运行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">nohup jupyter notebook --allow-root &gt; jupyter.log 2&gt;&amp;1 &amp;<br></code></pre></td></tr></table></figure>
+<p>关闭后台运行的jupyter</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">ps -ef | grep jupyter<br><span class="hljs-comment">#上面这条命令可以看到jupyter的进程ID</span><br><span class="hljs-built_in">kill</span> -9  PID<br><span class="hljs-comment">#PID要替换成刚刚查到的jupyter进程ID</span><br></code></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>杂七杂八</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>图神经网络入门</title>
+    <url>/2021/12/27/%E5%9B%BE%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%85%A5%E9%97%A8/</url>
+    <content><![CDATA[<div class="note note-primary">
+            <p><a href="https://github.com/thunlp/GNNPapers#knowledge-graph">https://github.com/thunlp/GNNPapers#knowledge-graph</a></p><p>最近对图神经网络进行一个入门，主要是看了百度飞桨训练营的视频，做一个小小的笔记~</p>
+          </div>
+<p>按照飞桨训练营中对图学习的划分, 图学习算法可以分为三大类:</p>
+<ol>
+<li><strong>图游走类算法</strong>(图嵌入算法): DeepWalk, Node2Vec 等.</li>
+<li><strong>图神经网络算法</strong>: GCN, GAT, GraphSAGE 等.</li>
+<li><strong>知识图谱嵌入算法</strong>: TransE, TransR, RotatE 等.</li>
+</ol>
+<h2 id="图游走类模型"><a href="#图游走类模型" class="headerlink" title="图游走类模型"></a>图游走类模型</h2><p>获得 Node embeddings 后进行下游任务。那如何获得 Node embeddings？</p>
+<p>图中的节点可以看作 NLP 中的词，节点序列可以联想成 NLP 中的句子。</p>
+<h3 id="Word2vec"><a href="#Word2vec" class="headerlink" title="Word2vec"></a>Word2vec</h3><p>图游走类模型最开始参考的就是 NLP 领域中的 Word2vec 算法。所以介绍一下 Word2vec ：</p>
+<p>在 Word2Vec 中, <strong>中心词语义可以由周围上下文的词语义</strong>来”决定”。Word2Vec 包含：</p>
+<ul>
+<li><strong>两个算法模型</strong>：<strong>continuous bag-of-words（CBOW）</strong>和 <strong>skip-gram</strong>。CBOW 是根据中心词周围的上下文单词来预测该词的词向量。skip-gram 则相反，是根据中心词预测周围上下文的词的概率分布。</li>
+<li><strong>两个训练方法</strong>：<strong>负采样（negative sampling）</strong>和<strong>层序 softmax（hierarchical softmax）</strong>。Negative sampling 通过抽取负样本来定义目标，hierarchical softmax 通过使用一个有效的树结构来计算所有词的概率来定义目标。</li>
+</ul>
+<blockquote>
+<p>详情可以参考 <a href="https://stuxiaozhang.github.io/2021/07/29/CS224n%2001%20Introduction%20and%20Word%20Vectors/">这篇博客</a>。</p>
+</blockquote>
+<p>图游走类算法更多用到的是 Skip Gram 模型. Skip Gram 是一种根据中心词预测周围上下文的词的方法：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105151021578.png" alt=""></p>
+<p>在 Word2Vec 中, <strong>中心词语义可以由周围上下文的词语义</strong>来”决定”。同样，在图中的节点也可能受到邻居节点的影响。所以想到将 Word2Vec 算法迁移到图嵌入领域。</p>
+<p>Word2Vec 整体框架如下：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105151057686.png"   style="zoom: 50%;" /></p>
+<h3 id="DeepWalk"><a href="#DeepWalk" class="headerlink" title="DeepWalk"></a>DeepWalk</h3><p>将 NLP 领域的思想运用到图嵌入领域。图的节点对应 NLP 的单词，图的节点序列对应 NLP 句子。通过在图上游走获得图的节点序列。</p>
+<p>DeepWalk 就是简单的在图中做<strong>随机游走</strong>(Random Walk)，即在当前节点的邻近节点(包括<strong>自身</strong>)随机游走，当游走到<strong>最大长度</strong>时停止，所以它本质上就是在无向图上<strong>可以重复遍历的DFS</strong>。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105151118597.png"  style="zoom: 50%;" /></p>
+<p>对于一般的 随机游走公式：</p>
+<script type="math/tex; mode=display">
+{P}\left(c_{i}=x \mid c_{i-1}=v\right)=\left\{\begin{array}{cc}
+\frac{\pi_{vx}}{Z}, & \text { if }(v, x) \in E \\
+0, & \text { otherwise }
+\end{array}\right.</script><p>其中，$v$ 是当前节点，$x$ 是选择的下一个节点，$Z$ 是归一化因子，$\pi<em>{vx}$ 是原始的概率分布，$\frac{\pi</em>{vx}}{Z}$ 是归一化后的转移概率分布。</p>
+<p>对于 DeepWalk 来说，只要与节点 v 相邻，节点概率是相等的，所以有:</p>
+<script type="math/tex; mode=display">
+P\left(c_{i}=x \mid c_{i-1}=v\right)=\left\{\begin{array}{cc}
+\frac{1}{|N(v)|}, & \text { if }(v, x) \in E \\
+0, & \text { otherwise }
+\end{array}\right.</script><p>DeepWalk 中，$\pi_{vx}=1$，$Z=|N(v)|$ 是节点的邻居个数。</p>
+<p>DeepWalk 的框架与 Word2Vec 的区别就是多了一个随机游走的过程，随机游走后拿到了这个图的遍历序列，就能将它作为一个序列输入到 Word2Vec 中，就得到了节点的表示。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105151138312.png"  style="zoom:50%;" /></p>
+<p>对于图游走类算法，可以更多的关注图游走的方式这块。</p>
+<h3 id="Node2vec"><a href="#Node2vec" class="headerlink" title="Node2vec"></a>Node2vec</h3><p>DeepWalk 存在一个问题：随机游走的方式比较简单直接，就是可以回头的 DFS 游走的一个过程。然而图是一个复杂结构，需要考虑很多因素。在 DeepWalk 中, 只考虑了使用 DFS 游走的方式。而在数据结构中可知，图的游走方式是有<strong>DFS</strong>和<strong>BFS</strong>两种的:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104164002009.png"  style="zoom: 67%;" /></p>
+<p>在 Node2Vec 中，考虑了上述问题，希望能够让游走的方式更加丰富一点。只需要将图游走的一般公式做如下替换:</p>
+<script type="math/tex; mode=display">
+\pi_{vx} =\alpha_{pq}(t, x) \cdot w_{vx}</script><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104164947865.png" style="zoom: 60%;" /></p>
+<p>$v$ 为当前节点, $t$ 为上一个节点, $w<em>{vx}$ 为 $v$ 和 $x$ 之间的权值, 其中 $\alpha</em>{pq}(t, x)$ 为:</p>
+<script type="math/tex; mode=display">
+\alpha_{p q}(t, x)=\left\{\begin{array}{ll}
+\frac{1}{p}, & \text { if } d_{t x}=0 \\
+1, & \text { if } d_{t x}=1 \\
+\frac{1}{q}, & \text { if } d_{t x}=2
+\end{array}\right.</script><p>$d_{tx}$ 代表节点 $t$ 到 $x$ 的距离, 即当前节点 $v$ 的一阶邻居。而 $p,q$ 则是两个参数，它们能控制如何游走:</p>
+<ul>
+<li>$p$ 能控制有多大的概率”回头”, 即从当前节点 $v$ 重新回到前一节点 $t$, 如下图 $v→t$).</li>
+<li>$q$ 控制游走策略倾向于 DFS 或是 BFS:<ul>
+<li>$q&gt;1$ 时倾向于 BFS, 如下图 $v→x_1$.</li>
+<li>$q&lt;1$ 时倾向于 DFS, 如下图 $v→x_2$.</li>
+</ul>
+</li>
+<li>$p=q=1$ 时, $\pi<em>{vx}=w</em>{vx}$.</li>
+</ul>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104173315702.png" alt=""></p>
+<p>Node2Vec 的框架如下：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105152305229.png"  style="zoom: 50%;" /></p>
+<p>Node2Vec 这样游走有如下好处:</p>
+<ol>
+<li>结合了图的<strong>权重</strong>对游走的影响.</li>
+<li>能够让模型<strong>自己学习</strong>如何游走合适(不是仅仅执行DFS, 也在某些时候BFS).</li>
+</ol>
+<h2 id="GNN"><a href="#GNN" class="headerlink" title="GNN"></a>GNN</h2><h3 id="GCN"><a href="#GCN" class="headerlink" title="GCN"></a>GCN</h3><p>在CV中的卷积被定义为: <strong>将某个像素点周围的像素以不同权重叠加起来</strong>. 那么扩展到图结构中, 对应的像素应该变为<strong>节点</strong>, <strong>即将某个节点周围的邻居以不同权重叠加起来</strong></p>
+<p>二者区别在于：对于图像来说，周围像素点的个数是固定的。而对于图来说，节点周围的邻居节点数量是不固定的，这也是它复杂的原因。</p>
+<p>于是就出现了两种方式来提取图的特征。一是空间域卷积（spatial domain)，二是频域卷积（spectral domain）。第一种方式由于每个顶点提取出来的 neighbors 不同，处理上比较麻烦，同时它的效果没有频域卷积效果好，没有做深究。因此，现在比较流行、工程上应用较多的为频域卷积。</p>
+<p>以下图中的右上角的 graph 为例：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104173713462.png" alt=""></p>
+<p>其中：</p>
+<ul>
+<li><p>$\hat A$ 为图的自邻接矩阵(有节点自身的闭环, 即 $\tilde{A} = A + I$</p>
+</li>
+<li><p>$D$ 为度矩阵。（Note：矩阵的度的计算 包括入度和出度。）</p>
+</li>
+<li><p>$H^{(l)}$ 为第 $l$ 层的 GCN 的节点表示</p>
+</li>
+<li>$W^{(l)}$ 是权重矩阵（DNN）</li>
+</ul>
+<p>则 graph 所对应的邻接矩阵 $\tilde{A}$, 度矩阵 $\tilde{D}$ 分别为:</p>
+<script type="math/tex; mode=display">
+\tilde{A}=\begin{bmatrix}\color{red}{1}&\color{red}{1}&\color{red}{1}&0&0&0&0\\\color{red}{1}&\color{red}{1}&\color{red}{1}&0&0&0&0\\\color{red}{1}&\color{red}{1}&\color{red}{1}&\color{red}{1}&0&0&0\\0&0&\color{red}{1}&\color{red}{1}&\color{red}{1}&\color{red}{1}&\color{red}{1}\\0&0&0&\color{red}{1}&\color{red}{1}&\color{red}{1}&\color{red}{1}\\0&0&0&\color{red}{1}&\color{red}{1}&\color{red}{1}&0\\0&0&0&\color{red}{1}&\color{red}{1}&0&\color{red}{1}\end{bmatrix} \quad
+\tilde{D}=\begin{bmatrix}\color{red}{3}&0&0&0&0&0&0\\0&\color{red}{3}&0&0&0&0&0\\0&0&\color{red}{4}&0&0&0&0\\0&0&0&\color{red}{5}&0&0&0\\0&0&0&0&\color{red}{4}&0&0\\0&0&0&0&0&\color{red}{3}&0\\0&0&0&0&0&0&\color{red}{3}\end{bmatrix}\</script><p>公式中所需要用到的 $\tilde{D}^{-\frac{1}{2}}$ 为如下矩阵:</p>
+<script type="math/tex; mode=display">
+\tilde{D}^{-\frac{1}{2}}=\begin{bmatrix}\color{red}{\frac{1}{\sqrt{3}}}&0&0&0&0&0&0\\0&\color{red}{\frac{1}{\sqrt{3}}}&0&0&0&0&0\\0&0&\color{red}{\frac{1}{\sqrt{4}}}&0&0&0&0\\0&0&0&\color{red}{\frac{1}{\sqrt{5}}}&0&0&0\\0&0&0&0&\color{red}{\frac{1}{\sqrt{4}}}&0&0\\0&0&0&0&0&\color{red}{\frac{1}{\sqrt{3}}}&0\\0&0&0&0&0&0&\color{red}{\frac{1}{\sqrt{3}}}\end{bmatrix}</script><p>为了方便理解更新方式，对<strong>图卷积计算公式</strong>先做如下方式的<strong>简化</strong>:</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+H^{(l+1)}&=\sigma(\tilde{D}^{-\frac{1}{2}}\tilde{A}\tilde{D}^{-\frac{1}{2}}H^{(l)}W^{(l)})\\\ &\Downarrow \\\ H^{(l+1)}&=\sigma(\tilde{A}H^{(l)}W^{(l)})
+\end{aligned}</script><p>即，<strong>先不考虑 度 对更新的影响</strong>。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104173728466.png" alt=""></p>
+<p>所以，$\tilde{A}H^{(l)}$ 的含义是：$l+1$ 层的第 0 节点表示是 $l$ 层第 0(自环), 1, 2 节点表示的和。</p>
+<p>GCN 计算方式本质上跟 CNN 卷积过程一样，是一个加权求和的过程，就是将邻居节点通过度矩阵及其邻接矩阵，计算出各边的权重，然后加权求和。</p>
+<p>在计算下一层节点表示的过程中, 隐含着一种机制(或是框架), <strong>消息传递</strong>:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104173754122.png" alt=""></p>
+<p>0号点<strong>接收</strong>了来自0、1、2号节点的消息；然后进行<strong>聚合</strong>，对自身进行<strong>更新</strong>。</p>
+<p>总结来说，消息传递方式实现图卷积网络的过程就是：</p>
+<ol>
+<li><strong>发送</strong>。边上的源节点，往目标节点发送消息(特征).</li>
+<li><strong>接收</strong>。目标节点对收到的特征进行<strong>聚合</strong>，并更新自身。</li>
+</ol>
+<p>既然已经能够完成特征更新的整个流程, 为什么要引入 $\tilde{D}^{-\frac{1}{2}}$ 呢? 因为如果只使用邻接矩阵做加权, 周围人对你的评价可能并不是真实的:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104173915329.png" style="zoom: 50%;" /></p>
+<p>例如新垣结衣的周围的人非常多(<strong>度非常大</strong>)，她的特征可能会因为对多人的评价而变得非常大，从而对你的评价可能就不那么准确，在训练时也容易导致梯度消失或梯度爆炸。相反，可能你的好友更加的了解你(<strong>度比较小</strong>), 对你的评价也更准确。对所有节点一视同仁会导致度大的节点特征越来越大，度小的节点越来越小。</p>
+<p>因此, 我们可以使用<strong>度</strong>来衡量邻居信息的<strong>重要性</strong>, 这里的 $\tilde{D}^{-\frac{1}{2}}\tilde{A}\tilde{D}^{-\frac{1}{2}}$ 在做的事情实际上是用度矩阵对 $\tilde{A}$ 做了<strong>Renormalization</strong>:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104173835589.png" alt=""></p>
+<p>度 d 越大, 信息就越少, $\frac{1}{\sqrt{d}}$ 就越小.</p>
+<blockquote>
+<p>这里采用<strong>Renormalization</strong>是有说法的, 想深入了解可以看 <a href="https://www.zhihu.com/question/426784258/answer/1536731121">GCN中的拉普拉斯矩阵如何归一化？</a>.</p>
+<p>之所以没有采用”对称归一化”这个说法, 是因为矩阵并没有真正的得到归一化, 原论文中的表述也是”Renormalization”…</p>
+</blockquote>
+<p>下面来总结一下 GCN 的流程:</p>
+<ol>
+<li><p>使用 $\tilde{D}^{-\frac{1}{2}}\tilde{A}\tilde{D}^{-\frac{1}{2}}$ 进行节点之间的<strong>特征传递</strong>:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105153028136.png" style="zoom:50%;" /></p>
+</li>
+<li><p>对每一个节点做一次线性变换并且激活:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105153039440.png"  style="zoom:50%;" /></p>
+</li>
+<li><p><strong>重复</strong>上面两步多次, 实现多层GCN, 并能获得每个节点的表示：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105153056016.png" alt=""></p>
+</li>
+<li><p>根据取得的节点表示 $H^{(l)}$ 将其用于<strong>下游任务</strong>:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105153122751.png" style="zoom:60%;" /></p>
+</li>
+</ol>
+<p>GCN首次提出了卷积的方式融合图结构特征，提供一个全新的视角。</p>
+<p>主要缺点：</p>
+<ol>
+<li>融合时边权值是固定的，不够灵活。</li>
+<li>可扩展性差，因为它是全图卷积融合，全图做梯度更新，当图比较大时，这样的方式就太慢了，不合适。</li>
+<li>层数加深时，结果会极容易平滑，每个点的特征结果都十分相似。</li>
+</ol>
+<blockquote>
+<p>详细的数学推导可以看 <a href="https://zhuanlan.zhihu.com/p/107162772">图卷积网络（GCN）入门详解</a></p>
+</blockquote>
+<h3 id="GAT"><a href="#GAT" class="headerlink" title="GAT"></a>GAT</h3><p>在GCN中的边权重是通过<strong>度</strong>来控制的, 这种度量仅与度有关, 而且不可学习权重的分配方式.</p>
+<p>在深度学习背景下, 我们更希望能够模型能够<strong>自己学习</strong>如何分配权重. 在深度学习中, 关于学习权重分配的分配方式, 人们很自然而然的就想到了<strong>Attention</strong>, 它也确实非常适合去做这件事情. <strong>图注意力网络</strong>(<strong>G</strong>raph <strong>At</strong>tention Network, <strong>GAT</strong>)应运而生.</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104210607354.png" style="zoom:50%;" /></p>
+<p>GAT 通过对调整当前节点 $i$ 与其他节点 $j$ 之间的关系的权重来调整, 在这里只考虑节点 $i$ 的<strong>一阶邻居</strong> $j\in N_i$.</p>
+<script type="math/tex; mode=display">
+e_{i j}=a\left(\mathbf{W} \vec{h}_{i}, \mathbf{W} \vec{h}_{j}\right)</script><p>GAT 中的 <strong>注意力系数 Attention coefficient</strong> 计算方式如下:</p>
+<script type="math/tex; mode=display">
+\displaylines{
+\alpha_{i j}=\operatorname{softmax}_{j}\left(e_{i j}\right)=\frac{\exp \left(e_{i j}\right)}{\sum_{k \in \mathcal{N}_{i}} \exp \left(e_{i k}\right)}
+\\\ \Downarrow \\
+\alpha_{i j}=\frac{\exp \left(\operatorname{LeakyReLU}\left(\overrightarrow{\mathbf{a}}^{T}\left[\mathbf{W} \vec{h}_{i} || \mathbf{W} \vec{h}_{j}\right]\right)\right)}{\sum_{k \in \mathcal{N}_{i}} \exp \left(\text { LeakyReLU }\left(\overrightarrow{\mathbf{a}}^{T}\left[\mathbf{W} \vec{h}_{i} || \mathbf{W} \vec{h}_{k}\right]\right)\right)}
+}</script><p>其中 $\overrightarrow{\mathbf{a}}$ 是一个权重向量, 也可以被视作是一个<strong>单层神经网络</strong>, $\mathbf{W}$ 为权重矩阵, 能够学习到输入特征 $\overrightarrow{h}$ 中更高级的特征. GAT 计算各节点的高阶特征, 后计算各节点对当前节点的重要程度, 并经过 LeakyReLU 激活, 最后用 Softmax 做归一化, 求得 注意力系数:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104211854226.png"  style="zoom: 33%;" /></p>
+<p>对特征的聚合方式如下:</p>
+<script type="math/tex; mode=display">
+\vec{h}_{i}^{\prime}=\sigma\left(\sum_{j \in \mathcal{N}_{i}} \alpha_{i j} \mathbf{W} \vec{h}_{j}\right)</script><p>$\sigma$ 是非线性的激活函数.</p>
+<p>与 Transformer 一样, GAT 也支持<strong>多头特征聚合</strong>:</p>
+<script type="math/tex; mode=display">
+\vec{h}_{i}^{\prime}=\operatorname{\lVert}\limits_{k=1}^{K} \sigma\left(\sum_{j \in \mathcal{N}_{i}} \alpha_{i j}^{k} \mathbf{W}^{k} \vec{h}_{j}\right)</script><p>其中 $||$ 代表 Concatenation. 即将多个头的特征 Concat 起来. 当然也可以采用求平均的方式来适应不同的场景:</p>
+<script type="math/tex; mode=display">
+\vec{h}_{i}^{\prime}=\sigma\left(\frac{1}{K} \sum_{k=1}^{K} \sum_{j \in \mathcal{N}_{i}} \alpha_{i j}^{k} \mathbf{W}^{k} \vec{h}_{j}\right)</script><p>GAT 总体来说如下所示:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220104213525395.png"  style="zoom:40%;" /></p>
+<p>图中三种颜色的线代表有三个头, 学习到了不同的权重分配方式, 最后再通过某种聚合方式聚合获得 $\overrightarrow{h_1^\prime}$.</p>
+<p>因此, GAT 不但将权重调整为与两个节点都相关的函数, 而且系数权重还是可学习的, 它同样遵守<u>消息传递框架</u></p>
+<h3 id="Message-Passing"><a href="#Message-Passing" class="headerlink" title="Message Passing"></a>Message Passing</h3><p>消息传递是对图神经网络更新权重方式的一种<strong>范式</strong>或是一种<strong>框架</strong>。GCN、GAT 都是基于邻居聚合的模型 称为 Spatial (空间) GNN, 大部分的 Spatial GNN 都可以用 Message Passing实现</p>
+<p>基于消息传递的 Graph Neural Network的通用公式如下:</p>
+<script type="math/tex; mode=display">
+h_{l}^{(t)}(v)=\color{green}{f}\left(h_{l}^{(t-1)}, \color{red}{\mathcal{F}}\left\{\color{blue}{h_{l}^{(t-1)}(u) \mid u \in N(v)}\right\}\right)</script><p>其中 $h_{l}^{(t-1)}(u)$ 代表邻居的消息发送, $\mathcal{F}$ 代表聚合函数, 可以是 <strong>Max</strong>, <strong>Mean</strong>, <strong>Sum</strong> 等, $\mathcal{F}$ 对应神经网络, 可以是 MLP 或者其他结构. 在 GCN 中, $\mathcal{F}$ 是基于<strong>度</strong>的加权求和, 在GAT 中是基于 <strong>Attention</strong> 的加权求和</p>
+<h2 id="Graph-Sampling"><a href="#Graph-Sampling" class="headerlink" title="Graph Sampling"></a>Graph Sampling</h2><p>前面 GCN 举例的图中，使用的图 $G$ 节点个数非常少，然而在实际问题中，一张图可能节点非常多，因此就没有办法一次性把整张图送入计算资源，所以应该使用一种有效的<strong>子图采样</strong>算法，从全图 $G$ 中采样出一个子图 $g$，这样就可以进行训练了</p>
+<p>但子图采样并不是随机采样, 我们最起码要保证采样完后的图是<strong>连通</strong>的。例如下图中，左边采样的子图就是连通的，右边的子图不是连通的</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105103240882.png"  style="zoom:50%;" /></p>
+<h3 id="GraphSAGE-SAmple-amp-aggreGatE"><a href="#GraphSAGE-SAmple-amp-aggreGatE" class="headerlink" title="GraphSAGE (SAmple &amp; aggreGatE)"></a>GraphSAGE (SAmple &amp; aggreGatE)</h3><p>GraphSAGE(<strong>SA</strong>mple &amp; aggre<strong>G</strong>at<strong>E</strong>) 主要分两步：<strong>采样、聚合</strong>、(节点预测)</p>
+<p>假设有下面这么一张图, 我们需要求出0号节点的表示, 所以需要从0号节点开始采样:</p>
+<ol>
+<li><p><strong>采样</strong>的阶段首先选取一个点，然后随机选取这个点的一阶邻居，再以这些邻居为起点随机选择它们的一阶邻居。</p>
+<p>因此首先随机选择 0 号节点的一阶邻居 2、4、5，然后<strong>随机</strong>选择 2 号节点的一阶邻居 8、9；4 号节点的一阶邻居 11、12；5 号节点的一阶邻居 13、15</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105103738578.png"  style="zoom: 60%;" /></p>
+</li>
+<li><p><strong>聚合</strong>具体来说就是直接将子图从全图中抽离出来，从最边缘的节点开始，一层一层向里<strong>更新</strong>节点</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105103840425.png" style="zoom:60%;" /></p>
+</li>
+<li><p>最后就可以通过采样获得的子图来做节点预测了.</p>
+</li>
+</ol>
+<p>邻居采样有两个优点:</p>
+<ol>
+<li><p>极大减少了训练计算量.</p>
+</li>
+<li><p>在<strong>推断</strong>时允许新的节点的加入, 增强了<strong>泛化</strong>能力.</p>
+<p>因为原本要更新一个节点需要它周围的所有邻居，而通过邻居采样之后，每个节点就不是由所有的邻居来更新它，而是部分邻居节点，所以具有比较强的泛化能力, 也就是所谓的 Inductive 能力.</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105104530922.png"  style="zoom: 67%;" /></p>
+<div class="note note-info">
+            <p>关于 GraphSAGE 在 <strong>Inductive</strong> 上的能力讨论可以看<a href="https://www.zhihu.com/question/409415383/answer/1361596817">这里</a>, 我个人是比较赞同答主的说法(但是有点没看懂T^T)。算法能否  Inductive 和 Transductive 仅取决于节点输入是否是 One Hot , 以及在更新节点表示时是否只依赖于局部子图.</p><blockquote><p>“Inductive learning” 意为归纳学习，“Transductive learning” 意为直推学习。</p></blockquote>
+          </div>
+<h3 id="PinSAGE"><a href="#PinSAGE" class="headerlink" title="PinSAGE"></a>PinSAGE</h3><p><strong>采样时只能选取真实的邻居节点吗？</strong>如果构建的是一个与虚拟邻居相连的子图有什么优点？PinSAGE 算法将会给我们解答</p>
+<ul>
+<li>PinSAGE 算法通过多次随机游走，按游走经过的<strong>频率</strong>选取邻居.</li>
+</ul>
+<p>例如下面以 0 号节点作为起始，随机进行了 4 次游走</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105112734715.png"  style="zoom:70%;" /></p>
+<p>其中 5、10、11 三个节点出现的频率最高，因此我们将这三个节点与 0 号节点相连，作为 0 号节点的虚拟邻居</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105112819870.png"  style="zoom:70%;" /></p>
+<p>回到上述问题，采样时选取虚拟邻居有什么好处？</p>
+<p><strong>可以快速获取高阶邻居的信息。</strong>实际上如果是按照 GraphSAGE 算法的方式生成子图，在聚合的过程中，非一阶邻居的信息可以通过消息传递逐渐传到中心，但是随着距离的增大，离中心越远的节点，其信息在传递过程中就越困难，甚至可能无法传递到；如果按照 PinSAGE 算法的方式生成子图，有一定的概率可以将非一阶邻居与中心直接相连，这样就可以快速聚合到多阶邻居的信息</p>
+<h2 id="Neighborhood-Aggregation"><a href="#Neighborhood-Aggregation" class="headerlink" title="Neighborhood Aggregation"></a>Neighborhood Aggregation</h2><p>邻居聚合是在图采样之后做的操作, 不同的聚合方式可以达到不同效果. 经典的聚合函数有:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105114426271.png"  style="zoom: 50%;" /></p>
+<p>栗：Max：特征维度对应的地方进行比较，比如第 0 位置上的max为 1，第 1 位置上的max也为 1</p>
+<p>评估聚合表达能力的指标是<strong>单射(一对一映射)</strong>, 单射能保证对聚合以后的结果<strong>可区分</strong>:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105114516651.png" alt=""></p>
+<p>两个子图分别进行 Mean、Max得出的结果相同，说明是不可区分的。对于不同的子图, Sum 保留了单射能力:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105114645993.png" style="zoom: 50%;" /></p>
+<p>因此, 就有基于单射的 GIN(<strong>G</strong>raph <strong>I</strong>somorphism <strong>N</strong>et)模型:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105114753035.png" style="zoom:67%;" /></p>
+<p>它的聚合方式就是具有单射能力的<strong>SUM</strong>, 但是为了区分中心节点与邻居, 特意加上了 $\mathcal{E}$:</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105114742148.png"  style="zoom:67%;" /></p>
+<p>当然, GCN, GAT这类的聚合函数都是相较于经典聚合函数更为复杂的.</p>
+]]></content>
+      <categories>
+        <category>GNN</category>
+      </categories>
+      <tags>
+        <tag>GNN</tag>
       </tags>
   </entry>
 </search>
