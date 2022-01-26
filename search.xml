@@ -259,82 +259,72 @@ e_{i j} = a\left(z_{i-1}, h_{j}\right)
   <entry>
     <title>ConvE：Convolutional 2D Knowledge Graph Embeddings</title>
     <url>/2021/08/20/ConvE%EF%BC%9AConvolutional%202D%20Knowledge%20Graph%20Embeddings/</url>
-    <content><![CDATA[<h1 id="conveconvolutional-2d-knowledge-graph-embeddings">ConvE：Convolutional 2D Knowledge Graph Embeddings</h1>
-<p>以前关于链接预测的工作主要集中在浅层、快速的模型上，这些模型可以扩展到大型知识图谱。然而，这些模型学习的表达功能不如深层、多层模型，这可能会限制性能。在作者的工作中，提出了一个 <strong>2D 卷积链接预测模型 ConvE</strong>。该模型具有很高的参数效率，在参数减少8倍和17倍的情况下，产生与 DistMult 和 R-GCN 相同的性能。</p>
-<h2 id="basic-idea">Basic Idea</h2>
-<p>在大型知识图谱中，一些浅层的链接预测模型常常用来做链接预测任务，浅层的链接预测模型缺乏提取深层次特征的能力，链接预测效果也不会很好。为了增加模型提取特征的能力，可以采用增加 <strong>embedding size</strong> 的方法，但对于大型知识图谱是不合适的，参数的数量与实体以及关系的个数成正比。以前的多层知识图谱嵌入采用<strong>增加全连接层数</strong>的方法，但是这样容易造成过拟合现象。为了解决<strong>规模</strong>与<strong>过拟合</strong>的矛盾，本文设计一种参数高效的、计算快速的 <strong>2D 卷积神经网络</strong>用来做知识图谱的表示学习。</p>
-<h2 id="background">Background</h2>
-<h3 id="number-of-interactions-for-1d-vs-2d-convolutions">Number of Interactions for 1D vs 2D Convolutions</h3>
-<p>为什么使用二维卷积而不是一维卷积?</p>
-<p>使用 2D 而不是 1D 卷积通过嵌入之间的额外交互点来增加模型的表达能力。</p>
-<p>一个填充了 3×3 滤波器大小的 2D 卷积将能够模拟整个连接线周围的相互作用(与 n 和 k 成比例的相互作用)。 一个两行的一维嵌入： <span class="math display">\[
+    <content><![CDATA[<h1 id="ConvE：Convolutional-2D-Knowledge-Graph-Embeddings"><a href="#ConvE：Convolutional-2D-Knowledge-Graph-Embeddings" class="headerlink" title="ConvE：Convolutional 2D Knowledge Graph Embeddings"></a>ConvE：Convolutional 2D Knowledge Graph Embeddings</h1><p>这篇文章是瑞士大学的 Tim Dettmers 发表在 AAAI 2018 上的工作，文章提出了 ConvE（Convolutional Embedding），用二维卷积网路做 KGE。</p>
+<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><p>在大型知识图谱中，一些浅层的链接预测模型常常用来做链接预测任务，浅层的链接预测模型缺乏提取深层次特征的能力，链接预测效果也不会很好。为了增加模型提取特征的能力，可以采用增加 <strong>embedding size</strong> 的方法，但对于大型知识图谱是不合适的，参数的数量与实体以及关系的个数成正比。以前的多层知识图谱嵌入采用<strong>增加全连接层数</strong>的方法，但是这样容易造成过拟合现象。为了解决<strong>规模</strong>与<strong>过拟合</strong>的矛盾，本文设计一种参数高效的、计算快速的 <strong>2D 卷积神经网络</strong>用来做知识图谱的表示学习。</p>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>文章首先提出链接预测的任务，之前做该任务的模型多是浅层的，相比于深的多层模型，学习特征的能力更弱，因此本文提出了多层的卷积网络 ConvE。</p>
+<p>文章重点强调了另一个问题：数据集 WN18 和 FB15k 存在<strong>测试集泄露（test set leakage）问题</strong>，具体而言就是测试集中的很多三元组样本，是训练集中样本的反向表示（inverse relaitons），这会使得它们很容易被测试成功，因为模型从训练集中学到了它们的相关信息。文章专门针对这个问题做了一些研究实验，甚至专门提出一个模型来处理这类关系。</p>
+<h3 id="Number-of-Interactions-for-1D-vs-2D-Convolutions"><a href="#Number-of-Interactions-for-1D-vs-2D-Convolutions" class="headerlink" title="Number of Interactions for 1D vs 2D Convolutions"></a>Number of Interactions for 1D vs 2D Convolutions</h3><p>为什么使用二维卷积而不是一维卷积? 文章给出的解释：使用 2D 而不是 1D 卷积<strong>通过 embedding 之间的交互增强了模型的表现力。</strong></p>
+<p>1D 卷积对一维的 embedding 做拼接，然后使用 k=3 的过滤器进行卷积，但这样只能捕捉到两个向量<strong>拼接点</strong>处的交互：</p>
+<script type="math/tex; mode=display">
 \left(\left[\begin{array}{lll}
-a &amp; a &amp; a
+a & a & a
 \end{array}\right] ;\left[\begin{array}{lll}
-b &amp; b &amp; b
+b & b & b
 \end{array}\right]\right)=\left[\begin{array}{llllll}
-a &amp; a &amp; a &amp; b &amp; b &amp; b
-\end{array}\right]
-\]</span></p>
-<ul>
-<li>滤波器大小为 <span class="math inline">\(\mathrm{k}=3\)</span> 的填充一维卷积将能够对这两个嵌入点周围的交互作用进行建模(相互作用的数量与k成正比)。</li>
-</ul>
-<p>将两行尺寸为 <span class="math inline">\(m \times n\)</span> 的二维嵌入进行串联(即堆叠)，其中 <span class="math inline">\(m =2, \mathrm{n}=3\)</span> , 得到如下结果: <span class="math display">\[
+a & a & a & b & b & b
+\end{array}\right]</script><p>而 2D 卷积将二维的 embedding 进行堆叠，然后用 3x3 的卷积核（过滤器）进行卷积，这样可以捕捉整个<strong>拼接行</strong>的交互：</p>
+<script type="math/tex; mode=display">
 \left(\left[\begin{array}{lll}
-a &amp; a &amp; a \\
-a &amp; a &amp; a
+a & a & a \\
+a & a & a
 \end{array}\right] ;\left[\begin{array}{lll}
-b &amp; b &amp; b \\
-b &amp; b &amp; b
+b & b & b \\
+b & b & b
 \end{array}\right]\right)=\left[\begin{array}{lll}
-a &amp; a &amp; a \\
-a &amp; a &amp; a \\
-b &amp; b &amp; b \\
-b &amp; b &amp; b
-\end{array}\right]
-\]</span></p>
-<ul>
-<li>过滤器大小为 <span class="math inline">\(3 \times 3\)</span> 的填充 2D 卷积将能够对整个串联线之间的相互作用进行建模 (相互作用的数量m与n 和 k 成正比) 。</li>
-</ul>
-<p>作者可以将此原理扩展为交替模式, 例如: <span class="math display">\[
+a & a & a \\
+a & a & a \\
+b & b & b \\
+b & b & b
+\end{array}\right] .</script><p>作者可以将此原理扩展为交替模式, 例如:</p>
+<script type="math/tex; mode=display">
 \left[\begin{array}{lll}
-a &amp; a &amp; a \\
-b &amp; b &amp; b \\
-a &amp; a &amp; a \\
-b &amp; b &amp; b
-\end{array}\right]
-\]</span></p>
-<ul>
-<li>在这种情况下，二维卷积运算能够建模a和b之间的更多交互（交互数量与m，n和k成比例）。 因此，与 1D 卷积相比，2D 卷积能够提取两个嵌入之间 的更多特征交互。</li>
+a & a & a \\
+b & b & b \\
+a & a & a \\
+b & b & b
+\end{array}\right]</script><ul>
+<li>在这种情况下，二维卷积运算能够建模a和b之间的更多交互（交互数量与m，n和k成比例）。</li>
 </ul>
-<h2 id="conve">ConvE</h2>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210811112404559.png" /></p>
-<p>作者提出了一个神经链路预测模型，其中输入实体和关系之间的相互作用由卷积和完全连接层建模。ConvE 模型的主要特点是分数由二维形状嵌入的卷积定义。架构总结如图1所示。ConvE 的流程如下：</p>
-<p>step1&amp;2：在前馈过程中，模型对两个嵌入矩阵执行 行矢量查找操作(<font color="orange">row-vector look-up operation</font>)，其中一个用于实体，表示为 <span class="math inline">\(\mathbf{E}^{|\mathcal{E}| \times k}\)</span>，另一用于关系式，表示为 <span class="math inline">\(\mathbf{R}^{|\mathcal{R}| \times k^{\prime}}\)</span>。其中 <span class="math inline">\(k\)</span> 和 <span class="math inline">\(k^{\prime}\)</span> 是实体和关系嵌入维度，<span class="math inline">\(|\mathcal{E}|\)</span> 和 <span class="math inline">\(|\mathcal{R}|\)</span> 代表实体和关系的数量。然后对实体和关系嵌入进行 reshape 和 concate 堆叠。（并进行 dropout = 0.2）</p>
-<p>step3：得到的矩阵输入到 2D 卷积层。（并进行 dropout = 0.2）。将卷积层的输出 reshape 成一个特征图张量 <span class="math inline">\(\mathcal{T} \in \mathbb{R}^{c m n}\)</span>，其中 <span class="math inline">\(c\)</span> 是尺寸为 <span class="math inline">\(m\)</span> 和 <span class="math inline">\(n\)</span> 的特征图的数量。</p>
-<p>step4：将特征图张量 <span class="math inline">\(\mathcal{T}\)</span> 向量化 <span class="math inline">\(\operatorname{vec}(\mathcal{T}) \in \mathbb{R}^{c m n}\)</span>，然后用矩阵 <span class="math inline">\(\mathbf{W} \in \mathbb{R}^{c m n \times k}\)</span> 参数化的线性变换将其投影到 <span class="math inline">\(k\)</span> 为空间中</p>
-<p>step5：并通过内积与所有候选的目标嵌入 <span class="math inline">\(e_o\)</span> 匹配。</p>
-<p>得分函数定义如下： <span class="math display">\[
-\psi_{r}\left(\mathbf{e}_{s}, \mathbf{e}_{o}\right)=f\left(\operatorname{vec}\left(f\left(\left[\overline{\mathbf{e}_{s}} ; \mathbf{r}_{r}\right] * \omega\right)\right) \mathbf{W}\right) \mathbf{e}_{o},
-\]</span> 其中，<span class="math inline">\(\mathbf{r}_{r} \in \mathbb{R}^{k}\)</span> 是一个取决于 <span class="math inline">\(r\)</span> 的关系参数， <span class="math inline">\(\overline{\mathbf{e}_{s}}\)</span> 和 <span class="math inline">\(\overline{\mathbf{r}_{r}}\)</span> 是 <span class="math inline">\(\mathbf{e}_{s}\)</span> 和 <span class="math inline">\(\mathbf{r}_{r}\)</span> 的 2D reshape，当 <span class="math inline">\(\mathbf{e}_{s},\mathbf{r}_{r} \in \mathbb{R}^{k}\)</span> 时，<span class="math inline">\(\overline{\mathbf{e}_{s} }, \overline{\mathbf{r}_{r} } \in \mathbb{R}^{ {k}_{w} \times k_{h} }\)</span>，其中 <span class="math inline">\(k=k_w k_h\)</span>，<span class="math inline">\(f()\)</span> 是非线性函数，这里使用了 <span class="math inline">\(sigmoid\)</span></p>
-<p>损失函数（交叉熵损失函数）： <span class="math display">\[
-\mathcal{L}(p, t)=-\frac{1}{N} \sum_{i}\left(t_{i} \cdot \log \left(p_{i}\right)+\left(1-t_{i}\right) \cdot \log \left(1-p_{i}\right)\right)
-\]</span></p>
-<h3 id="fast-evaluation-for-link-prediction-tasks">Fast Evaluation for Link Prediction Tasks</h3>
-<p>卷积操作占据了计算的大部分时间，为了减少卷积操作的时间，通常会增加 batch size, 但是<strong>增加 batch size 会极大的增加内存的消耗</strong>，本文这里采用了一个小技巧，打分时候不再是1-1，而是1-N。作者采用 <strong>一个 <span class="math inline">\((h,r)\)</span> 对</strong> 对同时 <strong>所有实体 <span class="math inline">\(t\)</span></strong> 进行评分<strong>（1-N 评分）</strong>。评估时间快了300倍。</p>
-<h2 id="experiments">Experiments</h2>
-<h3 id="inverse-model">Inverse Model</h3>
-<p>前人的工作指出，WN18 和 FB15k 的训练数据集有很大一部分的测试泄漏为反向关系，也就是说，这些数据集中的很大部分的三元组有与测试集相关的反向关系。例如，如果下义词是上义词的相反关系，那么测试三元组（猫科动物，下义词，猫）可以很容易地映射到训练三元组（猫，上义词，猫科动物）。这是一个很大的问题，因为在这些数据集上做得很好的链接预测<strong>可能只是了解哪些关系与其他关系相反，而不是对实际的知识图进行建模。</strong></p>
+<blockquote>
+<p>==我的疑问：所以关于 2D卷积，作者到底是怎么做的？中间那种还是下面的？需要阅读code进一步了解==</p>
+</blockquote>
+<p>总而言之，二维卷积可以比一维卷积抽取更多的特征交互。</p>
+<h2 id="ConvE"><a href="#ConvE" class="headerlink" title="ConvE"></a>ConvE</h2><p>ConvE 是最简单的用做链接预测的多层卷积网络，组成部分包括一个单层的卷积网，一个投影层和一个内积层。ConvE 不仅参数少，并且通过 1-N 打分的方式加速训练。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220121210615795.png" alt=""></p>
+<p>模型架构总结如图1所示。ConvE 的流程如下：（值得注意的是该模型大量使用 dropout，几乎每一层都用了）</p>
+<p><strong>step1&amp;2：</strong>对实体和关系嵌入进行 reshape 和 concate 堆叠。（并进行 dropout = 0.2）</p>
+<p><strong>step3：</strong>得到的矩阵输入到 2D 卷积层（并进行 dropout = 0.2）。经过卷积后，将卷积层的输出 reshape 成一个 feature map。 </p>
+<p><strong>step4：</strong>feature map 经过全连接层投影到 k 维空间中</p>
+<p><strong>step5：</strong>并通过内积与所有候选的目标嵌入 $e_o$ 匹配。</p>
+<p>得分函数定义如下：</p>
+<script type="math/tex; mode=display">
+\psi_{r}\left(\mathbf{e}_{s}, \mathbf{e}_{o}\right)=f\left(\operatorname{vec}\left(f\left(\left[\overline{\mathbf{e}_{s}} ; \overline{\mathbf{r}_{r}}\right] * \omega\right)\right) \mathbf{W}\right) \mathbf{e}_{o}</script><p>其中，$\mathbf{r}<em>{r} \in \mathbb{R}^{k}$ 是一个取决于 $r$ 的关系参数， $\overline{\mathbf{e}</em>{s}}$ 和 $\overline{\mathbf{r}<em>{r}}$ 是 $\mathbf{e}</em>{s}$ 和  $\mathbf{r}<em>{r}$ 的 2D reshape，当 $\mathbf{e}</em>{s},\mathbf{r}<em>{r} \in \mathbb{R}^{k}$ 时，$\overline{\mathbf{e}</em>{s} }, \overline{\mathbf{r}<em>{r} } \in \mathbb{R}^{ {k}</em>{w} \times k_{h} }$，其中 $k=k_w k_h$，$f()$ 是非线性函数，这里使用了 $sigmoid$ </p>
+<p>loss 采用二元交叉熵 loss，优化器采用 Adam：</p>
+<script type="math/tex; mode=display">
+\mathcal{L}(p, t)=-\frac{1}{N} \sum_{i}\left(t_{i} \cdot \log \left(p_{i}\right)+\left(1-t_{i}\right) \cdot \log \left(1-p_{i}\right)\right)</script><h3 id="Fast-Evaluation-for-Link-Prediction-Tasks"><a href="#Fast-Evaluation-for-Link-Prediction-Tasks" class="headerlink" title="Fast Evaluation for Link Prediction Tasks"></a>Fast Evaluation for Link Prediction Tasks</h3><p>卷积操作占据了计算的大部分时间，为了减少卷积操作的时间，通常会增加 batch size, 但是<strong>增加 batch size 会极大的增加内存的消耗</strong>，本文这里采用了一个小技巧，打分时候不再是1-1，而是1-N。作者采用 <strong>一个 $(h,r)$ 对</strong> 对同时 <strong>所有实体 $t$</strong> 进行评分<strong>（1-N 评分）</strong>。评估时间快了300倍。</p>
+<blockquote>
+<p>关于采用 1-N 而非 1-1 打分方式提高训练效率的原理，没有整明白=.=。</p>
+</blockquote>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="Inverse-Model"><a href="#Inverse-Model" class="headerlink" title="Inverse Model"></a>Inverse Model</h3><p>前人的工作指出，WN18 和 FB15k 的训练数据集有很大一部分的测试泄漏为反向关系，也就是说，这些数据集中的很大部分的三元组有与测试集相关的反向关系。例如，如果下义词是上义词的相反关系，那么测试三元组（猫科动物，下义词，猫）可以很容易地映射到训练三元组（猫，上义词，猫科动物）。这是一个很大的问题，因为在这些数据集上做得很好的链接预测<strong>可能只是了解哪些关系与其他关系相反，而不是对实际的知识图进行建模。</strong></p>
 <blockquote>
 <p>“上义词是对事物的概括性、抽象性说明;下义词是事物的具体表现形式或更为具体的说明”。可以理解为,上义词针对共性,而下义词针对个性。</p>
 </blockquote>
-<p>但是前人只是指出了问题的存在，没有验证这个问题的严重性。所以，作者构建了一个简单的、基于规则的模型，该模型只对反向关系建模。作者称这个模型为 Inverse Model。该模型自动从训练集中提取反向关系：给定两个关系对 <span class="math inline">\(r_1、r_2∈ R\)</span>、 作者检查 <span class="math inline">\((h,r_1,t)\)</span> 是否暗示 <span class="math inline">\((t,r_2,h)\)</span>，反之亦然。如果 <span class="math inline">\((h,r_1,t)\)</span> 与频率至少为 <span class="math inline">\(0.99−(f_v+f_t)\)</span> 的 <span class="math inline">\((t,r_2,h)\)</span> 共同存在，作者检测到反向关系，其中 <span class="math inline">\(f_v\)</span> 和 <span class="math inline">\(f_t\)</span> 是验证和测试集相对于数据集总大小的分数。</p>
+<p>但是前人只是指出了问题的存在，没有验证这个问题的严重性。所以，<u>作者构建了一个简单的、基于规则的模型，该模型只对反向关系建模。</u>作者称这个模型为 Inverse Model。该模型自动从训练集中提取反向关系：给定两个关系对 $r_1、r_2∈ R$、 作者检查 $(h,r_1,t)$ 是否暗示 $(t,r_2,h)$，反之亦然。如果 $(h,r_1,t)$ 与频率至少为 $0.99−(f_v+f_t)$ 的 $(t,r_2,h)$ 共同存在，作者检测到反向关系，其中 $f_v$ 和 $f_t$ 是验证和测试集相对于数据集总大小的分数。</p>
 <blockquote>
-<p>还是没明白怎么算的...</p>
+<p>还是没明白怎么算的…</p>
 </blockquote>
 <p>通过 Inverse model ，作者生成了新的数据集 FB15k-237、WN18RR。</p>
-<h3 id="link-prediction">Link Prediction</h3>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820174430327.png" /></p>
+<h3 id="Link-Prediction"><a href="#Link-Prediction" class="headerlink" title="Link Prediction"></a>Link Prediction</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820174430327.png" /></p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820174446696.png"/></p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820174534097.png" /></p>
 <p>Link Prediction 在 FB15k 和 WN18 上的结果如表3所示。表4显示了<u>去除反向关系的数据集</u>的结果。表5显示了 YAGO3-10 和 国家数据集的结果。可以看到：</p>
@@ -342,45 +332,53 @@ b &amp; b &amp; b
 <li>Inverse Model 在 FB15k 和 WN18 的许多不同指标上都达到了SOTA 水平。然而，它没有发现 YAGO3-10 和 FB15k-237 的反向关系。<u>前人推导 FB15k-237 数据集的过程没有删除某些对称关系</u>，例如“类似”。这些关系的存在解释了作者的 WN18RR 反向模型的良好得分。</li>
 <li>ConvE 在 YAGO3-10 上的所有指标和 FB15k 上的一些指标上都达到了最先进的性能，并且在 WN18 上表现良好。</li>
 </ul>
-<h3 id="parameter-efficiency-of-conve">Parameter efficiency of ConvE</h3>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820174657628.png" style="zoom: 40%;" /></p>
+<h3 id="Parameter-efficiency-of-ConvE"><a href="#Parameter-efficiency-of-ConvE" class="headerlink" title="Parameter efficiency of ConvE"></a>Parameter efficiency of ConvE</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820174657628.png" style="zoom: 40%;" /></p>
 <p>从表2中可以看出：</p>
 <ul>
-<li><p>参数为 0.23M 的 ConvE 比参数为 1.89M 的 DistMult 性能更好。</p></li>
-<li><p>参数为 0.46M 的 ConvE 在 FB15k-237上仍能达到 0.425 的最新结果Hits@10，已经比 DistMult 最好的性能还高。</p></li>
-<li><p>与之前最好的模型是R-GCN相比，它达到了 0.417 的Hits@10 时参数超过 8M。</p></li>
+<li><p>参数为 0.23M 的 ConvE 比参数为 1.89M 的 DistMult 性能更好。</p>
+</li>
+<li><p>参数为 0.46M 的 ConvE 在 FB15k-237上仍能达到 0.425 的最新结果Hits@10，已经比 DistMult 最好的性能还高。</p>
+</li>
+<li><p>与之前最好的模型是R-GCN相比，它达到了 0.417 的Hits@10 时参数超过 8M。</p>
+</li>
 </ul>
 <p>总体而言，ConvE 的参数效率还是很高的。</p>
-<h2 id="analysis">Analysis</h2>
-<h3 id="ablation-study">Ablation Study</h3>
-<p>表7显示了作者对比实验的结果，其中作者评估了不同的参数初始化（n=2）以计算置信区间。作者看到，Hidden dropout 是最重要的组成部分，因为它是作者的主要正则化技术。1-N 评分提高了性能。正如 Input dropout 一样，feature map dropout 的影响很小，而 label smoothing 似乎并不重要，因为没有它也可以获得好的结果。</p>
+<h3 id="Ablation-Study"><a href="#Ablation-Study" class="headerlink" title="Ablation Study"></a>Ablation Study</h3><p>在 FB15k-237 上进行了消融实验：</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210820175133459.png" style="zoom:35%;" /></p>
+<p>从消融实验结果看出，hidden 层的 dropout 作用最大，label smoothing 作用最无足轻重。</p>
+<p>label smoothing：标签平滑是一种正则化策略，用于防止过拟合；做法是减小真实样本标签类别在计算损失函数时的权重。</p>
 <blockquote>
-<p><font color="orange">我的疑问：为什么1-N 评分可以提高性能？</font></p>
+<font color="orange">我的疑问：为什么1-N 评分可以提高性能？</font>
+
+
+
+
+
 </blockquote>
-<h3 id="analysis-of-indegree-and-pagerank">Analysis of Indegree and PageRank</h3>
-<p>作者的假设是：更深层次的模型，即学习多层特征的模型（如 ConvE) 相对于浅层次的模型（如 DistMult) 来说，更有优势来捕捉所有这些约束。 然而，更深层次的模型更难优化，因此作者假设，对于平均关系特征度较低的数据集（如 WN18RR 和 WN18），一个像DistMult 这样的浅模型可能足以准确地表示网络结构。</p>
+<h3 id="Analysis-of-Indegree-and-PageRank"><a href="#Analysis-of-Indegree-and-PageRank" class="headerlink" title="Analysis of Indegree and PageRank"></a>Analysis of Indegree and PageRank</h3><p>作者的假设是：更深层次的模型，即学习多层特征的模型（如 ConvE) 相对于浅层次的模型（如 DistMult) 来说，更有优势来捕捉所有这些约束。 然而，更深层次的模型更难优化，因此作者假设，对于平均关系特征度较低的数据集（如 WN18RR 和 WN18），一个像DistMult 这样的浅模型可能足以准确地表示网络结构。</p>
 <p>为了检验作者的两个假设，作者通过构建不同 indegree 的数据集发现：较深的模型（如 ConvE）具有对较复杂的图形进行建模的优势（例如FB15k和FB15k-237），而较浅的模型（如 DistMult）具有对较复杂的图形进行建模的优势（如 WN18 WN18RR）。</p>
-<p>PageRank，它是节点中心性的度量。 PageRank 也可以看作是节点的递归度的度量：节点的 PageRank 值与该节点的度数，其邻居度数，其邻居-邻居度数等相对于网络中所有其他节点成比例。与标准链接预测变量 DistMult 相比，ConvE 的性能提高可以部分解释，这是因为我们能够以较高的度数对节点进行高精度建模，这可能与其深度有关。</p>
+<p>PageRank，它是节点中心性的度量。 PageRank 也可以看作是节点的递归度的度量：节点的 PageRank 值与该节点的度数，其邻居度数，其邻居-邻居度数等相对于网络中所有其他节点成比例。与标准链接预测变量 DistMult  相比，ConvE 的性能提高可以部分解释，这是因为我们能够以较高的度数对节点进行高精度建模，这可能与其深度有关。</p>
 <p><img src="C:%5CUsers%5CHP%5CAppData%5CRoaming%5CTypora%5Ctypora-user-images%5Cimage-20210820175238623.png" alt="image-20210820175238623" style="zoom:50%;" /></p>
 <blockquote>
-<p>看不懂这个实验....</p>
+<p>看不懂这个实验….</p>
 </blockquote>
-<h2 id="summary">Summary</h2>
-<p>Contributions：</p>
-<ol type="1">
+<h2 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h2><figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ConvE</span>(<span class="hljs-params">torch.nn.Module</span>):</span><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span>(<span class="hljs-params">self, args, num_entities, num_relations</span>):</span><br>        <span class="hljs-built_in">super</span>(ConvE, self).__init__()<br>        self.emb_e = torch.nn.Embedding(num_entities, args.embedding_dim, padding_idx=<span class="hljs-number">0</span>)<br>        self.emb_rel = torch.nn.Embedding(num_relations, args.embedding_dim, padding_idx=<span class="hljs-number">0</span>)<br>        self.inp_drop = torch.nn.Dropout(args.input_drop)<br>        self.hidden_drop = torch.nn.Dropout(args.hidden_drop)<br>        self.feature_map_drop = torch.nn.Dropout2d(args.feat_drop)<br>        self.loss = torch.nn.BCELoss()<br>        self.emb_dim1 = args.embedding_shape1<br>        self.emb_dim2 = args.embedding_dim // self.emb_dim1<br><br>        self.conv1 = torch.nn.Conv2d(<span class="hljs-number">1</span>, <span class="hljs-number">32</span>, (<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, bias=args.use_bias)<br>        self.bn0 = torch.nn.BatchNorm2d(<span class="hljs-number">1</span>)<br>        self.bn1 = torch.nn.BatchNorm2d(<span class="hljs-number">32</span>)<br>        self.bn2 = torch.nn.BatchNorm1d(args.embedding_dim)<br>        self.register_parameter(<span class="hljs-string">&#x27;b&#x27;</span>, Parameter(torch.zeros(num_entities)))<br>        self.fc = torch.nn.Linear(args.hidden_size,args.embedding_dim)<br>        print(num_entities, num_relations)<br><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">init</span>(<span class="hljs-params">self</span>):</span><br>        xavier_normal_(self.emb_e.weight.data)<br>        xavier_normal_(self.emb_rel.weight.data)<br><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">forward</span>(<span class="hljs-params">self, e1, rel</span>):</span><br>        <span class="hljs-comment"># step1&amp;2: 将头实体和关系的向量堆叠，然后 reshape 成二维的张量 </span><br>        e1_embedded= self.emb_e(e1).view(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, self.emb_dim1, self.emb_dim2)<br>        rel_embedded = self.emb_rel(rel).view(-<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, self.emb_dim1, self.emb_dim2)<br><br>        stacked_inputs = torch.cat([e1_embedded, rel_embedded], <span class="hljs-number">2</span>)<br><br>        stacked_inputs = self.bn0(stacked_inputs)<br>        x = self.inp_drop(stacked_inputs)<br>        <br>        <span class="hljs-comment"># step3: 得到的矩阵输入到 2D 卷积层（并进行 dropout = 0.2）。经过卷积后，将卷积层的输出 reshape 成一个 feature map.</span><br>        x = self.conv1(x)<br>        x = self.bn1(x)<br>        x = F.relu(x)<br>        x = self.feature_map_drop(x)<br>        <br>        <span class="hljs-comment"># step4: feature map 经过全连接层投影到 k 维空间中</span><br>        x = x.view(x.shape[<span class="hljs-number">0</span>], -<span class="hljs-number">1</span>)<br>        x = self.fc(x)<br>        x = self.hidden_drop(x)<br>        <br>        <span class="hljs-comment"># step5: 并通过内积与所有候选的目标嵌入 $e_o$ 匹配。</span><br>        x = self.bn2(x)<br>        x = F.relu(x)<br>        x = torch.mm(x, self.emb_e.weight.transpose(<span class="hljs-number">1</span>,<span class="hljs-number">0</span>))<br>        x += self.b.expand_as(x)<br>        pred = torch.sigmoid(x)<br><br>        <span class="hljs-keyword">return</span> pred<br></code></pre></td></tr></table></figure>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>Contributions：</p>
+<ol>
 <li>发明了ConvE，一个 2D 卷积链路预测模型</li>
 <li>制定了 1-N 评分程序，将训练速度提高3倍，评估速度提高300倍</li>
-<li><p>系统地研究报告了反向关系测试集在常用链接预测数据集上的泄露，在必要时引入数据集的鲁棒版本，使它们无法使用简单的基于规则的模型来解决。</p></li>
-<li><p>在鲁棒数据集上将 ConvE 和先前提出的几个模型进行比较，证明 ConvE 的先进的性能。</p></li>
+<li><p>系统地研究报告了反向关系测试集在常用链接预测数据集上的泄露，在必要时引入数据集的鲁棒版本，使它们无法使用简单的基于规则的模型来解决。</p>
+</li>
+<li><p>在鲁棒数据集上将 ConvE 和先前提出的几个模型进行比较，证明 ConvE 的先进的性能。</p>
+</li>
 </ol>
 ]]></content>
       <categories>
-        <category>NLP</category>
+        <category>Papers</category>
       </categories>
       <tags>
-        <tag>NLP</tag>
         <tag>ConvE</tag>
+        <tag>KG</tag>
       </tags>
   </entry>
   <entry>
@@ -2610,117 +2608,115 @@ b &amp; b &amp; b
   <entry>
     <title>TransE：Translating Embeddings for Modeling Multi-relational Data</title>
     <url>/2021/08/13/TransE%EF%BC%9ATranslating%20Embeddings%20for%20Modeling%20Multi-relational%20Data/</url>
-    <content><![CDATA[<h1 id="transetranslating-embeddings-for-modeling-multi-relational-data">TransE：Translating Embeddings for Modeling Multi-relational Data</h1>
-<p><strong>本文提出了一种将实体与关系嵌入到低维向量空间中的简单模型 TransE。</strong>以前有很多种训练三元组的方法，但是参数过多，以至于模型过于复杂难以理解。本文作者提出了 TransE 模型，工作效果和以前一样，但模型简单易扩展，达到了不错的效果。</p>
-<h2 id="basic-idea">Basic Idea</h2>
-<p>以前的 Knowledeg Embedding 模型，参数多，模型复杂，计算成本高。作者认为简单的模型也可以有一样的表现力。</p>
-<p>作者提出了 TransE 模型。一个基于平移的模型，用于学习实体的低维嵌入。在 TransE 中，<strong>关系表示为嵌入空间中的平移</strong>：如果 <span class="math inline">\((h, \ell, t)\)</span> 成立，则尾部实体 <span class="math inline">\(t\)</span> 的嵌入应接近头部实体 <span class="math inline">\(h\)</span> 的嵌入加上依赖于关系的向量 <span class="math inline">\(\ell\)</span>。</p>
+    <content><![CDATA[<h1 id="TransE：Translating-Embeddings-for-Modeling-Multi-relational-Data"><a href="#TransE：Translating-Embeddings-for-Modeling-Multi-relational-Data" class="headerlink" title="TransE：Translating Embeddings for Modeling Multi-relational Data"></a>TransE：Translating Embeddings for Modeling Multi-relational Data</h1><p><strong>本文提出了一种将实体与关系嵌入到低维向量空间中的简单模型 TransE。</strong>以前有很多种训练三元组的方法，但是参数过多，以至于模型过于复杂难以理解。本文作者提出了 TransE 模型，工作效果和以前一样，但模型简单易扩展，达到了不错的效果。</p>
+<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><p>以前的 Knowledeg Embedding 模型，参数多，模型复杂，计算成本高。作者认为简单的模型也可以有一样的表现力。</p>
+<p>作者提出了 TransE 模型。一个基于平移的模型，用于学习实体的低维嵌入。在 TransE 中，<strong>关系表示为嵌入空间中的平移</strong>：如果 $(h, \ell, t)$ 成立，则尾部实体 $t$ 的嵌入应接近头部实体 $h$ 的嵌入加上依赖于关系的向量 $\ell$。</p>
 <p>作者提出这个基于平移的模型的动机有两个：</p>
 <ul>
-<li><p>主要的动机，作者认为很多 KBs 的表示方法都含有<strong>层次关系</strong>，类似一个树结构。 树的自然表示可以看作每一个节点的 Embedding 可以用这个节点下面的子树和叶节点表示。那么节点和节点的关系，同样可以表示为实体共同的父节点。</p></li>
-<li><p>次要动机来自于 word embedding 的思想。作者通过学习词嵌入发现，一些实体之间的一对一关系，例如“国家”和“城市”之间的“首都”关系，用模型可以表示为嵌入空间中向量的平移。</p></li>
+<li><p>主要的动机，作者认为很多 KBs 的表示方法都含有<strong>层次关系</strong>，类似一个树结构。 树的自然表示可以看作每一个节点的 Embedding 可以用这个节点下面的子树和叶节点表示。那么节点和节点的关系，同样可以表示为实体共同的父节点。</p>
+</li>
+<li><p>次要动机来自于 word embedding 的思想。作者通过学习词嵌入发现，一些实体之间的一对一关系，例如“国家”和“城市”之间的“首都”关系，用模型可以表示为嵌入空间中向量的平移。</p>
+</li>
 </ul>
 <p>这两个动机使作者提出了 TransE 模型。</p>
-<h2 id="translation-based-model">Translation-based model</h2>
-<blockquote>
-<p>给定由两个实体 <span class="math inline">\(h,t \in E\)</span> 和一个关系 <span class="math inline">\(\ell\)</span> 组成的三元组 <span class="math inline">\((h, \ell, t)\)</span>。</p>
+<h2 id="Translation-based-model"><a href="#Translation-based-model" class="headerlink" title="Translation-based model"></a>Translation-based model</h2><blockquote>
+<p>给定由两个实体 $h,t \in E$ 和一个关系 $\ell$ 组成的三元组 $(h, \ell, t)$。</p>
 </blockquote>
-<p>TransE 模型认为一个正确的三元组的 embedding 向量 <span class="math inline">\((h, \ell, t)\)</span> 会满足公式：<span class="math inline">\(h+\ell \approx t\)</span></p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210813163920543.png" /></p>
+<p>TransE 模型认为一个正确的三元组的 embedding 向量 $(h, \ell, t)$ 会满足公式：$h+\ell \approx t$</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210813163920543.png" alt=""></p>
 <p>头实体 embedding 加上关系 embedding 会约等于尾实体 embedding。如果是一个错误的三元组，那么它们的 embedding 之间就不满足这种关系。即，如果三元组是正确的，则尾实体 embedding 应该与头实体 embedding 和关系 embedding 的加和更为接近；反之，如果三元组是错误的，则尾实体 embedding 应该与头实体 embedding 和关系 embedding 的加和更为远离。可以选择L1或者L2范数来衡量三个向量的差距。因此我们定义如下的势能函数，这里采用<u>L2范数</u>：</p>
 <blockquote>
 <p>势能函数原文里称“衡量三元组能量(energy)的距离函数”</p>
 <p>以后的系列论文都会称为 “得分函数”。</p>
 </blockquote>
-<p><span class="math display">\[
-d(h+\ell,t)=f(h,\ell,t)=||h+\ell-t||_2
-\]</span></p>
-<p>对于一个正确的三元组，我们希望距离(势能)越近越好，而对于一个错误的三元组，我们希望距离(势能)越远越好。基于此，TransE 模型的目标函数设计为： <span class="math display">\[
-\mathcal{L}=\sum_{(h, \ell, t) \in S} \sum_{\left(h^{\prime}, \ell, t^{\prime}\right) \in S_{(h, \ell, t)}^{\prime}}\left[\gamma+f(h,\ell,t)-f(h&#39;,\ell&#39;,t&#39;)\right]_{+}
-\]</span> 其中：</p>
+<script type="math/tex; mode=display">
+d(h+\ell,t)=f(h,\ell,t)=||h+\ell-t||_2</script><p>对于一个正确的三元组，我们希望距离(势能)越近越好，而对于一个错误的三元组，我们希望距离(势能)越远越好。基于此，TransE 模型的目标函数设计为：</p>
+<script type="math/tex; mode=display">
+\mathcal{L}=\sum_{(h, \ell, t) \in S} \sum_{\left(h^{\prime}, \ell, t^{\prime}\right) \in S_{(h, \ell, t)}^{\prime}}\left[\gamma+f(h,\ell,t)-f(h',\ell',t')\right]_{+}</script><p>其中：</p>
 <ul>
-<li><p>目标函数的目标是让正例的距离最小，也就是 <span class="math inline">\(min(d(h+\ell, t))\)</span>，让负例的相反数最小也就是 <span class="math inline">\((min(−d(h′+ \ell′,t ′)))\)</span>，对于每一个正样本和负样本求和，再增加一个常数的间距，就是整体距离的最小值。也就是我们的目标函数。</p></li>
-<li><p><span class="math inline">\([f(x)]_+\)</span> 表示为 <span class="math inline">\(max(0,f(x))\)</span>，即 f(x) 大于0为 <span class="math inline">\(f(x)+=f(x)\)</span>，小于0则为 <span class="math inline">\(f(x)+=0\)</span>。这叫做合页损失函数(hinge loss function)。</p>
+<li><p>目标函数的目标是让正例的距离最小，也就是 $min(d(h+\ell, t))$，让负例的相反数最小也就是 $(min(−d(h′+ \ell′,t ′)))$，对于每一个正样本和负样本求和，再增加一个常数的间距，就是整体距离的最小值。也就是我们的目标函数。</p>
+</li>
+<li><p>$[f(x)]_+$ 表示为 $max(0,f(x))$，即 f(x) 大于0为 $f(x)+=f(x)$，小于0则为 $f(x)+=0$。这叫做合页损失函数(hinge loss function)。</p>
 <blockquote>
-<p>这个地方我把 <span class="math inline">\([x]_+\)</span> 理解为 <span class="math inline">\([f(x)]_+\)</span> ，这样我就理解了为什么是两个求和符号。</p>
-</blockquote></li>
-<li><p>为了方便训练，避免过拟合，通常还会在上述目标函数后面增加约束条件 <span class="math inline">\(||h||\le1,||r||\le1,||t||\le1\)</span>。</p></li>
+<p>这个地方我把 $[x]<em>+$ 理解为 $[f(x)]</em>+$ ，这样我就理解了为什么是两个求和符号。</p>
+</blockquote>
+</li>
+<li><p>为了方便训练，避免过拟合，通常还会在上述目标函数后面增加约束条件 $||h||\le1,||r||\le1,||t||\le1$。</p>
+</li>
 </ul>
-<p>这种训练方法叫做 <strong>margin-based ranking criterion</strong>。它来自于 SVM。支持向量机也是如此，要将正和负尽可能分开，找出最大距离的支持向量。同理，TransE 也是如此，尽可能将对的和错的分开。<span class="math inline">\(\gamma\)</span> 表示的是三元组正样本和负样本的间隔 margin，margin 越大，则两个 triple 之前被修正的间隔就越大，则对于词向量的修正就越严格。<span class="math inline">\(\gamma\)</span> 为超参数。</p>
-<h3 id="负样本错误三元组的产生">负样本（错误三元组）的产生</h3>
-<p><span class="math display">\[
-S_{(h, \ell, t)}^{\prime}=\left\{\left(h^{\prime}, \ell, t\right) \mid h^{\prime} \in E\right\} \cup\left\{\left(h, \ell, t^{\prime}\right) \mid t^{\prime} \in E\right\} .
-\]</span></p>
-<p>上式构造错误的三元组，头部或尾部被随机实体代替（不能同时替换，但肯定有一个是属于训练项中的实体）。</p>
+<p>这种训练方法叫做 <strong>margin-based ranking criterion</strong>。它来自于 SVM。支持向量机也是如此，要将正和负尽可能分开，找出最大距离的支持向量。同理，TransE 也是如此，尽可能将对的和错的分开。$\gamma$ 表示的是三元组正样本和负样本的间隔 margin，margin 越大，则两个 triple 之前被修正的间隔就越大，则对于词向量的修正就越严格。$\gamma$ 为超参数。</p>
+<h3 id="负样本（错误三元组）的产生"><a href="#负样本（错误三元组）的产生" class="headerlink" title="负样本（错误三元组）的产生"></a>负样本（错误三元组）的产生</h3><script type="math/tex; mode=display">
+S_{(h, \ell, t)}^{\prime}=\left\{\left(h^{\prime}, \ell, t\right) \mid h^{\prime} \in E\right\} \cup\left\{\left(h, \ell, t^{\prime}\right) \mid t^{\prime} \in E\right\} .</script><p>上式构造错误的三元组，头部或尾部被随机实体代替（不能同时替换，但肯定有一个是属于训练项中的实体）。</p>
 <p>为了避免出现生成的负例其实存在于知识库中的情况，我们可以对生成的负例进行过滤，如果它是知识库中的正例，那我们就不把它作为负例，而是重新生成一个负例。</p>
-<h3 id="algorithm">Algorithm</h3>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210819112248295.png" /></p>
+<h3 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210819112248295.png" alt=""></p>
 <p>算法1中描述了详细的过程：</p>
-<ol start="0" type="1">
-<li><p>输入训练集三元组 <span class="math inline">\(S={(h, \ell, t)}\)</span>，实体集 <span class="math inline">\(E\)</span>，关系集 <span class="math inline">\(L\)</span>，嵌入维度 <span class="math inline">\(k\)</span>，超参数：margin <span class="math inline">\(\gamma\)</span>，学习率 <span class="math inline">\(\lambda\)</span></p></li>
-<li><p>初始化：随机初始化头实体、尾实体和关系向量 <span class="math inline">\(\boldsymbol{\ell} , \boldsymbol{e}\)</span> ，并对通过 <em>Xavier</em> 初始化的向量做归一化处理</p></li>
+<ol>
+<li><p>输入训练集三元组 $S={(h, \ell, t)}$，实体集 $E$，关系集 $L$，嵌入维度 $k$，超参数：margin $\gamma$，学习率 $\lambda$</p>
+</li>
+<li><p>初始化：随机初始化头实体、尾实体和关系向量 $\boldsymbol{\ell} , \boldsymbol{e}$  ，并对通过 <em>Xavier</em> 初始化的向量做归一化处理</p>
+</li>
 <li><p>循环：采用 minibatch，一批一批的训练会加快训练速度</p>
-<ol start="0" type="1">
-<li>每一次循环迭代后要对 <span class="math inline">\(e\)</span> 的 embedding 标准化</li>
-<li>取一个b大小的 <span class="math inline">\(S_{batch}\)</span> ，<span class="math inline">\(T_{batch}\)</span> 初始化为空列表</li>
-<li>对于每批数据 <span class="math inline">\(S_{batch}\)</span>
-<ol type="1">
+<ol>
+<li>每一次循环迭代后要对 $e$ 的 embedding 标准化</li>
+<li>取一个b大小的 $S<em>{batch}$ ，$T</em>{batch}$ 初始化为空列表</li>
+<li><p>对于每批数据 $S_{batch}$ </p>
+<ol>
 <li>进行负采样（将训练集中的三元组头实体 or 尾实体随机替换掉）</li>
-<li><span class="math inline">\(T_{batch}\)</span> 初始为一个空列表，然后向其添加由元组对（原三元组，错误三元组）组成的列表 <span class="math inline">\(T_{batch} = [ ( [h,r,t], [h&#39;,r,t&#39;] ), ([ ], [ ]), ......]\)</span></li>
-</ol></li>
-<li>利用 SGD 优化目标函数，进行 embedding 参数的更新</li>
-</ol></li>
+<li>$T<em>{batch}$ 初始为一个空列表，然后向其添加由元组对（原三元组，错误三元组）组成的列表  $T</em>{batch} = [ ( [h,r,t], [h’,r,t’] ), ([ ], [ ]), ……]$</li>
 </ol>
-<h2 id="experiments">Experiments</h2>
-<p>TransE 是根据从 Wordnet 和 Freebase 中提取的数据进行评估的，与文献中的几种最新方法相比，这些方法在各种基准上实现了最佳的当前性能，并可扩展到相对较大的数据集。</p>
-<h3 id="evaluation-protocol">Evaluation protocol</h3>
-<p>我们得到每个实体和关系的 embedding 之后，如何评估这些学得的 embedding 的质量呢？这里用了一个评估方法/协议—Link prediction。这个方法不仅可以用于评估 TransE ，很多模型也用了这个评估方法。</p>
+</li>
+<li><p>利用 SGD 优化目标函数，进行 embedding 参数的更新</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>TransE 是根据从 Wordnet 和 Freebase 中提取的数据进行评估的，与文献中的几种最新方法相比，这些方法在各种基准上实现了最佳的当前性能，并可扩展到相对较大的数据集。</p>
+<h3 id="Evaluation-protocol"><a href="#Evaluation-protocol" class="headerlink" title="Evaluation protocol"></a>Evaluation protocol</h3><p>我们得到每个实体和关系的 embedding 之后，如何评估这些学得的 embedding 的质量呢？这里用了一个评估方法/协议—Link prediction。这个方法不仅可以用于评估 TransE ，很多模型也用了这个评估方法。</p>
 <p>假设整个知识库中一共有 n 个实体，那么基本的评估过程如下：</p>
 <ul>
 <li>将一个正确的三元组 a 中的<u>头实体或者尾实体</u>，依次替换为整个知识库中的所有其它实体，也就是会产生 n 个三元组。</li>
-<li>分别对上述 n 个三元组计算其能量值，在 TransE 中，就是计算 <span class="math inline">\(h+\ell-t\)</span> 的值。这样可以得到 n 个能量值，分别对应上述 n 个三元组。</li>
+<li>分别对上述 n 个三元组计算其能量值，在 TransE 中，就是计算 $h+\ell-t$ 的值。这样可以得到 n 个能量值，分别对应上述 n 个三元组。</li>
 <li>对上述 n 个能量值进行升序排序。记录三元组 a 的能量值排序后的序号。</li>
 <li>对所有的正确的三元组重复上述过程。</li>
 </ul>
 <p>上述就是评估的过程，共有两个指标：<strong>Mean Rank 和 Hits@10</strong>。每个正确三元组的能量值排序后的序号求平均，得到的值称为 Mean Rank，Mean Rank 越小越好。计算正确三元组的能量排序后的序号小于10的比例，得到的值称为 Hits@10，Hits@10 越大越好。</p>
 <p>但是上述过程存在一个不合理的地方：<u>在将一个正确的三元组a的头或者尾实体替换成其它实体之后得到的这个三元组也有可能是正确的</u>，在计算每个三元组的能量并排序之后，这类正确的三元组的能量有可能排在三元组a的前面。但是上面的基本评估过程并没有考虑这点。因此<strong>把正确的三元组从训练集、验证集、测试集中都删除掉</strong>，从而保证生成的三元组一定是错误的三元组。</p>
 <p>把上述基本评价过程得到的结果称为 <strong>Raw Mean Rank 和 Raw Hits@10</strong>，把过滤掉正确后得到的结果称为 <strong>Filtered Mean Rank 和 Filtered Hits@10</strong>。</p>
-<h3 id="link-prediction">Link prediction</h3>
-<p>实验中使用的 baseline 有：RESCAL、SE、SME（linear）、SME（bilinear）和LFM。RESCAL 通过交替最小二乘法进行训练，而其他方法则通过随机梯度下降法进行训练。</p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814141511752.png" /></p>
+<h3 id="Link-prediction"><a href="#Link-prediction" class="headerlink" title="Link prediction"></a>Link prediction</h3><p>实验中使用的 baseline 有：RESCAL、SE、SME（linear）、SME（bilinear）和LFM。RESCAL 通过交替最小二乘法进行训练，而其他方法则通过随机梯度下降法进行训练。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814141511752.png" alt=""></p>
 <ul>
-<li><p>从链路预测结果中可以看到，TransE 在所有指标上都优于所有对手，而且有很大的差距。</p></li>
-<li><p>有些指标在 Raw 和 Filtered 上表现有些差距，说明过滤掉正确三元组是有必要的。</p></li>
+<li><p>从链路预测结果中可以看到，TransE 在所有指标上都优于所有对手，而且有很大的差距。</p>
+</li>
+<li><p>有些指标在 Raw 和 Filtered 上表现有些差距，说明过滤掉正确三元组是有必要的。</p>
+</li>
 </ul>
 <p>作者又将链路预测结果进行了关系的分类：</p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814153225701.png" /></p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814153225701.png" alt=""></p>
 <p>表4 通过关系的类型对结果进行了分类，发现： TransE <strong>在处理复杂关系上效果欠佳</strong>（复杂关系通常是指一对多、多对一，多对多三种关系模型）。</p>
 <blockquote>
 <p>给定两个事实（诺兰，导演，信条），（诺兰，导演，盗梦空间），那么网络的目的便是优化嵌入表达使得：诺兰+导演≈信条，诺兰+导演≈盗梦空间，这样一来会使得信条≈盗梦空间，但这两部电影是不同的实体，应该用不同的向量表示。</p>
 </blockquote>
-<h4 id="example-predictions">Example predictions</h4>
-<p>作者展示了几个链路预测结果的例子。给定头实体和关系，预测尾实体。粗体是真实的尾实体，斜体表示训练集中存在的其他真实尾部。</p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814175543833.png" /></p>
+<h4 id="Example-predictions"><a href="#Example-predictions" class="headerlink" title="Example predictions"></a>Example predictions</h4><p>作者展示了几个链路预测结果的例子。给定头实体和关系，预测尾实体。粗体是真实的尾实体，斜体表示训练集中存在的其他真实尾部。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814175543833.png" alt=""></p>
 <p>即使好的答案并不总是排名靠前，这些预测也说明了TransE能够表示一些常识。</p>
-<h4 id="learning-to-predict-new-relationships-with-few-examples">Learning to predict new relationships with few examples</h4>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814142644045.png" /></p>
+<h4 id="Learning-to-predict-new-relationships-with-few-examples"><a href="#Learning-to-predict-new-relationships-with-few-examples" class="headerlink" title="Learning to predict new relationships with few examples"></a>Learning to predict new relationships with few examples</h4><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20210814142644045.png" alt=""></p>
 <p>作者通过检查这些模型学习新关系的速度，来测试这些模型否能够很好地概括新事实。作者使用 <em>FB15k</em> 数据集，将数据集分为 <em>FB15k-40rel</em> 和 <em>Fb15k-rest</em> ，将 <em>FB15k-40rel</em> 分为 训练集(每种关系1000个样本)和测试集，将 <em>Fb15k-rest</em> 分为训练集和验证集。</p>
-<ol type="1">
+<ol>
 <li>先在 <em>Fb15k-rest</em> 上进行通过训练集和验证集进行模型的训练和选择。</li>
 <li>然后通过 <em>Fb15k-40rel</em> 进行训练让模型，只学习新的40种关系的相关参数。</li>
 <li>最后，在 <em>FB15k-40rel</em> 的测试集进行链路预测评估，评估仅包含在 第1步 中没有发现的关系。</li>
 </ol>
 <p>结果如上图所示，从图中的 Filtered Mean Rank（越小越好） 和 Filtered Hits@10（越大越好）指标可以看到，在没有提供未知关系的样本的情况下，非结构化的性能最好，因为它不使用这些信息进行预测。但是，在提供标记关系的样本时，这种性能并没有提高。而 TransE 是学习最快的模型，只需要新关系的10个例子hits@10 就已经是18%，展现了优秀的性能。</p>
-<h2 id="summary">Summary</h2>
-<p>TransE 简单有效，已经成为知识表示学习的代表模型，并衍生出不同的变体：TransH ，TransR ，TransD ，CTransR ，TransA 等等。</p>
-<p>与以往模型相比，TransE 模型参数较少， 计算复杂度低， 却能直接建立实体和关系之间的复杂语义联系。Bordes 等人在 WordNet 和 Freebase 等数据集上进行链接预测等评测任务， 实验表明 TransE 的性能较以往模型有显著提升。虽然 TransE 算法对知识图谱的表示学习提供了很好的研究思路，但是缺点也很多，比如它只能很好的解决知识图谱中1对1的关系表示，而对于1对多，多对1和多对多的关系类型就无法很好的进行表示。（还有其他的缺点我就不是很了解了...）</p>
+<h2 id="Code"><a href="#Code" class="headerlink" title="Code"></a>Code</h2><figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TransE</span>(<span class="hljs-params">PairwiseModel</span>):</span><br><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">__init__</span>(<span class="hljs-params">self, **kwargs</span>):</span><br>        <span class="hljs-built_in">super</span>(TransE, self).__init__(self.__class__.__name__.lower())<br>        param_list = [<span class="hljs-string">&quot;tot_entity&quot;</span>, <span class="hljs-string">&quot;tot_relation&quot;</span>, <span class="hljs-string">&quot;hidden_size&quot;</span>, <span class="hljs-string">&quot;l1_flag&quot;</span>]<br>        param_dict = self.load_params(param_list, kwargs)<br>        self.__dict__.update(param_dict)<br><br>        self.ent_embeddings = NamedEmbedding(<span class="hljs-string">&quot;ent_embedding&quot;</span>, self.tot_entity, self.hidden_size)<br>        self.rel_embeddings = NamedEmbedding(<span class="hljs-string">&quot;rel_embedding&quot;</span>, self.tot_relation, self.hidden_size)<br>        nn.init.xavier_uniform_(self.ent_embeddings.weight)<br>        nn.init.xavier_uniform_(self.rel_embeddings.weight)<br><br>        self.parameter_list = [<br>            self.ent_embeddings,<br>            self.rel_embeddings,<br>        ]<br><br>        self.loss = Criterion.pairwise_hinge<br><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">forward</span>(<span class="hljs-params">self, h, r, t</span>):</span><br>        <span class="hljs-string">&quot;&quot;&quot;Function to get the embedding value.</span><br><span class="hljs-string"></span><br><span class="hljs-string">           Args:</span><br><span class="hljs-string">               h (Tensor): Head entities ids.</span><br><span class="hljs-string">               r (Tensor): Relation ids.</span><br><span class="hljs-string">               t (Tensor): Tail entity ids.</span><br><span class="hljs-string"></span><br><span class="hljs-string">           Returns:</span><br><span class="hljs-string">               Tensors: the scores of evaluationReturns head, relation and tail embedding Tensors.</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        h_e, r_e, t_e = self.embed(h, r, t)<br><br>        norm_h_e = F.normalize(h_e, p=<span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br>        norm_r_e = F.normalize(r_e, p=<span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br>        norm_t_e = F.normalize(t_e, p=<span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br><br>        <span class="hljs-keyword">if</span> self.l1_flag:<br>            <span class="hljs-keyword">return</span> torch.norm(norm_h_e + norm_r_e - norm_t_e, p=<span class="hljs-number">1</span>, dim=-<span class="hljs-number">1</span>)<br><br>        <span class="hljs-keyword">return</span> torch.norm(norm_h_e + norm_r_e - norm_t_e, p=<span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br><br>    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">embed</span>(<span class="hljs-params">self, h, r, t</span>):</span><br>        <span class="hljs-string">&quot;&quot;&quot;Function to get the embedding value.</span><br><span class="hljs-string"></span><br><span class="hljs-string">           Args:</span><br><span class="hljs-string">               h (Tensor): Head entities ids.</span><br><span class="hljs-string">               r (Tensor): Relation ids.</span><br><span class="hljs-string">               t (Tensor): Tail entity ids.</span><br><span class="hljs-string"></span><br><span class="hljs-string">           Returns:</span><br><span class="hljs-string">               Tensors: Returns a tuple of head, relation and tail embedding Tensors.</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        h_e = self.ent_embeddings(h)<br>        r_e = self.rel_embeddings(r)<br>        t_e = self.ent_embeddings(t)<br><br>        <span class="hljs-keyword">return</span> h_e, r_e, t_e<br><br></code></pre></td></tr></table></figure>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>TransE 简单有效，已经成为知识表示学习的代表模型，并衍生出不同的变体：TransH ，TransR ，TransD ，CTransR ，TransA 等等。</p>
+<p>与以往模型相比，TransE 模型参数较少， 计算复杂度低， 却能直接建立实体和关系之间的复杂语义联系。Bordes 等人在 WordNet 和 Freebase 等数据集上进行链接预测等评测任务， 实验表明 TransE 的性能较以往模型有显著提升。虽然 TransE 算法对知识图谱的表示学习提供了很好的研究思路，但是缺点也很多，比如它只能很好的解决知识图谱中1对1的关系表示，而对于1对多，多对1和多对多的关系类型就无法很好的进行表示。（还有其他的缺点我就不是很了解了…）</p>
 ]]></content>
       <categories>
-        <category>NLP</category>
+        <category>Papers</category>
       </categories>
       <tags>
-        <tag>NLP</tag>
         <tag>TransE</tag>
+        <tag>KG</tag>
       </tags>
   </entry>
   <entry>
@@ -3222,32 +3218,75 @@ S_{x,y} = S_{x-1,y} +  S_{x,y-1} - S_{x-1,y-1} + a_{x,y}
     <title>快速排序与快速选择算法</title>
     <url>/2021/01/12/%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F/</url>
     <content><![CDATA[<p>第一次是在数据结构课学的快速排序。基本思路是：令 <code>i = l; j = r</code> ，选最左边的数为pivot。<code>j --</code>从后向前找比它小的数，找到后与pivot交换。再 <code>i ++</code> 从前往后找比它大的数，找到后与pivot交换。再重复执行这一过程，直到 <code>i == j</code> 时，就找到了pivot的位置。再分别递归直至顺序。学了y总的方法感觉更聪明，是一种双指针快排的思路。</p>
-<p>快速选择算法是快速排序的一种变形。通常用在未排序的数组中寻找第k小/第k大的元素。快速选择的总体思路与快速排序一致，选择一个元素作为基准来对元素进行分区，将小于和大于基准的元素分在基准左边和右边的两个区域。不同的是，快速选择并不递归访问双边，而是只递归进入一边的元素中继续寻找。这降低了平均时间复杂度，从 <span class="math inline">\(O(n logn)\)</span> 至 <span class="math inline">\(O(n)\)</span> ，不过最坏情况仍然是 <span class="math inline">\(O(n^2)\)</span> 。</p>
+<p><strong>快速选择算法</strong>是快速排序的一种变形。通常用在<strong>未排序的数组中寻找第k小/第k大的元素</strong>。快速选择的总体思路与快速排序一致，选择一个元素作为基准来对元素进行分区，将小于和大于基准的元素分在基准左边和右边的两个区域。不同的是，快速选择并不递归访问双边，而是只递归进入一边的元素中继续寻找。这降低了平均时间复杂度，从 $O(n logn)$ 至 $O(n)$ ，不过最坏情况仍然是 $O(n^2)$ 。</p>
 <p><em><a id="more"></a></em></p>
-<h1 id="快速排序算法双指针排序">快速排序算法(双指针排序)</h1>
-<h2 id="思路">思路</h2>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/算法基础/基础算法/快速排序/quick_sort.jpg" style="zoom: 67%;" /></p>
-<ol start="0" type="1">
-<li><strong>注意递归要退出！记得写退出条件！<code>if(l &gt;= r)</code> 时退出</strong></li>
-<li><strong>确定分界点</strong>：<code>int x = q[l + r &gt;&gt; 1]</code>。(这里最好取中间值比较保险，因为左右两端需要考虑边界问题)</li>
-<li><strong>调整区间</strong>：找到左边区间 <code>q[i] &lt; x</code> 的点 和 右边区间 <code>q[j] &gt; x</code> 的点，并交换~</li>
-<li><strong>递归处理左右两端</strong> (又回到0)</li>
+<h1 id="快速排序算法-双指针排序"><a href="#快速排序算法-双指针排序" class="headerlink" title="快速排序算法(双指针排序)"></a>快速排序算法(双指针排序)</h1><h2 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h2><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/算法基础/基础算法/快速排序/quick_sort.jpg" style="zoom: 67%;" /></p>
+<ol>
+<li><p><strong>注意递归要退出！记得写退出条件！<code>if(l &gt;= r)</code> 时退出</strong></p>
+</li>
+<li><p><strong>分成子问题</strong>：</p>
+<ul>
+<li><p><strong>确定分界点</strong>：<code>int x = q[l + r &gt;&gt; 1]</code>。(这里最好取中间值比较保险，因为左右两端需要考虑边界问题)</p>
+</li>
+<li><p><strong>调整区间</strong>：找到左边区间 <code>q[i] &lt; x</code> 的点 和 右边区间 <code>q[j] &gt; x</code> 的点，并交换~</p>
+</li>
+</ul>
+</li>
+<li><p><strong>递归处理子问题</strong>：即递归处理左右两端 (又回到0)</p>
+</li>
+<li><p>子问题合并. 快排这一步不需要操作，但归并排序的核心在这一步骤</p>
+</li>
 </ol>
-<h2 id="时间复杂度">时间复杂度</h2>
-<p>平均时间复杂度 <span class="math inline">\(O(nlogn)\)</span>，最坏情况下 <span class="math inline">\(O(n^2)\)</span>，在数组已排好序的情况下出现，可以通过随机化或者取中点来避免最差情况。</p>
+<div class="note note-info">
+            <p>分治算法都有三步：</p><ol><li>分成子问题</li><li>递归处理子问题</li><li>子问题合并</li></ol>
+          </div>
+<h2 id="时间复杂度"><a href="#时间复杂度" class="headerlink" title="时间复杂度"></a>时间复杂度</h2><p>平均时间复杂度 $O(nlogn)$，最坏情况下 $O(n^2)$，在数组已排好序的情况下出现，可以通过随机化或者取中点来避免最差情况。</p>
 <blockquote>
 <p>数学推导证明过程挺复杂的。算法导论上有，用主定理证明的，很详细。但是没法简化</p>
 </blockquote>
-<h2 id="快排模板">快排模板</h2>
-<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">quick_sort</span><span class="hljs-params">(<span class="hljs-keyword">int</span> q[], <span class="hljs-keyword">int</span> l, <span class="hljs-keyword">int</span> r)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span> (l &gt;= r) <span class="hljs-keyword">return</span>;  <span class="hljs-comment">// 循环退出条件</span><br><br>    <span class="hljs-keyword">int</span> x = q[l + r &gt;&gt; <span class="hljs-number">1</span>], i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>;  <span class="hljs-comment">// 注意值和下角标的区别。</span><br>    <span class="hljs-keyword">while</span> (i &lt; j)<br>    &#123;<br>        <span class="hljs-keyword">do</span> i ++ ; <span class="hljs-keyword">while</span> (q[i] &lt; x);<br>        <span class="hljs-keyword">do</span> j -- ; <span class="hljs-keyword">while</span> (q[j] &gt; x);<br>        <span class="hljs-keyword">if</span> (i &lt; j) swap(q[i], q[j]);<br>    &#125;<br>    <br>    quick_sort(q, l, j), quick_sort(q, j + <span class="hljs-number">1</span>, r);  <span class="hljs-comment">// 边界不要写错</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
-<h2 id="注意">注意</h2>
-<h3 id="边界情况分析">1、边界情况分析。</h3>
-<p>快排属于<strong>分治算法</strong>，最怕的就是 <code>n分成0和n</code>，或 <code>n分成n和0</code>，这会造成<strong>无限划分</strong>(死循环)</p>
-<ol type="1">
-<li><p><strong>以 <code>j</code> 为划分时，<code>x</code> 不能选 <code>q[r]</code> (若以 <code>i</code> 为划分,则 <code>x</code> 不能选 <code>q[l]</code> )</strong></p>
+<h2 id="快排模板"><a href="#快排模板" class="headerlink" title="快排模板"></a>快排模板</h2><figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">quick_sort</span><span class="hljs-params">(<span class="hljs-keyword">int</span> q[], <span class="hljs-keyword">int</span> l, <span class="hljs-keyword">int</span> r)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-comment">// 循环退出条件</span><br>    <span class="hljs-keyword">if</span> (l &gt;= r) <span class="hljs-keyword">return</span>;  <br>	<span class="hljs-comment">// 1. 分成子问题。</span><br>    <span class="hljs-keyword">int</span> x = q[l + r &gt;&gt; <span class="hljs-number">1</span>], i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>;  <span class="hljs-comment">// 注意值和下角标的区别。</span><br>    <span class="hljs-keyword">while</span> (i &lt; j)<br>    &#123;<br>        <span class="hljs-keyword">do</span> i ++ ; <span class="hljs-keyword">while</span> (q[i] &lt; x);<br>        <span class="hljs-keyword">do</span> j -- ; <span class="hljs-keyword">while</span> (q[j] &gt; x);<br>        <span class="hljs-keyword">if</span> (i &lt; j) swap(q[i], q[j]);<br>    &#125;<br>    <span class="hljs-comment">// 2. 递归处理子问题</span><br>    quick_sort(q, l, j), quick_sort(q, j + <span class="hljs-number">1</span>, r);  <span class="hljs-comment">// 边界不要写错</span><br>    <span class="hljs-comment">// 3. 子问题合并.快排这一步不需要操作，但归并排序的核心在这一步骤</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><h3 id="1-待证问题"><a href="#1-待证问题" class="headerlink" title="1. 待证问题"></a>1. 待证问题</h3><p>while循环结束后，<code>q[l..j] &lt;= x</code>, <code>q[j+1..r] &gt;= x</code></p>
+<p>注: <code>q[l..j] &lt;= x</code>意为 <code>q[l],q[l+1]...q[j-1],q[j]</code> 的所有元素都 <code>&lt;= x</code></p>
+<p><strong>证明:</strong> 循环不变式：<code>q[l..i] &lt;= x q[j..r] &gt;= x</code></p>
+<ol>
+<li><p>初始化</p>
+<p>循环开始之前 <code>i = l - 1, j = r + 1</code></p>
+<p>则 <code>q[l..i]</code>, <code>q[j..r]</code> 为空，循环不变式显然成立</p>
+</li>
+<li><p>保持</p>
+<p>假设某轮循环开始前循环不变式成立，即<code>q[l..i] &lt;= x, q[j..r] &gt;= x</code></p>
+<p>执行循环体</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">do</span> i++; <span class="hljs-keyword">while</span>(q[i] &lt; x);<br>会使得 q[l..i<span class="hljs-number">-1</span>] &lt;= x, q[i] &gt;= x<br><br><span class="hljs-keyword">do</span> j--; <span class="hljs-keyword">while</span>(q[j] &gt; x);<br>会使得 q[j+<span class="hljs-number">1.</span>.r] &gt;= x, q[j] &lt;= x<br><br><span class="hljs-keyword">if</span>(i &lt; j) swap(q[i], q[j]);<br>会使得 q[l..i] &lt;= x, q[j..r] &gt;= x<br></code></pre></td></tr></table></figure>
+<p>所以，i 和 j 更新之后，下一次循环开始之前，循环不变式依然成立</p>
+<p>注意: 由于使用 do-while 循环,所以 <code>i</code> 和 <code>j</code> 一定会!!!自增!!!使得循环会继续下去,但是如果采用while循环(<code>i</code> 和 <code>j</code> 的初始化做出对应的变更), <code>i</code> 和 <code>j</code> 在特殊情况下不自增的话,循环就会卡死</p>
+<p>例如:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">while</span>(q[i] &lt; x) i++;<br><span class="hljs-keyword">while</span>(q[j] &gt; x) j--;<br></code></pre></td></tr></table></figure>
+<p>当 <code>q[i]</code> 和 <code>q[j]</code> 都为 x 时, i 和 j 都不会更新, 导致 while 陷入死循环</p>
+</li>
+<li><p>终止</p>
+<p>循环结束时，<code>i &gt;= j</code></p>
+<p>正常情况下，按照循环不变式，我们应该会觉得结果已经显然了</p>
+<p>因为<code>i &gt;= j, q[l..i] &lt;= x, q[j..r] &gt;= x</code></p>
+<p>所以按照 <code>j</code> 来划分的话，<code>q[l..j] &lt;= x, q[j+1..r] &gt;= x</code>是显然的</p>
+<p>可是，最后一轮循环有点特殊，因为<strong>最后一轮循环的 if 语句一定不会执行</strong></p>
+<p>因为最后一轮循环一定满足 i &gt;= j, 不然不会跳出 while 循环的，所以 if 语句一定不执行</p>
+<p><strong>正确分析</strong>：</p>
+<p>由于最后一轮的 if 语句一定不执行</p>
+<p>所以，只能保证 <code>i &gt;= j</code> 和 <code>q[l..i-1] &lt;= x, q[i] &gt;= x</code>和<code>q[j+1..r] &gt;= x, q[j] &lt;= x</code></p>
+<p>由 <code>q[l..i-1] &lt;= x，i &gt;= j(i-1 &gt;= j-1)</code> 和 <code>q[j] &lt;= x</code> 可以得到 <code>q[l..j] &lt;= x</code></p>
+<p>又因为 <code>q[j+1..r] &gt;= x</code></p>
+<p>所以，<code>q[l..j] &lt;= x,q[j+1..r] &gt;= x</code>, <strong>问题得证</strong></p>
+<p><strong>总结</strong>: 只有最后一轮循环结束时，循环不变式不成立，其余的循环都是成立的, 但最终要求的问题还是解决了</p>
+<p><strong>注意</strong>: 循环结束时要记得检查是否存在数组越界/无限递归的情况</p>
+<p>所以还需要证明 <code>j</code> 最终的取值范围是 <code>[l..r-1]</code> (即不存在<code>n</code>划分成<code>0</code>和<code>n</code>的无限递归情况), 分析过程在分析<code>2.5</code></p>
+</li>
+</ol>
+<h3 id="2-边界情况分析"><a href="#2-边界情况分析" class="headerlink" title="2. 边界情况分析"></a>2. 边界情况分析</h3><p>快排属于<strong>分治算法</strong>，最怕的就是 <code>n分成0和n</code>，或 <code>n分成n和0</code>，这会造成<strong>无限划分</strong>(死循环)</p>
+<ol>
+<li><p><strong>以 <code>j</code> 为划分时，<code>x</code> 不能选 <code>q[r]</code>  (若以 <code>i</code> 为划分,则 <code>x</code> 不能选 <code>q[l]</code> )</strong></p>
 <p>假设 <code>x = q[r]</code>：关键句子 <code>quick_sort(q, l, j), quick_sort(q, j + 1, r)</code></p>
 <p>因为 <code>j</code> 的最小值是 <code>l</code>，所以 <code>[j + 1, r]</code> 不会造成无限划分，</p>
-<p>但<code>[l..j]</code>(即 <code>quick_sort(q, l, j)</code> )却可能造成无限划分，因为 <code>j</code> 可能为 <code>r</code></p>
+<p>但<code>[l..j]</code>(即 <code>quick_sort(q, l, j)</code> )却可能造成无限划分，因为 <code>j</code> 可能为 <code>r</code> </p>
 <p>举例来说，若 <code>x</code> 选为 <code>q[r]</code> ，数组中 <code>q[l..r-1] &lt; x</code> ，</p>
 <p>那么这一轮循环结束时 <code>i = r, j = r</code>，这就造成了无限划分。</p>
 <p>以 <code>0, 1</code> 这组数据为例，<code>x = q[r] = 1</code>，<code>do i ++ ; while(q[i] &lt; x)</code> ，</p>
@@ -3255,28 +3294,32 @@ S_{x,y} = S_{x-1,y} +  S_{x,y-1} - S_{x-1,y-1} + a_{x,y}
 <p>则 <code>[0, 1]</code> 被划分成 <code>[0, 1]</code> 和 <code>[2, 1]</code> ，这就造成无限划分，即死循环。</p>
 <blockquote>
 <p>边界情况复杂，建议 <code>x = q[l + r &gt;&gt; 1]</code> 。</p>
-</blockquote></li>
+</blockquote>
+</li>
 <li><p><strong><code>do i++; while(q[i] &lt; x)</code> 和 <code>do j--; while(q[j] &gt; x)</code> 不能用 <code>q[i] &lt;= x</code> 和 <code>q[j] &gt;= x</code>。</strong></p>
 <p>举个栗子，比如 取的 <code>x</code> 刚好是数据里的最大值，执行完 <code>do i++; while(q[i] &lt;= x);</code> 之后，<code>i</code> 会自增到 <code>i+1</code>，交换的时候就是 <code>q[i + 1]</code> 和 <code>q[j]</code> 交换了，这显然不对。</p>
 <p>或者举个极端情况，假设 <code>q[l..r]</code> 全相等，则执行完 <code>do i++; while(q[i] &lt;= x);</code> 之后，<code>i</code> 会自增到 <code>r+1</code>，然后继续执行 <code>q[i] &lt;= x</code> 判断条件，造成数组下标越界(但这貌似不会报错)。</p>
-<p>并且如果之后的 <code>q[i] &lt;= x</code> (此时 <code>i &gt; r</code> ) 条件也不幸成立，就会造成一直循环下去(亲身实验)，造成内存超限 <code>(Memory Limit Exceeded)</code></p></li>
+<p>并且如果之后的 <code>q[i] &lt;= x</code> (此时 <code>i &gt; r</code> ) 条件也不幸成立，就会造成一直循环下去(亲身实验)，造成内存超限 <code>(Memory Limit Exceeded)</code></p>
+</li>
 <li><p><code>if(i &lt; j) swap(q[i], q[j])</code> 能否使用 <code>i &lt;= j</code> ？</p>
 <p><strong>可以使用 <code>if(i &lt;= j) swap(q[i], q[j]);</code></strong></p>
-<p>因为 i = j 时，交换一下 <code>q[i],q[j]</code> 也就是交换自己，无影响，马上就会跳出循环了</p></li>
+<p>因为 i = j 时，交换一下 <code>q[i],q[j]</code> 也就是交换自己，无影响，马上就会跳出循环了</p>
+</li>
 <li><p>最后一句能否改用 <code>quick_sort(q, l, j-1), quick_sort(q, j, r)</code> 作为划分(用 <code>i</code> 做划分时也是同样的道理,)</p>
 <p><strong>不能</strong>。根据之前的证明，最后一轮循环可以得到这些结论</p>
 <ul>
-<li><code>q[l..i-1] &lt;= x, q[i...r] &gt;= x</code></li>
+<li><code>q[l..i-1] &lt;= x, q[i...r] &gt;= x</code> </li>
 <li><code>q[l...j] &lt;= x, q[j+1..r] &gt;= x</code></li>
-<li><code>j &lt;= i</code></li>
+<li><code>j &lt;= i</code> </li>
 </ul>
 <p>所以，<code>q[l..j-1] &lt;= x</code> 是显然成立的，</p>
 <p>但 <code>quick_sort(q, j, r)</code> 中的 <code>q[j]</code> 却是 <code>q[j] &lt;= x</code> ，这不符合快排的要求</p>
 <p>另外一点，注意 <code>quick_sort(q, l, j-1), quick_sort(q, j, r)</code> 可能会造成无线划分</p>
 <p>当 <code>x</code> 选为 <code>q[l]</code> 时会造成无限划分，报错为(MLE),</p>
 <p>如果手动改为 <code>x = q[r]</code>，可以避免无限划分。</p>
-<p>但是上面所说的 <code>q[j] &lt;= x</code> 的问题依然不能解决，这会造成 <code>WA (Wrong Answer)</code></p></li>
-<li><p><strong><code>j</code> 的取值范围为 <code>[l..r-1]</code></strong> (这块还是不太懂....)</p>
+<p>但是上面所说的 <code>q[j] &lt;= x</code> 的问题依然不能解决，这会造成 <code>WA (Wrong Answer)</code></p>
+</li>
+<li><p><strong><code>j</code> 的取值范围为 <code>[l..r-1]</code></strong> (这块还是不太懂….)</p>
 <p>证明：<strong>反证法</strong></p>
 <p>假设 <code>j</code> 最终的值为 <code>r</code> ,说明只有一轮循环(两轮的话 <code>j</code> 至少会自减两次)</p>
 <p>说明 <code>q[r] &lt;= x</code> (因为要跳出 <code>do-while</code> 循环)</p>
@@ -3286,31 +3329,29 @@ S_{x,y} = S_{x-1,y} +  S_{x,y-1} - S_{x-1,y-1} + a_{x,y}
 <p><strong>反证法</strong>得出 <code>j &lt; r</code></p>
 <p>假设 <code>j</code> 可能小于 <code>l</code> 说明 <code>q[l..r] &gt; x</code> ,矛盾</p>
 <p><strong>反证法</strong>得出 <code>j &gt;= l</code></p>
-<p>所以 <code>j</code> 的取值范围为 <code>[l..r-1]</code> ，不会造成无限划分和数组越界</p></li>
+<p>所以 <code>j</code> 的取值范围为 <code>[l..r-1]</code> ，不会造成无限划分和数组越界</p>
+</li>
 </ol>
 <p>顺带一提用 <code>i</code> 做划分时的模板</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">quick_sort</span><span class="hljs-params">(<span class="hljs-keyword">int</span> q[], <span class="hljs-keyword">int</span> l, <span class="hljs-keyword">int</span> r)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(l &gt;= r) <span class="hljs-keyword">return</span>;<br>    <span class="hljs-keyword">int</span> i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>, x = q[l + r + <span class="hljs-number">1</span> &gt;&gt; <span class="hljs-number">1</span>];  <span class="hljs-comment">// 注意是向上取整,因为向下取整可能使得x取到q[l]</span><br>    <span class="hljs-keyword">while</span>(i &lt; j)<br>    &#123;<br>        <span class="hljs-keyword">do</span> i ++ ; <span class="hljs-keyword">while</span>(q[i] &lt; x);<br>        <span class="hljs-keyword">do</span> j -- ; <span class="hljs-keyword">while</span>(q[j] &gt; x);<br>        <span class="hljs-keyword">if</span>(i &lt; j) swap(q[i], q[j]);<br>    &#125;<br>    quick_sort(q, l, i - <span class="hljs-number">1</span>), quick_sort(q, i, r);  <span class="hljs-comment">// 不用q[l..i],q[i+1..r]划分的道理和分析4中j的情况一样</span><br>&#125;<br></code></pre></td></tr></table></figure>
 <p>还有从大到小排序的模板(仅仅改两个地方的判断符号)</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">quick_sort</span><span class="hljs-params">(<span class="hljs-keyword">int</span> q[], <span class="hljs-keyword">int</span> l, <span class="hljs-keyword">int</span> r)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(l &gt;= r) <span class="hljs-keyword">return</span>;<br>    <span class="hljs-keyword">int</span> i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>, x = q[l + r &gt;&gt; <span class="hljs-number">1</span>];<br>    <span class="hljs-keyword">while</span>(i &lt; j)<br>    &#123;<br>        <span class="hljs-keyword">do</span> i ++ ; <span class="hljs-keyword">while</span>(q[i] &gt; x);  <span class="hljs-comment">// 这里和下面</span><br>        <span class="hljs-keyword">do</span> j -- ; <span class="hljs-keyword">while</span>(q[j] &lt; x);  <span class="hljs-comment">// 这行的判断条件改一下</span><br>        <span class="hljs-keyword">if</span>(i &lt; j) swap(q[i], q[j]);<br>    &#125;<br>    quick_sort(q, l, j), quick_sort(q, j + <span class="hljs-number">1</span>, r);<br>&#125;    <br></code></pre></td></tr></table></figure>
-<h3 id="元素值-和-q角标-的区别">2、<code>元素值</code> 和 <code>q[角标]</code> 的区别</h3>
-<p>我之前一直搞错了角标的问题。正确写法是 <code>x = q[l + r &gt;&gt; 1]</code> ，我总是写成 <code>x = l + r &gt;&gt; 1; ...q[i] &lt; q[x]</code>。好蠢，一直没弄清楚 <strong><code>元素值</code> 和 <code>q[角标]</code> 的区别</strong>。<code>元素值</code> 就是一个数字，而 <code>q[角标]</code> 表示角标所在位置的值，相当于一个坑。快排在交换元素时，可能这个坑里的元素会有变化，而快排想要的仅仅是一个作为比较的值，模板里选了中间位置的元素值，而不是这个位置的数。之前一直没想通这个问题，直到模拟了一个错误样例才想明白。</p>
+<h3 id="3-元素值-和-q-角标-的区别"><a href="#3-元素值-和-q-角标-的区别" class="headerlink" title="3. 元素值 和 q[角标] 的区别"></a>3. <code>元素值</code> 和 <code>q[角标]</code> 的区别</h3><p>我之前一直搞错了角标的问题。正确写法是 <code>x = q[l + r &gt;&gt; 1]</code> ，我总是写成 <code>x = l + r &gt;&gt; 1; ...q[i] &lt; q[x]</code>。好蠢，一直没弄清楚 <strong><code>元素值</code> 和 <code>q[角标]</code> 的区别</strong>。<code>元素值</code> 就是一个数字，而 <code>q[角标]</code> 表示角标所在位置的值，相当于一个坑。快排在交换元素时，可能这个坑里的元素会有变化，而快排想要的仅仅是一个作为比较的值，模板里选了中间位置的元素值，而不是这个位置的数(也就是位置的角标)。之前一直没想通这个问题，直到模拟了一个错误样例才想明白。</p>
 <blockquote>
 <p>错误样例为：49，59，88，37，98，97，68，54，31，3</p>
 </blockquote>
 <p>以后遇到错误也要<u>多模拟样例</u>，自己想明白才是真的明白，不然也不会背了四五遍模板也记不清楚。</p>
-<hr />
-<h2 id="例题">例题</h2>
-<h3 id="acwing-785.-快速排序">1. <a href="https://www.acwing.com/problem/content/787/">AcWing 785. 快速排序</a></h3>
-<p>给定你一个长度为n的整数数列。</p>
+<hr>
+<h2 id="例题"><a href="#例题" class="headerlink" title="例题"></a>例题</h2><h3 id="1-AcWing-785-快速排序"><a href="#1-AcWing-785-快速排序" class="headerlink" title="1. AcWing 785. 快速排序"></a>1. <a href="https://www.acwing.com/problem/content/787/">AcWing 785. 快速排序</a></h3><p>给定你一个长度为n的整数数列。</p>
 <p>请你使用快速排序对这个数列按照从小到大进行排序。</p>
 <p>并将排好序的数列按顺序输出。</p>
 <p><strong>输入格式</strong></p>
 <p>输入共两行，第一行包含整数 n。</p>
-<p>第二行包含 n 个整数（所有整数均在 <span class="math inline">\(1\)</span> ~ <span class="math inline">\(10^9\)</span> 范围内），表示整个数列。</p>
+<p>第二行包含 n 个整数（所有整数均在 $1$ ~ $10^9$ 范围内），表示整个数列。</p>
 <p><strong>输出格式</strong></p>
 <p>输出共一行，包含 n 个整数，表示排好序的数列。</p>
 <p><strong>数据范围</strong></p>
-<p><span class="math inline">\(1≤n≤100000\)</span></p>
+<p>$1≤n≤100000$</p>
 <p><strong>输入样例</strong>：</p>
 <figure class="highlight basic"><table><tr><td class="code"><pre><code class="hljs basic"><span class="hljs-number">5</span><br><span class="hljs-symbol">3 </span><span class="hljs-number">1</span> <span class="hljs-number">2</span> <span class="hljs-number">4</span> <span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
 <p><strong>输出样例：</strong></p>
@@ -3320,38 +3361,32 @@ S_{x,y} = S_{x-1,y} +  S_{x,y-1} - S_{x-1,y-1} + a_{x,y}
 </blockquote>
 <p><strong>code</strong></p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;algorithm&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> N = <span class="hljs-number">1e6</span> + <span class="hljs-number">10</span>;<br><br><span class="hljs-keyword">int</span> n;<br><span class="hljs-keyword">int</span> q[N];<br><br><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">quick_sort</span><span class="hljs-params">(<span class="hljs-keyword">int</span> q[], <span class="hljs-keyword">int</span> l, <span class="hljs-keyword">int</span> r)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span> (l &gt;= r) <span class="hljs-keyword">return</span> ;<br>    <span class="hljs-keyword">int</span> x = q[l + r &gt;&gt; <span class="hljs-number">1</span>], i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>;    <br>    <span class="hljs-keyword">while</span>(i &lt; j)<br>    &#123;<br>        <span class="hljs-keyword">do</span> i ++ ; <span class="hljs-keyword">while</span>(q[i] &lt; x);<br>        <span class="hljs-keyword">do</span> j -- ; <span class="hljs-keyword">while</span>(q[j] &gt; x);<br>        <span class="hljs-keyword">if</span> (i &lt; j ) swap(q[i], q[j]);<br>    &#125;    <br>    quick_sort(q, l, j), quick_sort(q, j + <span class="hljs-number">1</span>, r);<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; n;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n ;i ++ ) <span class="hljs-built_in">cin</span> &gt;&gt; q[i];<br>    quick_sort(q, <span class="hljs-number">0</span>, n - <span class="hljs-number">1</span>);    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i ++ ) <span class="hljs-built_in">cout</span> &lt;&lt; q[i] &lt;&lt; <span class="hljs-string">&#x27; &#x27;</span>;    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
-<hr />
-<h1 id="快速选择算法">快速选择算法</h1>
-<p>快速选择算法是快速排序的一种变形。通常用在未排序的数组中寻找第k小/第k大的元素。</p>
-<h2 id="思路-1">思路</h2>
-<p>快速选择的总体思路与快速排序一致。</p>
-<ol type="1">
+<hr>
+<h1 id="快速选择算法"><a href="#快速选择算法" class="headerlink" title="快速选择算法"></a>快速选择算法</h1><p>快速选择算法是快速排序的一种变形。通常用在未排序的数组中寻找第k小/第k大的元素。</p>
+<h2 id="思路-1"><a href="#思路-1" class="headerlink" title="思路"></a>思路</h2><p>快速选择的总体思路与快速排序一致。</p>
+<ol>
 <li><strong>确定分界点</strong>：<code>int x = q[l + r &gt;&gt; 1]</code>。(这里最好取中间值比较保险，因为左右两端需要考虑边界问题)</li>
 <li><strong>调整区间</strong>：找到左边区间 <code>q[i] &lt; x</code> 的点 和 右边区间 <code>q[j] &gt; x</code> 的点，并交换~</li>
 <li><strong>递归处理k在的一端</strong>：快速选择并不递归访问双边，而是只递归进入一边的元素中继续寻找。直至 <code>if (l &gt;= r) return q[l];</code> 。其中 <code>q[l]</code> 或者 <code>q[r]</code> 都可以，因为最后一次递归数组里只有一个数，就是要找的数。</li>
 </ol>
-<h2 id="时间复杂度-1">时间复杂度</h2>
-<p>快速选择并不递归访问双边，而是只递归进入一边的元素中继续寻找。这降低了平均时间复杂度，从 <span class="math inline">\(O(n logn)\)</span> 至 <span class="math inline">\(O(n)\)</span> ，不过最坏情况仍然是 <span class="math inline">\(O(n^2)\)</span> 。</p>
-<p>第一层：<span class="math inline">\(O(n)\)</span></p>
-<p>第二层：<span class="math inline">\(O(n/2)\)</span></p>
-<p>第三层：<span class="math inline">\(O(n/4)\)</span></p>
-<p>...</p>
-<p>所以：<span class="math inline">\(O(n·(1 + \frac{1}{2}+ \frac{1}{4} + ... + \frac{1}{n})) &lt;= O(2n) = O(n)\)</span></p>
-<h2 id="快速选择模板">快速选择模板</h2>
-<blockquote>
+<h2 id="时间复杂度-1"><a href="#时间复杂度-1" class="headerlink" title="时间复杂度"></a>时间复杂度</h2><p>快速选择并不递归访问双边，而是只递归进入一边的元素中继续寻找。这降低了平均时间复杂度，从 $O(n logn)$ 至 $O(n)$ ，不过最坏情况仍然是 $O(n^2)$ 。</p>
+<p>第一层：$O(n)$</p>
+<p>第二层：$O(n/2)$</p>
+<p>第三层：$O(n/4)$</p>
+<p>…</p>
+<p>所以：$O(n·(1 + \frac{1}{2}+ \frac{1}{4} + … + \frac{1}{n})) &lt;= O(2n) = O(n)$</p>
+<h2 id="快速选择模板"><a href="#快速选择模板" class="headerlink" title="快速选择模板"></a>快速选择模板</h2><blockquote>
 <p>快速选择算法：类似快排+二分，k在哪半部分，就递归哪个部分。</p>
 </blockquote>
 <figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">quick_xuan</span><span class="hljs-params">(<span class="hljs-keyword">int</span> q[], <span class="hljs-keyword">int</span> l, <span class="hljs-keyword">int</span> r, <span class="hljs-keyword">int</span> k)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span> (l &gt;= r) <span class="hljs-keyword">return</span> q[l];  <span class="hljs-comment">// q[l]/q[r]都可以，因为最后一次递归数组里只有一个数</span><br>    <br>    <span class="hljs-keyword">int</span> x = q[l + r &gt;&gt; <span class="hljs-number">1</span>], i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>;<br>    <br>    <span class="hljs-keyword">while</span>(i &lt; j)<br>    &#123;<br>        <span class="hljs-keyword">do</span> i ++ ; <span class="hljs-keyword">while</span>(q[i] &lt; x);<br>        <span class="hljs-keyword">do</span> j -- ; <span class="hljs-keyword">while</span>(q[j] &gt; x);<br>        <span class="hljs-keyword">if</span> (i &lt; j) swap(q[i], q[j]);<br>    &#125;<br>    <br>    <span class="hljs-keyword">int</span> left_num = j - l + <span class="hljs-number">1</span>;  <span class="hljs-comment">// left_num: 左边的数有多少个</span><br>    <br>    <span class="hljs-keyword">if</span> (k &lt;= left_num) quick_xuan(q, l, j, k);  <span class="hljs-comment">// 递归左半边</span><br>    <span class="hljs-keyword">else</span> quick_xuan(q, j + <span class="hljs-number">1</span>, r, k - (j - l + <span class="hljs-number">1</span>));  <span class="hljs-comment">// 递归右半边</span><br>&#125;<br></code></pre></td></tr></table></figure>
-<h2 id="例题-1">例题</h2>
-<h3 id="acwing-786.-第k个数">1. <a href="https://www.acwing.com/problem/content/788/">AcWing 786. 第k个数</a></h3>
-<p>给定一个长度为n的整数数列，以及一个整数k，请用快速选择算法求出数列从小到大排序后的第k个数。</p>
+<h2 id="例题-1"><a href="#例题-1" class="headerlink" title="例题"></a>例题</h2><h3 id="1-AcWing-786-第k个数"><a href="#1-AcWing-786-第k个数" class="headerlink" title="1. AcWing 786. 第k个数"></a>1. <a href="https://www.acwing.com/problem/content/788/">AcWing 786. 第k个数</a></h3><p>给定一个长度为n的整数数列，以及一个整数k，请用快速选择算法求出数列从小到大排序后的第k个数。</p>
 <p><strong>输入格式</strong></p>
-<p>第一行包含两个整数 <span class="math inline">\(n\)</span> 和 <span class="math inline">\(k\)</span>。</p>
-<p>第二行包含 <span class="math inline">\(n\)</span> 个整数（所有整数均在 <span class="math inline">\(1\)</span> ~ <span class="math inline">\(10^9\)</span>范围内），表示整数数列。</p>
+<p>第一行包含两个整数 $n$ 和 $k$。</p>
+<p>第二行包含 $n$ 个整数（所有整数均在 $1$ ~ $10^9$范围内），表示整数数列。</p>
 <p><strong>输出格式</strong></p>
 <p>输出一个整数，表示数列的第k小数。</p>
 <p><strong>数据范围</strong></p>
-<p><span class="math inline">\(1≤n≤100000\)</span>, <span class="math inline">\(1≤k≤n\)</span></p>
+<p>$1≤n≤100000$,<br>$1≤k≤n$</p>
 <p><strong>输入样例</strong></p>
 <figure class="highlight basic"><table><tr><td class="code"><pre><code class="hljs basic"><span class="hljs-symbol">5 </span><span class="hljs-number">3</span><br><span class="hljs-symbol">2 </span><span class="hljs-number">4</span> <span class="hljs-number">1</span> <span class="hljs-number">5</span> <span class="hljs-number">3</span><br></code></pre></td></tr></table></figure>
 <p><strong>输出样例</strong></p>
@@ -3361,8 +3396,7 @@ S_{x,y} = S_{x-1,y} +  S_{x,y-1} - S_{x-1,y-1} + a_{x,y}
 </blockquote>
 <p><strong>code</strong></p>
 <figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-comment">#include&lt;iostream&gt;</span><br><span class="hljs-comment">#include&lt;algorithm&gt;</span><br><br>using namespace std;<br><br>const <span class="hljs-built_in">int</span> N = <span class="hljs-number">1e6</span> + <span class="hljs-number">10</span>;<br><br><span class="hljs-built_in">int</span> q[N];<br><span class="hljs-built_in">int</span> n, k;<br><br><span class="hljs-built_in">int</span> quick_xuan(<span class="hljs-built_in">int</span> q[], <span class="hljs-built_in">int</span> l, <span class="hljs-built_in">int</span> r, <span class="hljs-built_in">int</span> k)<br>&#123;<br>    <span class="hljs-keyword">if</span> (l &gt;= r) <span class="hljs-keyword">return</span> q[l];  // q[l]/q[r]都可以，因为最后一次递归数组里只有一个数<br>    <br>    <span class="hljs-built_in">int</span> x = q[l + r &gt;&gt; <span class="hljs-number">1</span>], i = l - <span class="hljs-number">1</span>, j = r + <span class="hljs-number">1</span>;<br>    <br>    <span class="hljs-keyword">while</span>(i &lt; j)<br>    &#123;<br>        do i ++ ; <span class="hljs-keyword">while</span>(q[i] &lt; x);<br>        do j -- ; <span class="hljs-keyword">while</span>(q[j] &gt; x);<br>        <span class="hljs-keyword">if</span> (i &lt; j) swap(q[i], q[j]);<br>    &#125;<br>    <br>    <span class="hljs-built_in">int</span> left_num = j - l + <span class="hljs-number">1</span>;  // left_num: 左边的数有多少个<br>    <br>    <span class="hljs-keyword">if</span> (k &lt;= left_num) quick_xuan(q, l, j, k);  // 递归左半边<br>    <span class="hljs-keyword">else</span> quick_xuan(q, j + <span class="hljs-number">1</span>, r, k - (j - l + <span class="hljs-number">1</span>));  // 递归右半边<br>&#125;<br><br><span class="hljs-built_in">int</span> main()<br>&#123;<br>    cin &gt;&gt; n &gt;&gt; k;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i ++ ) cin &gt;&gt; q[i];<br>    <br>    cout &lt;&lt; quick_xuan(q, <span class="hljs-number">0</span>, n - <span class="hljs-number">1</span>, k) &lt;&lt; endl;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;    <br>&#125;<br></code></pre></td></tr></table></figure>
-<h3 id="acwing-104.-货仓选址">2. <a href="https://www.acwing.com/problem/content/106/">AcWing 104. 货仓选址</a></h3>
-<blockquote>
+<h3 id="2-AcWing-104-货仓选址"><a href="#2-AcWing-104-货仓选址" class="headerlink" title="2. AcWing 104. 货仓选址"></a>2. <a href="https://www.acwing.com/problem/content/106/">AcWing 104. 货仓选址</a></h3><blockquote>
 <p>此题需要贪心算法。我还不会，留个坑以后填。</p>
 </blockquote>
 ]]></content>
@@ -17411,8 +17445,8 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
   <entry>
     <title>shell 语法</title>
     <url>/2021/10/17/shell%E8%AF%AD%E6%B3%95/</url>
-    <content><![CDATA[<h1 id="shell-语法"><a href="#shell-语法" class="headerlink" title="shell 语法"></a>shell 语法</h1><h2 id="1-概论"><a href="#1-概论" class="headerlink" title="1. 概论"></a>1. 概论</h2><p>shell是我们通过命令行与操作系统沟通的语言。</p>
-<p>shell脚本可以直接在命令行中执行，也可以将一套逻辑组织成一个文件，方便复用。</p>
+    <content><![CDATA[<h1 id="shell-语法"><a href="#shell-语法" class="headerlink" title="shell 语法"></a>shell 语法</h1><h2 id="1-概论"><a href="#1-概论" class="headerlink" title="1. 概论"></a>1. 概论</h2><p>shell 是我们通过命令行与操作系统沟通的语言。</p>
+<p>shell 脚本可以直接在命令行中执行，也可以将一套逻辑组织成一个文件，方便复用。</p>
 <blockquote>
 <p>AC Terminal中的命令行可以看成是一个<strong>“shell脚本在逐行执行”</strong>。</p>
 </blockquote>
@@ -17425,7 +17459,7 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
 <li>zsh</li>
 <li>…</li>
 </ul>
-<p>Linux系统中一般默认使用bash，所以接下来提一提bash中的语法。</p>
+<p>Linux 系统中一般默认使用bash，所以接下来提一提bash中的语法。</p>
 <p>文件开头需要写<code>#! /bin/bash</code>，指明bash为脚本解释器。</p>
 <p><strong>学习技巧</strong></p>
 <p>不要死记硬背，遇到含糊不清的地方，可以在AC Terminal里实际运行一遍。</p>
@@ -17438,6 +17472,7 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
 <p><strong>运行方式</strong></p>
 <p>作为可执行文件</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ chmod +x test.sh  <span class="hljs-comment"># 使脚本具有可执行权限</span><br><br>acs@9e0ebfcd82d7:~$ ./test.sh  <span class="hljs-comment"># 当前路径下执行</span><br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br>acs@9e0ebfcd82d7:~$ /home/acs/test.sh  <span class="hljs-comment"># 绝对路径下执行</span><br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br>acs@9e0ebfcd82d7:~$ ~/test.sh  <span class="hljs-comment"># 家目录路径下执行</span><br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br></code></pre></td></tr></table></figure>
+<p><code>chmod +x test.sh</code> 使脚本具有可执行权限可执行文件会从白色变为绿色。</p>
 <p>用解释器执行</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><code class="hljs bash">acs@9e0ebfcd82d7:~$ bash test.sh<br>Hello World!  <span class="hljs-comment"># 脚本输出</span><br></code></pre></td></tr></table></figure>
 <h2 id="2-注释"><a href="#2-注释" class="headerlink" title="2. 注释"></a>2. 注释</h2><h3 id="单行注释"><a href="#单行注释" class="headerlink" title="单行注释"></a>单行注释</h3><p>每行中 <code>#</code> 之后的内容均是注释。</p>
@@ -17856,102 +17891,89 @@ J(\theta)=\mathbb{E}_{\left(e_{s}, r, e_{o}\right) \in \mathcal{K} \mathcal{G}} 
   <entry>
     <title>Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning Interpretability</title>
     <url>/2021/10/30/Is%20Multi-Hop%20Reasoning%20Really%20Explainable%20Towards%20Benchmarking%20Reasoning%20%20Interpretability/</url>
-    <content><![CDATA[<h1 id="is-multi-hop-reasoning-really-explainable-towards-benchmarking-reasoning-interpretability">Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning Interpretability</h1>
-<p>这篇论文是今年新出的，在 <a href="https://arxiv.org/pdf/2104.06751.pdf">arxiv</a> 上，但还未公开发表，但根据作者吕欣历年的习惯，八成是要投今年的 EMNLP。</p>
+    <content><![CDATA[<h1 id="Is-Multi-Hop-Reasoning-Really-Explainable-Towards-Benchmarking-Reasoning-Interpretability"><a href="#Is-Multi-Hop-Reasoning-Really-Explainable-Towards-Benchmarking-Reasoning-Interpretability" class="headerlink" title="Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning  Interpretability"></a>Is Multi-Hop Reasoning Really Explainable? Towards Benchmarking Reasoning  Interpretability</h1><p>这篇论文是今年新出的，在 <a href="https://arxiv.org/pdf/2104.06751.pdf">arxiv</a> 上，但还未公开发表，但根据作者吕欣历年的习惯，八成是要投今年的 EMNLP。</p>
+<blockquote>
+<p>果然中了 EMNLP…</p>
+</blockquote>
 <p>文章的主要工作是提出了一个 benchmark：<strong>BIMR</strong> (Benchmark to detect the Interpretability of Multi-hop Reasoning)，用于对多跳推理的效果进行评估，并用该 benchmark 对 9 个 baseline 模型进行了测试，验证了 A-benchmark 的有效性 和 R-benchmark 的泛化性。</p>
-<h2 id="problem">Problem</h2>
-<p>以前的 KG 的多跳推理，大多数都关心模型性能，而<strong>忽略了对路径可解释性的评估</strong>。</p>
+<h2 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h2><p>以前的 KG 的多跳推理，大多数都关心模型性能，而<strong>忽略了对路径可解释性的评估</strong>。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211030192312525.png"  style="zoom:67%;" /></p>
 <p>很多多跳推理模型给出的路径并不合理，如上图下面的例子，尽管模型预测出了正确的尾实体，但是给出的推理路径完全不合理，目前对多跳推理效果评价的方法只有 case study，很少有人做可解释性的评估，因此<strong>文章提出了量化的评价指标 BIMR，用于评价多跳路径的可解释性。</strong></p>
-<h2 id="benchmark">Benchmark</h2>
-<h3 id="dataset-construction">1. Dataset Construction</h3>
-<p>这里没细看，可以见论文的附录 A.</p>
-<h3 id="evaluation-framework">2. Evaluation Framework</h3>
-<p>计算模型的可解释性分数基于三个指标定义：Path Recall (PR)，Local Interpretability (LI)，Global Interpretability (GI).</p>
-<h4 id="path-recall-pr">2.1 Path Recall (PR)</h4>
-<p>路径召回（PR）表示<strong>测试集中，模型可以通过至少一条从头部实体到尾部实体的路径找到三元组的比例</strong>。 <span class="math display">\[
-\mathrm{PR}=\frac{\sum_{(h, r, t) \in \mathcal{T}^{\text {test }}} \operatorname{Cnt}(h, r, t)}{\left|\mathcal{T}^{\text {test }}\right|}
-\]</span> 其中，<span class="math inline">\(\operatorname{Cnt}(h, r, t)\)</span> 是一个指示函数，表示模型是否可以从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 中找到路径。如果至少可以找到一条路径，则函数值为 1，否则为 0。</p>
-<p>Path Recall 的意义在于：对于大多数模型，不是每个三元组都能找到从头部实体到尾部实体的路径。没有来自 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 的路径，或者可能无法为每个 rule 匹配 KG 上的真实路径。</p>
-<h4 id="local-interpretability-li">2.2 Local Interpretability (LI)</h4>
-<p>局部可解释性（LI）用于<strong>评估模型找到的路径的合理性</strong>。 <span class="math display">\[
-\mathrm{LI}=\frac{\sum_{(h, r, t) \in \mathcal{T}^{\text {test } } } \operatorname{Cnt}(h, r, t) S(p)}{\sum_{(h, r, t) \in \mathcal{T}^{\text {test } } } \operatorname{Cnt}(h, r, t)}
-\]</span> 其中，<span class="math inline">\(p\)</span> 是模型找到的从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 的得分最高的路径，<span class="math inline">\(S(p)\)</span> 是该路径的可解释性得分</p>
-<h4 id="global-interpretability-gi">2.3 Global Interpretability (GI)</h4>
-<p>全局可解释性（GI）<strong>评估模型的整体可解释性</strong>，因为 LI 只能表达由模型发现的路径的合理程度，但是它不能考虑可以找到多少路径。 <span class="math display">\[
-\mathrm{GI} = \mathrm{PR} \cdot \mathrm{LI}
-\]</span> <strong>LI 可以反映可以找到的所有路径的可解释性，而 GI 评估模型的整体可解释性。</strong></p>
-<h3 id="approximate-interpretability-score">3. Approximate Interpretability Score</h3>
-<p>构建 benchmarks 来定量评估解释性。然而，由于路径数量巨大，评估框架中的 <span class="math inline">\(S(p)\)</span> 很难获得。所以在此之前，先进行：路径收集 和 近似策略。</p>
-<h4 id="path-collection">3.1 Path Collection</h4>
-<p>Path Collection 目的是<strong>收集所有从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 可能的路径</strong>，以便评估框架能够覆盖多跳推理模型的各种输出。</p>
-<ol type="1">
-<li>针对训练集中的每个 <span class="math inline">\((h,r,t)\)</span>，添加反向三元组 <span class="math inline">\((t,r^{-1}, h)\)</span></li>
-<li>对测试集的每个 <span class="math inline">\((h,r,t)\)</span>，使用 <strong>BFS</strong> 搜索从 <span class="math inline">\(h\)</span> 到 <span class="math inline">\(t\)</span> 长度为 3 的所有路径。</li>
+<h2 id="Benchmark"><a href="#Benchmark" class="headerlink" title="Benchmark"></a>Benchmark</h2><h3 id="1-Dataset-Construction"><a href="#1-Dataset-Construction" class="headerlink" title="1. Dataset Construction"></a>1. Dataset Construction</h3><p>这里没细看，可以见论文的附录 A.</p>
+<h3 id="2-Evaluation-Framework"><a href="#2-Evaluation-Framework" class="headerlink" title="2. Evaluation Framework"></a>2. Evaluation Framework</h3><p>计算模型的可解释性分数基于三个指标定义：Path Recall (PR)，Local Interpretability (LI)，Global Interpretability (GI).</p>
+<h4 id="2-1-Path-Recall-PR"><a href="#2-1-Path-Recall-PR" class="headerlink" title="2.1 Path Recall (PR)"></a>2.1 Path Recall (PR)</h4><p>路径召回（PR）表示<strong>测试集中，模型可以通过至少一条从头部实体到尾部实体的路径找到三元组的比例</strong>。</p>
+<script type="math/tex; mode=display">
+\mathrm{PR}=\frac{\sum_{(h, r, t) \in \mathcal{T}^{\text {test }}} \operatorname{Cnt}(h, r, t)}{\left|\mathcal{T}^{\text {test }}\right|}</script><p>其中，$\operatorname{Cnt}(h, r, t)$  是一个指示函数，表示模型是否可以从 $h$ 到 $t$ 中找到路径。如果至少可以找到一条路径，则函数值为 1，否则为 0。</p>
+<p>Path Recall 的意义在于：对于大多数模型，不是每个三元组都能找到从头部实体到尾部实体的路径。没有来自 $h$ 到 $t$ 的路径，或者可能无法为每个 rule 匹配 KG 上的真实路径。</p>
+<h4 id="2-2-Local-Interpretability-LI"><a href="#2-2-Local-Interpretability-LI" class="headerlink" title="2.2 Local Interpretability (LI)"></a>2.2 Local Interpretability (LI)</h4><p>局部可解释性（LI）用于<strong>评估模型找到的路径的合理性</strong>。</p>
+<script type="math/tex; mode=display">
+\mathrm{LI}=\frac{\sum_{(h, r, t) \in \mathcal{T}^{\text {test } } } \operatorname{Cnt}(h, r, t) S(p)}{\sum_{(h, r, t) \in \mathcal{T}^{\text {test } } } \operatorname{Cnt}(h, r, t)}</script><p>其中，$p$ 是模型找到的从 $h$ 到 $t$ 的得分最高的路径，$S(p)$ 是该路径的可解释性得分</p>
+<h4 id="2-3-Global-Interpretability-GI"><a href="#2-3-Global-Interpretability-GI" class="headerlink" title="2.3 Global Interpretability (GI)"></a>2.3 Global Interpretability (GI)</h4><p>全局可解释性（GI）<strong>评估模型的整体可解释性</strong>，因为 LI 只能表达由模型发现的路径的合理程度，但是它不能考虑可以找到多少路径。</p>
+<script type="math/tex; mode=display">
+\mathrm{GI} = \mathrm{PR} \cdot \mathrm{LI}</script><p><strong>LI 可以反映可以找到的所有路径的可解释性，而 GI 评估模型的整体可解释性。</strong></p>
+<h3 id="3-Approximate-Interpretability-Score"><a href="#3-Approximate-Interpretability-Score" class="headerlink" title="3. Approximate Interpretability Score"></a>3. Approximate Interpretability Score</h3><p>构建 benchmarks 来定量评估解释性。然而，由于路径数量巨大，评估框架中的 $S(p)$ 很难获得。所以在此之前，先进行：路径收集 和 近似策略。</p>
+<h4 id="3-1-Path-Collection"><a href="#3-1-Path-Collection" class="headerlink" title="3.1 Path Collection"></a>3.1 Path Collection</h4><p>Path Collection 目的是<strong>收集所有从 $h$ 到 $t$ 可能的路径</strong>，以便评估框架能够覆盖多跳推理模型的各种输出。</p>
+<ol>
+<li>针对训练集中的每个 $(h,r,t)$，添加反向三元组 $(t,r^{-1}, h)$</li>
+<li>对测试集的每个 $(h,r,t)$，使用 <strong>BFS</strong> 搜索从 $h$ 到 $t$ 长度为 3 的所有路径。</li>
 </ol>
 <p>最后生成了包含约1600万条路径的最终路径集，它涵盖了多跳推理模型可能发现的所有路径。</p>
-<h4 id="approximation-optimization">3.2 Approximation Optimization</h4>
-<p>Approximation Optimization 目的是为了避免在大路径集 P（即1600万）上进行不切实际的注释或计算。作者发现路径的可解释性主要来自<strong>规则 rule</strong>，而不是特定的实体。所以<strong>将每个路径 <span class="math inline">\(p\)</span> 抽象为其相应的规则 <span class="math inline">\(f\)</span>，并使用规则的可解释性得分 <span class="math inline">\(S(f)\)</span> 作为路径可解释性得分 <span class="math inline">\(S(p)\)</span>，</strong> <span class="math display">\[
-S(p) \approx S(f)
-\]</span> 对于一条路径 <span class="math inline">\(p\)</span> <span class="math display">\[
-(h,r,t)←(h, r_1, e_1) ∧ (e_1, r_2, e_2) ∧ (e_2, r_3, t)
-\]</span> 根据规则 <span class="math inline">\(f\)</span> 将 <span class="math inline">\(p\)</span> 转换为： <span class="math display">\[
-r(X, Y)←r_1(X, A_1)∧ r_2(A_1, A_2)∧r_3(A_{2}, Y)
-\]</span> 转换之后，将路径集 <span class="math inline">\(\mathcal{P}\)</span> 转换为一组规则集 <span class="math inline">\(\mathcal{F}\)</span>。因为这些规则是独立于实体的，所以规则集 <span class="math inline">\(\mathcal{F}\)</span> 的大小减少到 96019，只需要给出每个规则 <span class="math inline">\(f \in \mathcal{F}\)</span> 的可解释性分数 <span class="math inline">\(S(f)\)</span> 用于构建 benchmark 即可。</p>
-<h3 id="benchmark-with-manual-annotation-a-benchmark">4. Benchmark with Manual Annotation (A-benchmark)</h3>
-<p>作者用可解释性分数手动标记每个规则，以形成手动注释的基准 (A-benchmark)。该基准的具体构建过程可以分为两个步骤，即剪枝优化和手工标注。</p>
-<h4 id="pruning-optimization">4.1 Pruning Optimization</h4>
-<p>为了在不影响最终结果的情况下<u>节省注释成本</u>，作者提出了一种剪枝策略。Rule mining 方法可以在 KG 上自动挖掘规则，并给每个规则一个置信度。作者的剪枝策略基于这样的假设：那些不在 Rule mining 方法所挖掘的规则列表中的规则，或者那些置信度非常低的规则，可解释性分数更低。</p>
+<h4 id="3-2-Approximation-Optimization"><a href="#3-2-Approximation-Optimization" class="headerlink" title="3.2 Approximation Optimization"></a>3.2 Approximation Optimization</h4><p>Approximation Optimization 目的是为了避免在大路径集 P（即1600万）上进行不切实际的注释或计算。作者发现路径的可解释性主要来自<strong>规则 rule</strong>，而不是特定的实体。所以<strong>将每个路径 $p$ 抽象为其相应的规则 $f$，并使用规则的可解释性得分 $S(f)$ 作为路径可解释性得分 $S(p)$，</strong></p>
+<script type="math/tex; mode=display">
+S(p) \approx S(f)</script><p>对于一条路径 $p$</p>
+<script type="math/tex; mode=display">
+(h,r,t)←(h, r_1, e_1) ∧ (e_1, r_2, e_2) ∧ (e_2, r_3, t)</script><p>根据规则 $f$ 将 $p$ 转换为：</p>
+<script type="math/tex; mode=display">
+r(X, Y)←r_1(X, A_1)∧ r_2(A_1, A_2)∧r_3(A_{2}, Y)</script><p>转换之后，将路径集 $\mathcal{P}$ 转换为一组规则集 $\mathcal{F}$。因为这些规则是独立于实体的，所以规则集 $\mathcal{F}$ 的大小减少到 96019，只需要给出每个规则 $f \in \mathcal{F}$ 的可解释性分数 $S(f)$ 用于构建 benchmark 即可。</p>
+<h3 id="4-Benchmark-with-Manual-Annotation-A-benchmark"><a href="#4-Benchmark-with-Manual-Annotation-A-benchmark" class="headerlink" title="4. Benchmark with Manual Annotation (A-benchmark)"></a>4. Benchmark with Manual Annotation (A-benchmark)</h3><p>作者用可解释性分数手动标记每个规则，以形成手动注释的基准 (A-benchmark)。该基准的具体构建过程可以分为两个步骤，即剪枝优化和手工标注。</p>
+<h4 id="4-1-Pruning-Optimization"><a href="#4-1-Pruning-Optimization" class="headerlink" title="4.1 Pruning Optimization"></a>4.1 Pruning Optimization</h4><p>为了在不影响最终结果的情况下<u>节省注释成本</u>，作者提出了一种剪枝策略。Rule mining 方法可以在 KG 上自动挖掘规则，并给每个规则一个置信度。作者的剪枝策略基于这样的假设：那些不在 Rule mining 方法所挖掘的规则列表中的规则，或者那些置信度非常低的规则，可解释性分数更低。</p>
 <div class="note note-primary">
-            <p>规则怎么挖掘的？没有看过 Rule mining 的论文...</p>
+            <p>规则怎么挖掘的？没有看过 Rule mining 的论文…</p>
           </div>
-<p>作者使用 <a href="https://www.ijcai.org/Proceedings/2019/0435.pdf">AnyBURL</a> 在训练集上挖掘规则，并获得 36065 条 rules 的规则集 <span class="math inline">\(\mathcal{F}^A\)</span> 。根据规则集 <span class="math inline">\(\mathcal{F}^A\)</span> 的 rule 及其置信度得分，将整个规则集 <span class="math inline">\(\mathcal{F}^A\)</span> 分为三组：高置信度规则（H rules）、低置信度规则（L rules）和其他规则（O rules）。每组中随机抽取500条规则，并邀请专家用可解释性分数手动标记它们。规则的分类标准和标签结果如表所示。</p>
+<p>作者使用 <a href="https://www.ijcai.org/Proceedings/2019/0435.pdf">AnyBURL</a> 在训练集上挖掘规则，并获得 36065 条 rules 的规则集 $\mathcal{F}^A$ 。根据规则集 $\mathcal{F}^A$ 的 rule 及其置信度得分，将整个规则集 $\mathcal{F}^A$ 分为三组：高置信度规则（H rules）、低置信度规则（L rules）和其他规则（O rules）。每组中随机抽取500条规则，并邀请专家用可解释性分数手动标记它们。规则的分类标准和标签结果如表所示。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211030210219452.png"  /></p>
 <blockquote>
-<p>三类规则的分类标准和统计信息，其中 <span class="math inline">\(C(f)\)</span> 是规则 f 的置信度得分，#Rules 表示规则的数量，#Paths 表示与此类型规则对应的路径数量，Avg Score 表示此类规则的平均可解释性得分。0.01是用于选择低置信度规则的阈值，被规则挖掘方法广泛采用。</p>
+<p>三类规则的分类标准和统计信息，其中 $C(f)$ 是规则 f 的置信度得分，#Rules 表示规则的数量，#Paths 表示与此类型规则对应的路径数量，Avg Score 表示此类规则的平均可解释性得分。0.01是用于选择低置信度规则的阈值，被规则挖掘方法广泛采用。</p>
 </blockquote>
 <p>从表2可以发现 L rules 的平均解释性得分远低于 H rules。虽然 O rules 的平均分数没有 L rules 的平均分数小，但 O rules 对应的路径太少（0.8M），而规则的数量相对较大（75027）。因此，O rules 可以被视为“长尾”规则。</p>
 <p>为了节省标注成本，并且尽可能不影响最终的评价结果，只手动标注 H rules 的可解释性得分。其他规则，使用此类规则的平均分数作为其可解释性分数，即认为所有 L rules 的可解释性得分为 0.005，所有的 O rules 可解释性得分为 0.069.</p>
 <div class="note note-primary">
             <p>长尾：大概的意思就是虽然尾部很小，但是关注“尾部”产生的总体效益甚至会超过“头部”。在这里应该是，虽然 O rules 的的路径很少，但是它产生的规则数量很大。</p>
           </div>
-<h4 id="manual-annotation">4.2 Manual Annotation</h4>
-<p>因为注释者很难直接注释规则的可解释性分数，因此对于每个 H rules，随机抽取最多10条对应的真实路径进行标记，用 与该规则对应的路径的平均可解释性得分 作为该规则的得分： <span class="math display">\[
-S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)
-\]</span></p>
-<p>其中，<span class="math inline">\(|P_{c}(f)|\)</span> 是规则 <span class="math inline">\(f\)</span> 的所有采样路径，<span class="math inline">\(S^{A}(p)\)</span> 是通过手动注释获得的路径的可解释性得分, 因为无法对所有路径的可解释性得分进行注释，对于等式 8 中注释的少数路径，也就是每个 H rules，随机抽取最多的那10条对应的真实路径，可以直接获得它们的 <span class="math inline">\(S(p)=S^{A}(p)\)</span>，而对于大多数其他路径，也就是 H rules 下 没被抽取到的真实路径，用等式 5：<span class="math inline">\(S(p) \approx S(f)\)</span> 获得它们的近似解释性得分。可解释性分数让注释者选择合理、部分合理和不合理 <span class="math inline">\((1，0.5，0)\)</span></p>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211031141941326.png" /></p>
-<h3 id="benchmarks-with-mined-rules-r-benchmark">5. Benchmarks with Mined Rules (R-benchmark)</h3>
-<p>R-benchmark：使用 Rule mining 方法来挖掘训练集上的 rules，这些挖掘的规则形成一个规则集 <span class="math inline">\(\mathcal{F}^*\)</span>。可以使用规则的置信度作为可解释性得分。但会有另一个问题：规则的置信度和可解释性得分之间没有校准。</p>
-<p>解决方式：通过两个阈值，使用三个分类来标记规则的可解释性得分： <span class="math display">\[
+<h4 id="4-2-Manual-Annotation"><a href="#4-2-Manual-Annotation" class="headerlink" title="4.2 Manual Annotation"></a>4.2 Manual Annotation</h4><p>因为注释者很难直接注释规则的可解释性分数，因此对于每个 H rules，随机抽取最多10条对应的真实路径进行标记，用 与该规则对应的路径的平均可解释性得分 作为该规则的得分：</p>
+<script type="math/tex; mode=display">
+S(f)=\frac{1}{\left|P_{c}(f)\right|} \sum_{p \in P_{c}(f)} S^{A}(p)</script><p>其中，$|P_{c}(f)|$ 是规则 $f$ 的所有采样路径，$S^{A}(p)$ 是通过手动注释获得的路径的可解释性得分, 因为无法对所有路径的可解释性得分进行注释，对于等式 8 中注释的少数路径，也就是每个 H rules，随机抽取最多的那10条对应的真实路径，可以直接获得它们的 $S(p)=S^{A}(p)$，而对于大多数其他路径，也就是 H rules 下 没被抽取到的真实路径，用等式 5：$S(p) \approx S(f)$ 获得它们的近似解释性得分。可解释性分数让注释者选择合理、部分合理和不合理 $(1，0.5，0)$</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211031141941326.png" alt=""></p>
+<h3 id="5-Benchmarks-with-Mined-Rules-R-benchmark"><a href="#5-Benchmarks-with-Mined-Rules-R-benchmark" class="headerlink" title="5. Benchmarks with Mined Rules (R-benchmark)"></a>5. Benchmarks with Mined Rules (R-benchmark)</h3><p>R-benchmark：使用 Rule mining 方法来挖掘训练集上的 rules，这些挖掘的规则形成一个规则集 $\mathcal{F}^*$。可以使用规则的置信度作为可解释性得分。但会有另一个问题：规则的置信度和可解释性得分之间没有校准。</p>
+<p>解决方式：通过两个阈值，使用三个分类来标记规则的可解释性得分：</p>
+<script type="math/tex; mode=display">
 \operatorname{Type}(f)=\left\{\begin{array}{l}
-\text { unreasonable, } c(f)&lt;h_{1} \\
-\text { partially reasonable, } h_{1} \leq c(f)&lt;h_{2} \\
+\text { unreasonable, } c(f)<h_{1} \\
+\text { partially reasonable, } h_{1} \leq c(f)<h_{2} \\
 \text { reasonable, } c(f) \geq h_{2}
-\end{array}\right.
-\]</span> 其中，<span class="math inline">\(c(f)\)</span> 是规则的置信度，使用 Micro-F1 分数来找到最佳的 h1 和 h2。</p>
-<h2 id="experiments">Experiments</h2>
-<h3 id="link-prediction">Link prediction</h3>
-<p>作者主要做了链接预测和可解释性评估。</p>
+\end{array}\right.</script><p>其中，$c(f)$ 是规则的置信度，使用 Micro-F1 分数来找到最佳的 h1 和 h2。</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="Link-prediction"><a href="#Link-prediction" class="headerlink" title="Link prediction"></a>Link prediction</h3><p>作者主要做了链接预测和可解释性评估。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211030222158205.png" style="zoom:67%;" /></p>
-<ol type="1">
-<li><p>在本文更关注的可解释性方面，AnyBURL 取得了几乎最好的结果，PR 值达到 98，这表明几乎测试集中的所有三元组都可以通过 AnyBURL 找到一条真实路径。</p></li>
-<li><p>对于多跳推理模型，在 PR 方面 与 AnyBURL 没有太大的差距。</p></li>
+<ol>
+<li><p>在本文更关注的可解释性方面，AnyBURL 取得了几乎最好的结果，PR 值达到 98，这表明几乎测试集中的所有三元组都可以通过 AnyBURL 找到一条真实路径。</p>
+</li>
+<li><p>对于多跳推理模型，在 PR 方面 与 AnyBURL 没有太大的差距。</p>
+</li>
 <li><p>NeuralLP 在所有模型中获得最高的 LI 分数，并且比其他模型高得多，但这并不意味着 NeuralLP是一个高度可解释的模型，因为它的 PR 分数只有 10.2，因为它使用 高置信度的 rule 作为解释。对于大多数三元组，它不能给出与实际路径对应的规则。</p>
-<p>所以必须得有 GI 来反映整体的可解释性。</p></li>
-<li>在所有模型中，AnyBURL 的 GI 得分最高，远远高于第二名。RuleGuider是一种基于多跳的改进模型。它在 reward 中加入了规则（用 AnyBURL 来挖掘）的置信度信息，提高了模型的可解释性。从实验结果来看，这种改进确实是有效的</li>
-<li><p>当前的多跳推理模型确实具有一定的可解释性。然而，与最好的 基于规则的推理模型 AnyBURL 相比，多跳推理模型在可解释性和链路预测性能方面仍然存在一些差距。这表明目前的多跳推理模型存在许多不足，仍然落后于基于规则的最佳推理模型。</p></li>
+<p>所以必须得有 GI 来反映整体的可解释性。</p>
+</li>
+<li><p>在所有模型中，AnyBURL 的 GI 得分最高，远远高于第二名。RuleGuider是一种基于多跳的改进模型。它在 reward 中加入了规则（用 AnyBURL 来挖掘）的置信度信息，提高了模型的可解释性。从实验结果来看，这种改进确实是有效的</p>
+</li>
+<li>当前的多跳推理模型确实具有一定的可解释性。然而，与最好的 基于规则的推理模型 AnyBURL 相比，多跳推理模型在可解释性和链路预测性能方面仍然存在一些差距。这表明目前的多跳推理模型存在许多不足，仍然落后于基于规则的最佳推理模型。</li>
 </ol>
-<h3 id="manual-annotation-vs.-mined-rules">Manual Annotation vs. Mined Rules</h3>
-<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211031091713802.png"  style="zoom:67%;" /></p>
+<h3 id="Manual-Annotation-vs-Mined-Rules"><a href="#Manual-Annotation-vs-Mined-Rules" class="headerlink" title="Manual Annotation vs. Mined Rules"></a>Manual Annotation vs. Mined Rules</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20211031091713802.png"  style="zoom:67%;" /></p>
 <blockquote>
 <p>ABS-DIFF-AVG表示该基准的可解释性得分与 golden score 之间绝对值的平均值。</p>
 </blockquote>
 <p>可以看到，A-benchmark 可以准确地评估模型的可解释性。R-benchmark 无法提供准确的结果。然而，它有自己的一些优势。例如，它可以应用于其他KG，具有更大的通用性。此外，它还可以为不同模型的解释性比较提供参考指标。</p>
-<h2 id="summary">Summary</h2>
-<p>以前的 KG 的多跳推理，大多数都关心模型性能，而<strong>忽略了对路径可解释性的评估</strong>。本文提出了一个定量评估多跳推理模型可解释性的框架。基于这个框架，对一个数据集进行注释，形成一个名为 BIMR 的 benchmark，该基准可以准确地评估可解释性。实验结果表明，A-benchmark 与 golden truth 的结果相似，可以作为评估模型可解释性的指标。R-benchmark 的准确度不高，但是作者解释说它具有通用性，可以推广到大多数KG。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>以前的 KG 的多跳推理，大多数都关心模型性能，而<strong>忽略了对路径可解释性的评估</strong>。本文提出了一个定量评估多跳推理模型可解释性的框架。基于这个框架，对一个数据集进行注释，形成一个名为 BIMR 的 benchmark，该基准可以准确地评估可解释性。实验结果表明，A-benchmark 与 golden truth 的结果相似，可以作为评估模型可解释性的指标。R-benchmark 的准确度不高，但是作者解释说它具有通用性，可以推广到大多数KG。</p>
 <p>另外，作者提出了未来的工作可以研究：如何更好地将 <strong>挖掘出的规则 融入到 多跳推理模型</strong> 中，以获得更好的性能和可解释性。</p>
-<p>这篇论文给我感觉，实验效果不好的话，解释的通就行....emm...</p>
+<p>这篇论文给我感觉，实验效果不好的话，解释的通就行….emm…</p>
 ]]></content>
       <categories>
         <category>NLP</category>
@@ -18114,7 +18136,7 @@ h_{i}^{(l+1)}=\sigma\left(\sum_{m \in \mathcal{M}_{i}} g_{m}\left(h_{i}^{(l)}, h
 <p>可以看到：同一关系，有 in 和 out 的区别，也就是方向的不同决定了关系也是不同的，可以理解为有向图。</p>
 <p>针对不同种类的关系，R-GCN 采用<strong>不同的聚合方式</strong>，在这里是使用了不同的线性变换矩阵 $W_r$，其更新方程为:</p>
 <script type="math/tex; mode=display">
-h_{i}^{(l+1)}=\sigma\left(\sum_{r \in \mathcal{R}} \sum_{j \in \mathcal{N}_{i}^{r}} \frac{1}{c_{i, r}} W_{r}^{(l)} h_{j}^{(l)}+W_{0}^{(l)} h_{i}^{(l)}\right)</script><p>其中 $h<em>i$ 就是 $l$ 层节点本身，$W_r$ 是 关系 $r$ 下的权重矩阵，$h_j$ 是关系 $r$ 下的邻居节点，也就是说，不同关系下分开来算。 $c</em>{i,r}$ 代表归一化因子, 可以由学习得来, 或规定 $c_{i, r} = |\mathcal{N}_i^r|$。$W_0$ 代表节点自身闭环所对应的变换矩阵。</p>
+h_{i}^{(l+1)}=\sigma\left(\sum_{r \in \mathcal{R} } \sum_{j \in \mathcal{N}_{i}^{r} } \frac{1}{c_{i, r} } W_{r}^{(l)} h_{j}^{(l)}+W_{0}^{(l)} h_{i}^{(l)}\right)</script><p>其中 $h<em>i$ 就是 $l$ 层节点本身，$W_r$ 是 关系 $r$ 下的权重矩阵，$h_j$ 是关系 $r$ 下的邻居节点，也就是说，不同关系下分开来算。 $c</em>{i,r}$ 代表归一化因子, 可以由学习得来, 或规定 $c_{i, r} = |\mathcal{N}_i^r|$。$W_0$ 代表节点自身闭环所对应的变换矩阵。</p>
 <p>针对节点 $v_i$ 及其所有邻居 $N_i$, 分别考虑 $v_i$ 与邻居 $v_j$ 二者之间的关系 $r$，施加以不同的关系变换 $W_r$，再将它们求和并归一化，加上自身的闭环影响，在激活函数的影响下获得下一层的节点表示。</p>
 <p>对比一下 GCN : $H^{(l+1)}=\sigma(\tilde{D}^{-\frac{1}{2}}\tilde{A}\tilde{D}^{-\frac{1}{2}}H^{(l)}W^{(l)})$ 看得到，W在两边皆为模型待学参数，而 GCN 是采用度矩阵D及邻接矩阵A作为一个加权求和的特征融合，而 R-GCN 的参数都在模型参数 $W_r$ 中，它没有用度矩阵D及邻接矩阵A作为边的权重的，而是在模型中参数自学.</p>
 <h3 id="Regularization-规则化"><a href="#Regularization-规则化" class="headerlink" title="Regularization 规则化"></a>Regularization 规则化</h3><p>由于 R-GCN 模型应用于多关系数据，因此一个核心的问题就是当图中关系与参数数目增长时，会产生对罕见关系过拟合的问题。文中对此提出了两种独立的方法对 R-GCN 层进行规则化：基函数分解 和 块对角分解。</p>
@@ -18124,7 +18146,7 @@ W_{r}^{(l)}=\sum_{b=1}^{B} a_{r b}^{(l)} V_{b}^{(l)}</script><p>其中 $B$ 为�
 <p>这种表示方法可以被视为是不同关系下的<strong>权重共享</strong>，对于少关系的情况能够缓解过拟合现象，因为关系之间的基是相互共享的，基总会被其他关系所频繁更新。</p>
 <h4 id="Block-Diagonal-Decomposition"><a href="#Block-Diagonal-Decomposition" class="headerlink" title="Block - Diagonal Decomposition"></a>Block - Diagonal Decomposition</h4><p>块对角分解将变换矩阵 $W_r$ 拆分为 $B$ 个大小<strong>相同</strong>的块:</p>
 <script type="math/tex; mode=display">
-W_{r}^{(l)}=\bigoplus_{b=1}^{B} Q_{b r}^{(l)}=diag(Q_{1r}^{(l)}......Q_{Br}^{(l)})</script><p>其中 $Q<em>{b r}^{(l)} \in \mathbb{R}^{\left(d^{(l+1)} / B\right) \times\left(d^{(l)} / B\right)}$，$\bigoplus$ 为生成一系列低维矩阵 $Q</em>{Br}$ 的求和。</p>
+W_{r}^{(l)}=\bigoplus_{b=1}^{B} Q_{b r}^{(l)}=diag(Q_{1r}^{(l)}......Q_{Br}^{(l)})</script><p>其中 $Q<em>{b r}^{(l)} \in \mathbb{R}^{\left(d^{(l+1)} / B\right) \times\left(d^{(l)} / B\right) }$，$\bigoplus$ 为生成一系列低维矩阵 $Q</em>{Br}$ 的求和。</p>
 <p>对角块分解又可以视为是一种 $W_r$ 的一种<strong>稀疏性约束</strong>，除去块的位置其余位置都是0，与未分解时相比更为稀疏。而且由于分块的影响，在每个块内部，隐特征的联系将比块与块之间更加<strong>紧密</strong>。</p>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220103212837251.png" style="zoom:90%;" /></p>
 <p>至此，R-GCN 已经能够作为一个单独的层，按照层级结构堆叠获得 $L$ 层的多层输出。如果没有节点的初始特征，可以采用 <strong>Embedding</strong> 的方式获取。</p>
@@ -18182,7 +18204,7 @@ f(s, r, t)_{\mathrm{R}-\mathrm{GCN}+}=\alpha f(s, r, t)_{\mathrm{R}-\mathrm{GCN}
 </ol>
 ]]></content>
       <categories>
-        <category>NLP</category>
+        <category>Papers</category>
       </categories>
       <tags>
         <tag>R-GCN</tag>
@@ -18403,7 +18425,7 @@ h_{l}^{(t)}(v)=\color{green}{f}\left(h_{l}^{(t-1)}, \color{red}{\mathcal{F}}\lef
 </ol>
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105104530922.png"  style="zoom: 67%;" /></p>
 <div class="note note-info">
-            <p>关于 GraphSAGE 在 <strong>Inductive</strong> 上的能力讨论可以看<a href="https://www.zhihu.com/question/409415383/answer/1361596817">这里</a>, 我个人是比较赞同答主的说法(但是有点没看懂T^T)。算法能否  Inductive 和 Transductive 仅取决于节点输入是否是 One Hot , 以及在更新节点表示时是否只依赖于局部子图.</p><blockquote><p>“Inductive learning” 意为归纳学习，“Transductive learning” 意为直推学习。</p></blockquote>
+            <p>关于 GraphSAGE 在 <strong>Inductive</strong> 上的能力讨论可以看 <a href="https://www.zhihu.com/question/409415383/answer/1361596817">这里</a>, 我个人是比较赞同答主的说法(但是有点没看懂T^T)。算法能否  Inductive 和 Transductive 仅取决于节点输入是否是 One Hot , 以及在更新节点表示时是否只依赖于局部子图.</p><blockquote><p>“Inductive learning” 意为归纳学习，“Transductive learning” 意为直推学习。</p></blockquote>
           </div>
 <h3 id="PinSAGE"><a href="#PinSAGE" class="headerlink" title="PinSAGE"></a>PinSAGE</h3><p><strong>采样时只能选取真实的邻居节点吗？</strong>如果构建的是一个与虚拟邻居相连的子图有什么优点？PinSAGE 算法将会给我们解答</p>
 <ul>
@@ -18428,11 +18450,386 @@ h_{l}^{(t)}(v)=\color{green}{f}\left(h_{l}^{(t-1)}, \color{red}{\mathcal{F}}\lef
 <p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220105114742148.png"  style="zoom:67%;" /></p>
 <p>当然, GCN, GAT这类的聚合函数都是相较于经典聚合函数更为复杂的.</p>
 ]]></content>
+      <tags>
+        <tag>GNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【SACN】End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion</title>
+    <url>/2022/01/18/End-to-end%20Structure-Aware%20Convolutional%20Networks%20for%20Knowledge%20Base%20Completion/</url>
+    <content><![CDATA[<h1 id="End-to-end-Structure-Aware-Convolutional-Networks-for-Knowledge-Base-Completion"><a href="#End-to-end-Structure-Aware-Convolutional-Networks-for-Knowledge-Base-Completion" class="headerlink" title="End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion"></a>End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion</h1><p>本文是美国康涅狄格大学的研究者发表在 AAAI 2019 上的文章，提出了 WGCN、Conv-TransE 及两者的结合 SACN，文章的主要思想是将图卷积与 ConvE 结合，在用卷积做 KGE 时既考虑图结构信息（GCN），又考虑翻译特性（Conv-TransE）。</p>
+<div class="note note-primary">
+            <p><strong>问：</strong>这个图的节点属性是 KB 里本来有的吗？那以前的方法没把它算进去吗？</p><ul><li>不是…应该是作者自己构建了带有属性三元组的数据集 FB15k-237-Attr, 但是是如何构建的，貌似没有在文章和code中看到…</li></ul>
+          </div>
+<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><p>文章认为，知识图谱补全任务: </p>
+<ol>
+<li>以前的方法只建模关系三元组，忽略了大量<strong>图节点相关属性</strong></li>
+<li>以前的方法<strong>没有考虑 KG 的图结构信息</strong></li>
+<li>ConvE 模型中采用的 2D 卷积操作没能保留翻译特性 (TransE)</li>
+</ol>
+<p>针对这三个问题，文章提出用加权的图卷积网络 WGCN 解决图结构 (connectivity structure) 信息没有考虑在内的问题，省略了 ConvE 2D 卷积中的 reshape 操作用于保留翻译特性。整体的模型称为 SACN (Structure-Aware Convolutional Network)，是一个 End-to-end 的结构</p>
+<ul>
+<li>WGCN 作为 Encoder: 利用一个带权重的 GCN 的方法（利用图的结构并保留节点的属性）</li>
+<li>Conv-TransE 作为 Decoder: 利用 ConvE 的方法，但是去掉了实体和关系的矩阵 reshape 部分（为了保留 TransE 的 <code>h+r=t</code> 的特性）。</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>作者<strong>比较了 ConvE 和 ConvKB 的区别</strong>：ConvE 是第一个在不同嵌入维度的嵌入上使用 2D 卷积的模型，希望提取更多的特征交互。ConvKB 将 ConvE 中的二维卷积替换为一维卷积，从而将卷积限制为相同的嵌入维数，并保持 TransE 的平移特性。ConvKB 可被视为 Conv-TransE 的特例，它只使用宽度等于1的过滤器。尽管 ConvKB 被证明比 ConvE 更好，但两个数据集（FB15k-237和WN18RR）的结果并不一致，因此我们将这些结果从对比表中删除。</p>
+<p>ConvE 和 ConvKB 的另一个主要区别在于模型中使用的损失函数。ConvE 使用了交叉熵损失，该损失可以通过解码器中的 1-N 评分来加速，而 ConvKB 使用了铰链损失，该损失是从正示例和采样的负示例中计算出来的。作者采用 ConvE 的解码器，因为可以很容易地将 GCN 的编码器和 ConvE 的解码器集成到端到端的训练框架中，而 ConvKB 不适合。 </p>
+<div class="note note-primary">
+            <p>Knowledge Graph Embedding: 将实体和关系的语义编码在一个连续的低维向量空间（称为嵌入 embeddings）中。然后可以使用这些嵌入来预测新的关系。</p>
+          </div>
+<h2 id="SACN"><a href="#SACN" class="headerlink" title="SACN"></a>SACN</h2><h3 id="GCN"><a href="#GCN" class="headerlink" title="GCN"></a>GCN</h3><p>回忆一下 GCN 的定义，主要思想为：将每个节点作为聚合的中心节点，对每个中心节点，聚合邻居节点的本层特征表示，来作为中心节点的下一层特征表示，即</p>
+<script type="math/tex; mode=display">
+\begin{array}{c}
+h_{i}^{l+1}=\sigma\left(\sum_{j \in N_{i}} g\left(h_{i}^{l}, h_{j}^{l}\right)\right) \\
+g\left(h_{i}^{l}, h_{j}^{l}\right)=h_{j}^{l} W^{l} \\
+h_{j}^{l} \in R^{F^{l}}, W^{l} \in R^{F^{l} \times F^{l+1}}
+\end{array}</script><p>通过求和操作，将线性变换后的邻居节点的向量表示共享给中心节点，实现 GCN 层中的聚合操作。通过 GCN 层的逐层堆叠，来实现前向传递。值得一提的是，每层 GCN 都聚合了邻居的信息，在第一层聚合了一阶邻居信息之后，第二层聚合邻居的时候，它的邻居节点已经有了邻居节点的邻居节点的信息，因此第二层 GCN 聚合了二阶邻居的信息。GCN 层堆叠次数越多，中心节点所聚合的邻居范围也越广。</p>
+<p>GCN 的本质和 PageRank 是一样的，就是信息累积(聚合)，用邻居节点表示当前节点。在 WGCN 这里模型做了一点小小的提升，就是在信息累积时候加上了<u>权重</u>，用于控制在多大程度上接受从邻居节点流过来的信息（文中称为当前节点与邻居节点的交互强度），之前的 GCN 只是单纯地把汇过来的信息求平均。这个权重由两节点的关系类型决定。</p>
+<h3 id="WGCN-Weighted-Graph-Convolutional-Layer"><a href="#WGCN-Weighted-Graph-Convolutional-Layer" class="headerlink" title="WGCN: Weighted Graph Convolutional Layer"></a>WGCN: Weighted Graph Convolutional Layer</h3><p>WGCN 是加权的 GCN，<strong>在聚合时对不同类型的关系进行不同的加权，并在网络训练期间自适应学习加权</strong>。通过这种自适应，WGCN 可以控制来自聚合中使用的相邻节点的信息量。WGCN 将多关系 KB 图视为多个单关系子图，其中每个子图都包含特定类型的关系。WGCN 确定在组合节点的 GCN 嵌入时给每个子图的权重。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220118114511145.png" alt=""></p>
+<p>上图展示了 SACN 的整个过程。在这个例子中，网络的 WGCN 层计算中间图中的红色节点的嵌入。这些层按照 KB 关系中的指定聚合相邻实体节点的嵌入。边的三种颜色（蓝色、黄色和绿色）表示图形中的三种不同关系类型。根据该层中的权重 $\alpha_{t}$，将对应的三个实体节点以不同的权值相加，得到红色节点的嵌入。具有相同颜色（相同关系类型）的边使用相同的 $\alpha_t$。每个层都有自己的一组关系权重 $\alpha_t$。因此，节点 $v_i$ 的第 $l$ 层的输出可以如下写入:</p>
+<script type="math/tex; mode=display">
+h_{i}^{l+1}=\sigma\left(\sum_{j \in \mathbf{N}_{\mathbf{i}}} \alpha_{t}^{l} g\left(h_{i}^{l}, h_{j}^{l}\right)\right)</script><ul>
+<li>其中，$h<em>{j}^{l}$ 是节点 $v_i$ 的输入， $v_j$ 是 $v_i$ 的邻居节点(一共 $N_i$ 个)，$\alpha</em>{t}^{l}$ 是第 $l$ 层，第 $t$ 种边（关系）类型的权重参数, $g$ 是聚合邻居信息的函数:</li>
+</ul>
+<script type="math/tex; mode=display">
+g\left(h_{i}^{l}, h_{j}^{l}\right)=h_{j}^{l} W^{l}</script><ul>
+<li>$W^{l} \in \mathbb{R}^{F^{l} \times F^{l+1}}$ 是连接系数矩阵，用于 $F^{l}$ 到 $F^{l+1}$ 的线性变换.</li>
+</ul>
+<p>每个节点在接收邻居信息的时候应当<strong>保留自己的信息</strong>，和 R-GCN 一样，加上 self-loop，则节点 $v_i$ 的传播过程可以被定义为：</p>
+<script type="math/tex; mode=display">
+h_{i}^{l+1}=\sigma\left(\sum_{j \in \mathbf{N}_{\mathbf{i}}} \alpha_{t}^{l} h_{j}^{l} W^{l}+h_{i}^{l} W^{l}\right)</script><p>$l$ 层的输出是一个节点特征矩阵：$H^{l+1} \in \mathbb{R}^{N \times F^{l+1}}$ ，$h_i^{l+1}$ 是 $H^{l+1}$ 的第 $i$ 行，代表第 $l+1$ 层中节点 $v_i$ 的特征。</p>
+<p>以上的为不同类型的边加权重的过程可以看做一个矩阵乘法：通过一个邻接矩阵同时为所有节点计算 embeddings，见下图：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220118222657043.png"  style="zoom:50%;" /></p>
+<p>对于每种关系（边）类型，邻接矩阵 $A_t$ 是一个二元矩阵，如果存在连接 $v_i$ 和 $v_j$ 的边，则邻接矩阵中第 $ij$ 的位置为 1，否则为0。最终邻接矩阵如下所示：</p>
+<script type="math/tex; mode=display">
+A^{l}=\sum_{t=1}^{T}\left(\alpha_{t}^{l} A_{t}\right)+I</script><ul>
+<li>其中 $I$ 是大小为 $N×N$ 的单位矩阵, $A^l$ 是子图的邻接矩阵加上自连接的加权和。</li>
+</ul>
+<p>故，由此可以等到每一层线性变换的所有一节邻居：</p>
+<script type="math/tex; mode=display">
+H^{l+1}=\sigma\left(A^{l} H^{l} W^{l}\right)</script><h3 id="Node-Attributes"><a href="#Node-Attributes" class="headerlink" title="Node Attributes"></a>Node Attributes</h3><p>在知识图谱中，属性节点的形式为 <code>(entity, relation, attribute)</code>，例如：<code>(s = Tom, r = people.person.gender, a = male)</code>。但是如果用向量表达节点属性会出现两个问题：</p>
+<ol>
+<li>每个节点的属性数通常很小，并且每个节点的属性数不同。会产生属性向量稀疏的问题。</li>
+<li>属性向量中的0值会产生歧义：该节点没有该属性，或者该属性缺失值。这些0会影响嵌入的准确性。</li>
+</ol>
+<p>本文还使用了<strong>节点的属性作为图的节点</strong>，如属性 <code>(Tom,gender,male)</code>。这样做的目的是将属性也作为节点，起到“桥”的作用，相同属性的节点可以共享信息。还有作者为了减少过多的属性节点，对节点进行了合并， 将 gender 也作为了图中的节点，而不是建立 male 和 female 两个属性，理由是 gender 已经能够确定实体的 person，而不必过多区分性别。（即作者把属性三元组变为了两元组（实体，属性名）</p>
+<p>这样，WGCN 不仅利用了图形连接结构（关系和关系类型），而且还有效地利用了节点属性（一种图形结构）。这就是我们将 WGCN 命名为结构感知卷积网络的原因。 </p>
+<div class="note note-primary">
+            <p>节点属性是怎么合并的？能不能让model自己学？</p>
+          </div>
+<h3 id="ConvE-TransE"><a href="#ConvE-TransE" class="headerlink" title="ConvE-TransE"></a>ConvE-TransE</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220126144946922.png" alt=""></p>
+<p>Decoder 的过程如图：将 WGCN 得到的实体 s 的 embedding 和预训练的关系 r 的 embedding 进行 concat 操作，变成一个 2*n 维的矩阵。对这个矩阵进行卷积操作，通过多个相同尺寸的卷积核，得到 feature maps。然后将 feature maps 拉直成一个向量，通过全连接层进行维度缩减。将这个融合了 s 和 r 的向量与 WGCN 生成的所有向量分别进行点积操作，计算 $(s, r)$ 与所有待选o的相似度。相似度通过 sigmoid 缩放到 0~1 范围内，取相似度最高的作为预测的实体 o。</p>
+<p>SACN 的评分网络是一个卷积神经模型，称为 Conv-TransE。Conv-TransE 和 ConvE 的 区别是在叠加 $e_s$ 和 $e_r$ 后，<strong>没有 reshape 操作</strong>，然后进行卷积计算：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+m_{c}\left(e_{s}, e_{r}, n\right)=& \sum_{\tau=0}^{K-1} \omega_{c}(\tau, 0) \hat{e}_{s}(n+\tau) +\omega_{c}(\tau, 1) \hat{e}_{r}(n+\tau)
+\end{aligned}</script><ul>
+<li>其中，$K$ 是指 kernel width，$n$ 索引输出向量中的条目, $\omega_{c}$ 是卷积核参数。</li>
+</ul>
+<p>卷积操作相当于一维卷积后 $e<em>s$ 和 $e_r$ 的和，因此，它<strong>保留了 $e_s$ 和 $e_r$ embeddings 的翻译性质</strong>。输出形成了 $M</em>{c}\left(e<em>{s}, e</em>{r}\right)=\left[m<em>{c}\left(e</em>{s}, e<em>{r}, 0\right), \ldots, m</em>{c}\left(e<em>{s}, e</em>{r}, F^{L}-1\right)\right]$, 将卷积的输出向量与所有核对齐，得到特征矩阵 $\mathbf{M}\left(e<em>{s}, e</em>{r}\right) \in \mathbb{R}^{C \times F^{L}}$。将特征映射矩阵 $\mathbf{M}\left(e<em>{s}, e</em>{r}\right)$ reshape 为向量 $\operatorname{vec}(\mathbf{M}) \in \mathbb{R}^{C F^{L}}$, 用 $W$ 进行线性变换，投影到 $F^{L}$ 维空间。然后通过适当的距离度量将计算出与 $e_o$ 匹配的 embeddings，得到每个实体的得分。</p>
+<p>Conv-TransE 方法的评分函数定义如下：</p>
+<script type="math/tex; mode=display">
+\psi\left(e_{s}, e_{o}\right)=f\left(\operatorname{vec}\left(\mathbf{M}\left(e_{s}, e_{r}\right)\right) W\right) e_{o} \\
+p\left(e_{s}, e_{r}, e_{o}\right)=\sigma\left(\psi\left(e_{s}, e_{o}\right)\right)</script><hr>
+<p>作者也总结了一些经典模型的评分函数，其中 $*$ 表示卷积操作，如下图：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120165512658.png" style="zoom: 33%;" /></p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="datasets"><a href="#datasets" class="headerlink" title="datasets"></a>datasets</h3><p>   文中共使用了三个数据集，包括：</p>
+<ol>
+<li>FB15k-237: freebase三元组</li>
+<li>WN18RR: wordnet三元组</li>
+<li>FB15k-237-Attr: 作者从FB24k中抽取了实体的属性</li>
+</ol>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220126143913306.png"  style="zoom: 33%;" /></p>
+<h3 id="Link-prediction"><a href="#Link-prediction" class="headerlink" title="Link prediction"></a>Link prediction</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120170457232.png" alt=""></p>
+<p>从表中可以看到：</p>
+<ol>
+<li>ConvE-TransE 要比其他四个 baseline 模型性能好。</li>
+<li>将结构信息添加到 SACN 模型中，也比其他的 baseline 模型性能好。</li>
+<li>将<strong>节点属性</strong>添加到 SACN 模型中，即使用 FB15k-237-Attr 来训练 SACN。也比其他的 baseline 模型性能好。</li>
+<li>为了更好地与 ConvE 进行比较，作者还将属性应用到 ConvE 中。在这里，属性将被视为实体三元组。实验结果得出: 并没有提升 ConvE 性能。(估计是效果不好所以结果就没放到图表中…)</li>
+</ol>
+<h3 id="Kernel-Size-Analysis"><a href="#Kernel-Size-Analysis" class="headerlink" title="Kernel Size Analysis"></a>Kernel Size Analysis</h3><p>卷积核形状的设置对模型效果有影响，卷积核增大，效果提升。但最佳卷积核大小可能取决于任务。 </p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120221259246.png"  style="zoom: 40%;" /></p>
+<h3 id="Node-Indegree-Analysis"><a href="#Node-Indegree-Analysis" class="headerlink" title="Node Indegree Analysis"></a>Node Indegree Analysis</h3><p>度大的节点说明它有更多的相邻节点，这种节点比度小的节点可以从相邻节点接收更多的信息。即入度越大，图的密度越大，模型的效果越好。从表中实验结果可以得知：</p>
+<ol>
+<li><p>对于度数较小的节点，其信息来自 SACN 的 WGCN 层的邻居信息的聚合。它的 embeddings 可以可靠地估计。</p>
+</li>
+<li><p>对于度数较大的节点，WGCN 聚合的信息就比较多，较多的邻居节点使较重要的邻居信息被过度“平滑”掉了，就会没有区分度。所以从 SACN 学习到的嵌入比从 ConvE-TransE 学习到的嵌入更差。作者认为这个问题的一个解决方案是 neighbor selection，如 PinSAGE。</p>
+<blockquote>
+<p>PinSAGE 的基本思想可以<a href="https://stuxiaozhang.github.io/2021/12/27/%E5%9B%BE%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%85%A5%E9%97%A8/#PinSAGE">参考这里</a>.</p>
+</blockquote>
+</li>
+</ol>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120222031304.png"  style="zoom:45%;" /></p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>文章提出了一种端到端结构感知卷积网络（SACN）。编码网络是一个加权图卷积网络，利用知识图的连通结构、节点属性和关系类型。具有可学习权重的WGCN具有从相邻图节点聚合信息的优点。此外，在网络中添加实体属性作为节点，从而将属性转化为知识结构信息，便于集成到节点嵌入中。SACN的评分网络是一个卷积神经模型，称为Conv-TransE。它使用卷积网络保留实体和关系之间的翻译特性，以学习用于链接预测的节点嵌入。</p>
+<p>作者提到了未来的改进方向：将 PinSAGE 的思想加入到模型中，它在聚合邻居的向量表示时考虑了邻居的重要性，同时也使模型具有更大的可扩展性。</p>
+]]></content>
       <categories>
-        <category>GNN</category>
+        <category>Papers</category>
       </categories>
       <tags>
         <tag>GNN</tag>
+        <tag>KG</tag>
+        <tag>SACN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【SACN】End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion</title>
+    <url>/2022/01/18/SACN%EF%BC%9AEnd-to-end%20Structure-Aware%20Convolutional%20Networks%20for%20Knowledge%20Base%20Completion/</url>
+    <content><![CDATA[<h1 id="End-to-end-Structure-Aware-Convolutional-Networks-for-Knowledge-Base-Completion"><a href="#End-to-end-Structure-Aware-Convolutional-Networks-for-Knowledge-Base-Completion" class="headerlink" title="End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion"></a>End-to-end Structure-Aware Convolutional Networks for Knowledge Base Completion</h1><p>本文是美国康涅狄格大学的研究者发表在 AAAI 2019 上的文章，提出了 WGCN、Conv-TransE 及两者的结合 SACN，文章的主要思想是将图卷积与 ConvE 结合，在用卷积做 KGE 时既考虑图结构信息（GCN），又考虑翻译特性（Conv-TransE）。</p>
+<div class="note note-primary">
+            <p><strong>问：</strong>这个图的节点属性是 KB 里本来有的吗？那以前的方法没把它算进去吗？</p><ul><li>不是…应该是作者自己构建了带有属性三元组的数据集 FB15k-237-Attr, 但是是如何构建的，貌似没有在文章和code中看到…</li></ul><p><strong>问：</strong>KGC vs KGR</p><ul><li>KGC: </li><li>KGR: 知识图谱通常是不完整的，很多事实是缺失的，知识图谱上的一个基本任务便是预测缺失的事实（实体或关系），因此便需要根据已有事实进行推理Reasoning on Knowledge Graphs</li></ul>
+          </div>
+<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><p>文章认为，知识图谱补全任务: </p>
+<ol>
+<li>以前的方法只建模关系三元组，忽略了大量<strong>图节点相关属性</strong></li>
+<li>以前的方法<strong>没有考虑 KG 的图结构信息</strong></li>
+<li>ConvE 模型中采用的 2D 卷积操作没能保留翻译特性 (TransE)</li>
+</ol>
+<p>针对这三个问题，文章提出用加权的图卷积网络 WGCN 解决图结构 (connectivity structure) 信息没有考虑在内的问题，省略了 ConvE 2D 卷积中的 reshape 操作用于保留翻译特性。整体的模型称为 SACN (Structure-Aware Convolutional Network)，是一个 End-to-end 的结构</p>
+<ul>
+<li>WGCN 作为 Encoder: 利用一个带权重的 GCN 的方法（利用图的结构并保留节点的属性）</li>
+<li>Conv-TransE 作为 Decoder: 利用 ConvE 的方法，但是去掉了实体和关系的矩阵 reshape 部分（为了保留 TransE 的 <code>h+r=t</code> 的特性）。</li>
+</ul>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>作者<strong>比较了 ConvE 和 ConvKB 的区别</strong>：ConvE 是第一个在不同嵌入维度的嵌入上使用 2D 卷积的模型，希望提取更多的特征交互。ConvKB 将 ConvE 中的二维卷积替换为一维卷积，从而将卷积限制为相同的嵌入维数，并保持 TransE 的平移特性。ConvKB 可被视为 Conv-TransE 的特例，它只使用宽度等于1的过滤器。尽管 ConvKB 被证明比 ConvE 更好，但两个数据集（FB15k-237和WN18RR）的结果并不一致，因此我们将这些结果从对比表中删除。</p>
+<p>ConvE 和 ConvKB 的另一个主要区别在于模型中使用的损失函数。ConvE 使用了交叉熵损失，该损失可以通过解码器中的 1-N 评分来加速，而 ConvKB 使用了铰链损失，该损失是从正示例和采样的负示例中计算出来的。作者采用 ConvE 的解码器，因为可以很容易地将 GCN 的编码器和 ConvE 的解码器集成到端到端的训练框架中，而 ConvKB 不适合。 </p>
+<div class="note note-primary">
+            <p>Knowledge Graph Embedding: 将实体和关系的语义编码在一个连续的低维向量空间（称为嵌入 embeddings）中。然后可以使用这些嵌入来预测新的关系。</p>
+          </div>
+<h2 id="SACN"><a href="#SACN" class="headerlink" title="SACN"></a>SACN</h2><h3 id="GCN"><a href="#GCN" class="headerlink" title="GCN"></a>GCN</h3><p>回忆一下 GCN 的定义，主要思想为：将每个节点作为聚合的中心节点，对每个中心节点，聚合邻居节点的本层特征表示，来作为中心节点的下一层特征表示，即</p>
+<script type="math/tex; mode=display">
+\begin{array}{c}
+h_{i}^{l+1}=\sigma\left(\sum_{j \in N_{i}} g\left(h_{i}^{l}, h_{j}^{l}\right)\right) \\
+g\left(h_{i}^{l}, h_{j}^{l}\right)=h_{j}^{l} W^{l} \\
+h_{j}^{l} \in R^{F^{l}}, W^{l} \in R^{F^{l} \times F^{l+1}}
+\end{array}</script><p>通过求和操作，将线性变换后的邻居节点的向量表示共享给中心节点，实现 GCN 层中的聚合操作。通过 GCN 层的逐层堆叠，来实现前向传递。值得一提的是，每层 GCN 都聚合了邻居的信息，在第一层聚合了一阶邻居信息之后，第二层聚合邻居的时候，它的邻居节点已经有了邻居节点的邻居节点的信息，因此第二层 GCN 聚合了二阶邻居的信息。GCN 层堆叠次数越多，中心节点所聚合的邻居范围也越广。</p>
+<p>GCN 的本质和 PageRank 是一样的，就是信息累积(聚合)，用邻居节点表示当前节点。在 WGCN 这里模型做了一点小小的提升，就是在信息累积时候加上了<u>权重</u>，用于控制在多大程度上接受从邻居节点流过来的信息（文中称为当前节点与邻居节点的交互强度），之前的 GCN 只是单纯地把汇过来的信息求平均。这个权重由两节点的关系类型决定。</p>
+<h3 id="WGCN-Weighted-Graph-Convolutional-Layer"><a href="#WGCN-Weighted-Graph-Convolutional-Layer" class="headerlink" title="WGCN: Weighted Graph Convolutional Layer"></a>WGCN: Weighted Graph Convolutional Layer</h3><p>WGCN 是加权的 GCN，<strong>在聚合时对不同类型的关系进行不同的加权，并在网络训练期间自适应学习加权</strong>。通过这种自适应，WGCN 可以控制来自聚合中使用的相邻节点的信息量。WGCN 将多关系 KB 图视为多个单关系子图，其中每个子图都包含特定类型的关系。WGCN 确定在组合节点的 GCN 嵌入时给每个子图的权重。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220118114511145.png" alt=""></p>
+<p>上图展示了 SACN 的整个过程。在这个例子中，网络的 WGCN 层计算中间图中的红色节点的嵌入。这些层按照 KB 关系中的指定聚合相邻实体节点的嵌入。边的三种颜色（蓝色、黄色和绿色）表示图形中的三种不同关系类型。根据该层中的权重 $\alpha_{t}$，将对应的三个实体节点以不同的权值相加，得到红色节点的嵌入。具有相同颜色（相同关系类型）的边使用相同的 $\alpha_t$。每个层都有自己的一组关系权重 $\alpha_t$。因此，节点 $v_i$ 的第 $l$ 层的输出可以如下写入:</p>
+<script type="math/tex; mode=display">
+h_{i}^{l+1}=\sigma\left(\sum_{j \in \mathbf{N}_{\mathbf{i}}} \alpha_{t}^{l} g\left(h_{i}^{l}, h_{j}^{l}\right)\right)</script><ul>
+<li>其中，$h<em>{j}^{l}$ 是节点 $v_i$ 的输入， $v_j$ 是 $v_i$ 的邻居节点(一共 $N_i$ 个)，$\alpha</em>{t}^{l}$ 是第 $l$ 层，第 $t$ 种边（关系）类型的权重参数, $g$ 是聚合邻居信息的函数:</li>
+</ul>
+<script type="math/tex; mode=display">
+g\left(h_{i}^{l}, h_{j}^{l}\right)=h_{j}^{l} W^{l}</script><ul>
+<li>$W^{l} \in \mathbb{R}^{F^{l} \times F^{l+1}}$ 是连接系数矩阵，用于 $F^{l}$ 到 $F^{l+1}$ 的线性变换.</li>
+</ul>
+<p>每个节点在接收邻居信息的时候应当<strong>保留自己的信息</strong>，和 R-GCN 一样，加上 self-loop，则节点 $v_i$ 的传播过程可以被定义为：</p>
+<script type="math/tex; mode=display">
+h_{i}^{l+1}=\sigma\left(\sum_{j \in \mathbf{N}_{\mathbf{i}}} \alpha_{t}^{l} h_{j}^{l} W^{l}+h_{i}^{l} W^{l}\right)</script><p>$l$ 层的输出是一个节点特征矩阵：$H^{l+1} \in \mathbb{R}^{N \times F^{l+1}}$ ，$h_i^{l+1}$ 是 $H^{l+1}$ 的第 $i$ 行，代表第 $l+1$ 层中节点 $v_i$ 的特征。</p>
+<p>以上的为不同类型的边加权重的过程可以看做一个矩阵乘法：通过一个邻接矩阵同时为所有节点计算 embeddings，见下图：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220118222657043.png"  style="zoom:50%;" /></p>
+<p>对于每种关系（边）类型，邻接矩阵 $A_t$ 是一个二元矩阵，如果存在连接 $v_i$ 和 $v_j$ 的边，则邻接矩阵中第 $ij$ 的位置为 1，否则为0。最终邻接矩阵如下所示：</p>
+<script type="math/tex; mode=display">
+A^{l}=\sum_{t=1}^{T}\left(\alpha_{t}^{l} A_{t}\right)+I</script><ul>
+<li>其中 $I$ 是大小为 $N×N$ 的单位矩阵, $A^l$ 是子图的邻接矩阵加上自连接的加权和。</li>
+</ul>
+<p>故，由此可以等到每一层线性变换的所有一节邻居：</p>
+<script type="math/tex; mode=display">
+H^{l+1}=\sigma\left(A^{l} H^{l} W^{l}\right)</script><h3 id="Node-Attributes"><a href="#Node-Attributes" class="headerlink" title="Node Attributes"></a>Node Attributes</h3><p>在知识图谱中，属性节点的形式为 <code>(entity, relation, attribute)</code>，例如：<code>(s = Tom, r = people.person.gender, a = male)</code>。但是如果用向量表达节点属性会出现两个问题：</p>
+<ol>
+<li>每个节点的属性数通常很小，并且每个节点的属性数不同。会产生属性向量稀疏的问题。</li>
+<li>属性向量中的0值会产生歧义：该节点没有该属性，或者该属性缺失值。这些0会影响嵌入的准确性。</li>
+</ol>
+<p>本文还使用了<strong>节点的属性作为图的节点</strong>，如属性 <code>(Tom,gender,male)</code>。这样做的目的是将属性也作为节点，起到“桥”的作用，相同属性的节点可以共享信息。还有作者为了减少过多的属性节点，对节点进行了合并， 将 gender 也作为了图中的节点，而不是建立 male 和 female 两个属性，理由是 gender 已经能够确定实体的 person，而不必过多区分性别。（即作者把属性三元组变为了两元组（实体，属性名）</p>
+<p>这样，WGCN 不仅利用了图形连接结构（关系和关系类型），而且还有效地利用了节点属性（一种图形结构）。这就是我们将 WGCN 命名为结构感知卷积网络的原因。 </p>
+<div class="note note-primary">
+            <p>节点属性是怎么合并的？能不能让model自己学？</p>
+          </div>
+<h3 id="ConvE-TransE"><a href="#ConvE-TransE" class="headerlink" title="ConvE-TransE"></a>ConvE-TransE</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220126144946922.png" alt=""></p>
+<p>Decoder 的过程如图：将 WGCN 得到的实体 s 的 embedding 和预训练的关系 r 的 embedding 进行 concat 操作，变成一个 2*n 维的矩阵。对这个矩阵进行卷积操作，通过多个相同尺寸的卷积核，得到 feature maps。然后将 feature maps 拉直成一个向量，通过全连接层进行维度缩减。将这个融合了 s 和 r 的向量与 WGCN 生成的所有向量分别进行点积操作，计算 $(s, r)$ 与所有待选o的相似度。相似度通过 sigmoid 缩放到 0~1 范围内，取相似度最高的作为预测的实体 o。</p>
+<p>SACN 的评分网络是一个卷积神经模型，称为 Conv-TransE。Conv-TransE 和 ConvE 的 区别是在叠加 $e_s$ 和 $e_r$ 后，<strong>没有 reshape 操作</strong>，然后进行卷积计算：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+m_{c}\left(e_{s}, e_{r}, n\right)=& \sum_{\tau=0}^{K-1} \omega_{c}(\tau, 0) \hat{e}_{s}(n+\tau) +\omega_{c}(\tau, 1) \hat{e}_{r}(n+\tau)
+\end{aligned}</script><ul>
+<li>其中，$K$ 是指 kernel width，$n$ 索引输出向量中的条目, $\omega_{c}$ 是卷积核参数。</li>
+</ul>
+<p>卷积操作相当于一维卷积后 $e<em>s$ 和 $e_r$ 的和，因此，它<strong>保留了 $e_s$ 和 $e_r$ embeddings 的翻译性质</strong>。输出形成了 $M</em>{c}\left(e<em>{s}, e</em>{r}\right)=\left[m<em>{c}\left(e</em>{s}, e<em>{r}, 0\right), \ldots, m</em>{c}\left(e<em>{s}, e</em>{r}, F^{L}-1\right)\right]$, 将卷积的输出向量与所有核对齐，得到特征矩阵 $\mathbf{M}\left(e<em>{s}, e</em>{r}\right) \in \mathbb{R}^{C \times F^{L}}$。将特征映射矩阵 $\mathbf{M}\left(e<em>{s}, e</em>{r}\right)$ reshape 为向量 $\operatorname{vec}(\mathbf{M}) \in \mathbb{R}^{C F^{L}}$, 用 $W$ 进行线性变换，投影到 $F^{L}$ 维空间。然后通过适当的距离度量将计算出与 $e_o$ 匹配的 embeddings，得到每个实体的得分。</p>
+<p>Conv-TransE 方法的评分函数定义如下：</p>
+<script type="math/tex; mode=display">
+\psi\left(e_{s}, e_{o}\right)=f\left(\operatorname{vec}\left(\mathbf{M}\left(e_{s}, e_{r}\right)\right) W\right) e_{o} \\
+p\left(e_{s}, e_{r}, e_{o}\right)=\sigma\left(\psi\left(e_{s}, e_{o}\right)\right)</script><hr>
+<p>作者也总结了一些经典模型的评分函数，其中 $*$ 表示卷积操作，如下图：</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120165512658.png" style="zoom: 33%;" /></p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="datasets"><a href="#datasets" class="headerlink" title="datasets"></a>datasets</h3><p>   文中共使用了三个数据集，包括：</p>
+<ol>
+<li>FB15k-237: freebase三元组</li>
+<li>WN18RR: wordnet三元组</li>
+<li>FB15k-237-Attr: 作者从FB24k中抽取了实体的属性</li>
+</ol>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220126143913306.png"  style="zoom: 33%;" /></p>
+<h3 id="Link-prediction"><a href="#Link-prediction" class="headerlink" title="Link prediction"></a>Link prediction</h3><p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120170457232.png" alt=""></p>
+<p>从表中可以看到：</p>
+<ol>
+<li>ConvE-TransE 要比其他四个 baseline 模型性能好。</li>
+<li>将结构信息添加到 SACN 模型中，也比其他的 baseline 模型性能好。</li>
+<li>将<strong>节点属性</strong>添加到 SACN 模型中，即使用 FB15k-237-Attr 来训练 SACN。也比其他的 baseline 模型性能好。</li>
+<li>为了更好地与 ConvE 进行比较，作者还将属性应用到 ConvE 中。在这里，属性将被视为实体三元组。实验结果得出: 并没有提升 ConvE 性能。(估计是效果不好所以结果就没放到图表中…)</li>
+</ol>
+<h3 id="Kernel-Size-Analysis"><a href="#Kernel-Size-Analysis" class="headerlink" title="Kernel Size Analysis"></a>Kernel Size Analysis</h3><p>卷积核形状的设置对模型效果有影响，卷积核增大，效果提升。但最佳卷积核大小可能取决于任务。 </p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120221259246.png"  style="zoom: 40%;" /></p>
+<h3 id="Node-Indegree-Analysis"><a href="#Node-Indegree-Analysis" class="headerlink" title="Node Indegree Analysis"></a>Node Indegree Analysis</h3><p>度大的节点说明它有更多的相邻节点，这种节点比度小的节点可以从相邻节点接收更多的信息。即入度越大，图的密度越大，模型的效果越好。从表中实验结果可以得知：</p>
+<ol>
+<li><p>对于度数较小的节点，其信息来自 SACN 的 WGCN 层的邻居信息的聚合。它的 embeddings 可以可靠地估计。</p>
+</li>
+<li><p>对于度数较大的节点，WGCN 聚合的信息就比较多，较多的邻居节点使较重要的邻居信息被过度“平滑”掉了，就会没有区分度。所以从 SACN 学习到的嵌入比从 ConvE-TransE 学习到的嵌入更差。作者认为这个问题的一个解决方案是 neighbor selection，如 PinSAGE。</p>
+<blockquote>
+<p>PinSAGE 的基本思想可以<a href="https://stuxiaozhang.github.io/2021/12/27/%E5%9B%BE%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%85%A5%E9%97%A8/#PinSAGE">参考这里</a>.</p>
+</blockquote>
+</li>
+</ol>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220120222031304.png"  style="zoom:45%;" /></p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>文章提出了一种端到端结构感知卷积网络（SACN）。编码网络是一个加权图卷积网络，利用知识图的连通结构、节点属性和关系类型。具有可学习权重的WGCN具有从相邻图节点聚合信息的优点。此外，在网络中添加实体属性作为节点，从而将属性转化为知识结构信息，便于集成到节点嵌入中。SACN的评分网络是一个卷积神经模型，称为Conv-TransE。它使用卷积网络保留实体和关系之间的翻译特性，以学习用于链接预测的节点嵌入。</p>
+<p>作者提到了未来的改进方向：将 PinSAGE 的思想加入到模型中，它在聚合邻居的向量表示时考虑了邻居的重要性，同时也使模型具有更大的可扩展性。</p>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+      <tags>
+        <tag>GNN</tag>
+        <tag>KG</tag>
+        <tag>SACN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>论文写作素材整理</title>
+    <url>/2022/01/18/%E8%AE%BA%E6%96%87%E5%86%99%E4%BD%9C%E7%B4%A0%E6%9D%90%E6%95%B4%E7%90%86/</url>
+    <content><![CDATA[<h1 id="论文写作素材整理"><a href="#论文写作素材整理" class="headerlink" title="论文写作素材整理"></a>论文写作素材整理</h1><p>记录一些可能会用到的素材：</p>
+<ul>
+<li>尽管这些知识库已经包含了数百万个实体和三元组，但与现有事实和新增加的真实世界知识相比，它们还远远不够完整。因此，知识库的完善对于在现有三元组的基础上预测新的三元组从而进一步扩展知识库是非常重要的。 </li>
+</ul>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>【LAN】Logic Attention Based Neighborhood Aggregation for Inductive Knowledge Graph Embedding</title>
+    <url>/2022/01/05/Logic%20Attention%20Based%20Neighborhood%20Aggregation%20for%20Inductive%20Knowledge%20Graph%20Embedding/</url>
+    <content><![CDATA[<h1 id="Logic-Attention-Based-Neighborhood-Aggregation-for-Inductive-Knowledge-Graph-Embedding"><a href="#Logic-Attention-Based-Neighborhood-Aggregation-for-Inductive-Knowledge-Graph-Embedding" class="headerlink" title="Logic Attention Based Neighborhood Aggregation for Inductive Knowledge Graph Embedding"></a>Logic Attention Based Neighborhood Aggregation for Inductive Knowledge Graph Embedding</h1><p>这篇文章是腾讯 AI Lab 发表在 AAAI 2019 上的一篇文章。Knowledge Graph Embedding 的目的是使用低维向量建模实体和关系，用于下游任务。目前方法大多要求所有实体在训练时可见，这在每天更新的 Knowledge Base 中是不切实际的。本篇论文中，作者使用同时训练邻域聚集模型的方式来去除这种限制，并提出一种基于规则和注意力机制的聚集模型，即逻辑注意力网络（LAN）。在两个知识图谱补全任务上，LAN 被证明优于传统聚集模型。</p>
+<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><p>传统的 KGE 模型(Transductive KGE)是 transductive learning, 在训练时需要看到全部的实体, 这种限制阻碍他们推广到新出现的实体。而对于归纳性的 KGE 模型(Inductive KGE)，新出现的实体相当于 Inductive KGE model 的输入。当前关于 Inductive model 的工作是利用额外的节点属性来嵌入 unseen node；还有 aggregator 对邻居一视同仁，要么不必要地要求对它们进行排序。而且这些模型不能直接应用于具有多关系边的 KG。 </p>
+<p>因此，作者提出了 LAN 来建模 Inductive KGE。Inductive KGE 问题归结为设计一个 KG 特定的<strong>邻域聚合器(neighbourhood aggregator)</strong> 来捕获基本的邻域信息。作者定义的理想的邻域聚合器应该有以下三个属性： </p>
+<ul>
+<li><strong>Permutation Invariant (置换不变)</strong>: 这也是 GNN 中的一个基本的性质，即：<strong>聚合与邻域节点的顺序无关。</strong></li>
+<li><strong>Redundancy Aware (邻域冗余感知)</strong>：aggregator 应该学会利用实体邻域的<strong>冗余信息</strong>。如图：一个人为芝加哥公牛队效力意味着他是一名篮球运动员。利用实体邻域中的这种冗余是有益的，从而使聚合提供信息。好的聚合器应该能利用这种非显示的冗余信息。</li>
+<li><strong>Query Relation Aware (查询关系感知)</strong>: 对于常见的 KG 补全任务，查询关系是预先给出的，如图中的查询关系: <code>live_in</code>。一个聚合器可能会利用这些信息集中在附近的相关事实，例如，一个entity <code>play for</code> <code>Chicago Bulls</code>。这条性质和上一条有所区别，因为 <code>live_in</code> 这个关系并不一定真的与 <code>play_for</code> 有很强烈的因果或是包含关系，二者只是有一定的概率一同出现。结合后文的算法，这条性质应该旨在说明<strong>聚合器需要建模不同关系之间的概率关系</strong>。</li>
+</ul>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220107143410224.png" alt="image-20220107143410224" style="zoom:50%;" /></p>
+<p>图中，虚线圆圈和箭头表示现有的KG，实线表示由新出现的实体带来的KG。</p>
+<h2 id="Framework"><a href="#Framework" class="headerlink" title="Framework"></a>Framework</h2><p>当一个新的实体出现了一些涉及KB内的实体和关系的三元组时，可以在其新建立的邻域上应用聚合器，并使用输出嵌入来推断关于它的新事实。</p>
+<p>模型的 framework 如下：</p>
+<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220105202132271.png" alt="image-20220105202132271" style="zoom:67%;" /></p>
+<p>如图，给定一个训练三元组，编码器 $(s,r,o)$ 用 aggregator 将 $s$ 和 $o$ 编码为两个嵌入。解码器通过评分函数计算三元组的合理性，并向编码器提供反馈以调整 aggregator 的参数。</p>
+<h3 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h3><p>对于一个实体 $e_i$，编码器输入它的 neighbor embeddings 的集合，输出 $e_i$ 的 embedding….?</p>
+<p>为了反应关系 $r$ 对 $e_j$ 的影响，定义了一个特定于关系的 Transforming function $T_r(\cdot)$:</p>
+<script type="math/tex; mode=display">
+T_{r}\left(\mathbf{e}_{j}^{I}\right)=\mathbf{e}_{j}^{I}-\mathbf{w}_{r}^{\top} \mathbf{e}_{j}^{I} \mathbf{w}_{r}</script><p>其中，$\mathbf{w}_{r}$ 是关系 $r$ 的变换向量并被限制为单位向量。其实这个公式来源于 TransH 的得分函数，详情可以参考<a href="https://stuxiaozhang.github.io/2021/08/18/TransH%EF%BC%9AKnowledge%20Graph%20Embedding%20by%20Translating%20on%20Hyperplanes/">这篇笔记</a>。因为 TransH 其不涉及矩阵积运算，并且计算复杂度较低。</p>
+<p>在转换 neighbor embeddings 之后，这些 transformed embeddings 被送到聚合器 A 以输出目标实体 $e<em>i$ 的嵌入 $\mathbf{e}</em>{i}^{O}$，即:</p>
+<script type="math/tex; mode=display">
+\mathbf{e}_{i}^{O}=A\left(\left\{T_{r}\left(\mathbf{e}_{j}^{I}\right) \mid\left(r, e_{j}\right) \in N_{\mathcal{K}}(i)\right\}\right)</script><p>根据定义，聚合器 A 本质上接受向量 $\mathbf{X}=\left{\mathbf{x}<em>{j}\right}\left(\mathbf{x}</em>{j} \in \mathbb{R}^{d}\right)$的集合作为输入 并将它们映射到单个向量。以前曾经用过以下两种方法作为聚合器：</p>
+<ul>
+<li><p>Pooling Functions. 虽然满足置换不变性质，但是它<strong>视邻居为等价的</strong>，这些类似的池化函数既不知道邻域中的潜在冗余，也不知道查询关系.</p>
+</li>
+<li><p>RNNs. 在 <a href="https://arxiv.org/abs/1706.02216">GraphSAGE (Inductive representation learning on large graphs 这篇论文)</a>中，作者采用 LSTM 作为邻域聚合器，为了训练和应用基于 LSTM 的聚合器，它们必须随机排列邻居，这违反了 permutation variance property.</p>
+<blockquote>
+<p>我觉得这块是不是写错了。应该是 LSTM 违反了 permutation <strong>in</strong>variance property.</p>
+</blockquote>
+</li>
+<li><p>作者提出了 LAN 作为聚合器，并做了实验，在下文中描述。</p>
+</li>
+</ul>
+<h3 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h3><p>编码器输出 $\mathbf{s}^{O}$ 和 $\mathbf{O}^{O}$ embeddings 后，解码器需要评价训练三元组的合理性。为了避免邻域中关系 $r$ 的潜在混合，作者用 query relation 指代训练三元组中的关系，并用 $q$ 表示它。 从嵌入矩阵 $\mathbf{W}_r$ 总找到 $q$ 的表示后，使用评分函数对三元组 $(s,q,o)$ 进行打分. 评分函数用了基于 TransE 的评分函数：</p>
+<script type="math/tex; mode=display">
+\phi^{O}(s, q, o)=-\left|\mathbf{s}^{O}+\mathbf{q}-\mathbf{o}^{O}\right|_{L 1}</script><p>为了检验所研究的聚合器是否在不同的评分函数之间推广/泛化，作者实验了几种备选方案。</p>
+<h2 id="Logic-Attention-Network"><a href="#Logic-Attention-Network" class="headerlink" title="Logic Attention Network"></a>Logic Attention Network</h2><p>传统的邻域聚合器不能保留所有需要的属性。所以作者提出了 LAN，且满足提出的理想聚合器的三个属性.</p>
+<h3 id="Incorporating-Neighborhood-Attention"><a href="#Incorporating-Neighborhood-Attention" class="headerlink" title="Incorporating Neighborhood Attention"></a>Incorporating Neighborhood Attention</h3><p>传统的邻域聚合器仅依赖于 transformed embeddings 的集合。它们忽略了邻域 $N<em>{K(i)}$ 和查询关系 $q$ 中的其他有用信息. 作者提出：将聚合器从 $A(X)$ 推广到 $A(X;N</em>{K(i)},q)$。具体而言，<strong>对于实体 $e_i$，其邻居 $e_j$ 应根据其代表 $e_i$ 的重要性对 $e^O_i$ 做出不同的贡献。</strong> </p>
+<p>为了保持置换不变性质，对 transformed embeddings 采用<strong>基于 attention 的聚合</strong>方法。然后在估计注意权重时利用 $N_{K(i)}$ 和 $q$ 中的附加信息。公式如下：</p>
+<script type="math/tex; mode=display">
+\mathbf{e}_{i}^{O}=\sum_{\left(r, e_{j}\right) \in N_{\mathcal{K}}(i)} \alpha_{j \mid i, q} T_{r}\left(\mathbf{e}_{j}^{I}\right)</script><p>其中，$\alpha_{j \mid i, q} $ 是为给定 $e_i$ 和查询关系 $q$ 的每个邻居 $e_j$ 指定的注意力权重。</p>
+<p>为了将更大的权重 $\alpha_{j \mid i, q}$ 分配给更重要的邻居，从 $e_i$ 的角度来看，作者在渐进的层面上提出两个问题：</p>
+<ol>
+<li>什么类型的邻居关系可能导致成为潜在的重要邻居？</li>
+<li>根据这些关系，哪个特定的邻居（在 transformed embeddings 中）可能包含重要信息？</li>
+</ol>
+<p>受这两个问题的启发，采用以下两种机制来估计 $\alpha_{j \mid i, q} $ </p>
+<h4 id="Logic-Rule-Mechanism"><a href="#Logic-Rule-Mechanism" class="headerlink" title="Logic Rule Mechanism"></a>Logic Rule Mechanism</h4><p>KG 中的关系不是独立存在的，<strong>一个相邻关系可能意味着另一个相邻关系的存在</strong>，尽管它们不一定将 $e$ 连接到同一个邻居。</p>
+<p>例如：一个相邻关系 <code>‘play_for’</code> 也许表示 entity <code>athlete</code> 的家乡城市，即关系 <code>‘live_in’</code>。所以作者定义了 $r<em>{1} \Rightarrow r</em>{2}$ 来度量 $r_1$ 和 $r_2$ 潜在的依赖关系：</p>
+<script type="math/tex; mode=display">
+\mathcal{P}\left(r_{1} \Rightarrow r_{2}\right)=\frac{\sum_{e \in \mathcal{E} } \mathbb{1}\left(r_{1} \in N_{\mathcal{R} }(e) \wedge r_{2} \in N_{\mathcal{R} }(e)\right)}{\sum_{e \in \mathcal{E} } \mathbb{1}\left(r_{1} \in N_{\mathcal{R} }(e)\right)}</script><p>其中，$\mathbb{1}(x)$ 是示性函数，x 为真时等于1，其余为0。如果具有相邻关系 $r<em>1$ 的实体，同时 $r_2$ 也是相邻关系的实体越多，则 $\mathcal{P}\left(r</em>{1} \Rightarrow r_{2}\right)$ 越大。</p>
+<script type="math/tex; mode=display">
+\alpha_{j \mid i, q}^{\text {Logic }}=\frac{\mathcal{P}(r \Rightarrow q)}{\max \left(\left\{\mathcal{P}\left(r^{\prime} \Rightarrow r\right) \mid r^{\prime} \in N_{\mathcal{R}}\left(e_{i}\right) \wedge r^{\prime} \neq r\right\}\right)} .</script><p>一方面，对于查询关系 $q$， $r$ 与 $q$ 的相关程度应该很高，即这样重要的相邻关系 $r$ 应该有一个大的 $\mathcal{P}\left(r \Rightarrow q \right)$ 。另一方面，对于重要邻居的相邻关系 $r$，$r$ 不应该被邻域中的其他关系 $r’$ 所暗示/找到. 我理解为：其他关系 $r’$ 既然没用，就让其与 $r$ 区分开来，即 $r’$ 与 $r$ 的相关程度很低: $\mathcal{P}\left(r \Rightarrow q \right)$ 很小.</p>
+<blockquote>
+<p>例如：在上面的栗子中，如果查询关系 $q$ 是  <code>‘live_in’</code>，则应去考虑重要的相邻关系 $r$ <code>‘play_for’</code> 。另一方面，例如，无论查询关系是否是  <code>‘live_in’</code>，都不应为 <code>work_as</code> 这个相邻关系分配太多的权重，因为 <code>‘play_for’</code> 已经为其提供了足够的信息。</p>
+</blockquote>
+<p>所以说： <strong>$\alpha_{j \mid i, q} $ 提升了重要关系 $r$ 对 $q$ (分子)的影响，并降低了相同邻域(分母)中其他关系 $r’$ 找到关系 $r$ 的影响。</strong>通过这种方式，Logic Rule Mechanism 达成了查询关系感知和邻域冗余感知。 </p>
+<h4 id="Neural-Network-Mechanism"><a href="#Neural-Network-Mechanism" class="headerlink" title="Neural Network Mechanism"></a>Neural Network Mechanism</h4><p><strong>Logic Rule Mechanism 将注意力权重引导到关系的粗粒度上</strong>，而 <strong>Neural Network Mechanism 考虑隐藏在转换的邻居嵌入中的细粒度信息 来确定哪个邻居重要。</strong></p>
+<p>给定一个查询关系 $q \in \mathcal{R}$，$e_i$ 和 邻居节点 $e_j$ 之间关系的重要性用下面公式衡量：</p>
+<script type="math/tex; mode=display">
+\alpha_{j \mid i, q}^{\mathrm{NN}}=\operatorname{softmax}\left(\alpha_{j \mid i, q}^{\prime}\right)=\frac{\exp \left(\alpha_{j \mid i, q}^{\prime}\right)}{\sum_{j^{\prime} \in N_{\mathcal{E}}(i)} \exp \left(\alpha_{j^{\prime} \mid i, q}^{\prime}\right)} .</script><p>其中，未归一化的注意力权重 $\alpha_{j \mid i, q}^{\prime}$ 通过 Attention neural network 给出：</p>
+<script type="math/tex; mode=display">
+\alpha_{j \mid i, q}^{\prime}=\mathbf{u}_{a}^{\top} \cdot \tanh \left(\mathbf{W}_{a} \cdot\left[\mathbf{z}_{q} ; T_{r}\left(\mathbf{e}_{j}^{I}\right)\right]\right)</script><p>其中，$\mathbf{u}<em>{a}$ 和 $\mathbf{W}</em>{a}$ 是全局的 attention 参数，$\mathbf{z}_{q}$ 是查询关系 $q$ 的特定于关系的 attention 参数。所有这些 attention 参数都被视为编码器的参数，并直接从数据中学习。 </p>
+<p><strong>注意：</strong>与 Logic Rule Mechanism 的 $\alpha<em>{j \mid i, q}^{\text {Logic }}$ 不同，$\alpha</em>{j \mid i, q}^{\mathrm{NN}}$ 的计算更多的集中于 <strong>邻居节点 $e_j$ 本身</strong>。栗，图2中，邻居节点 <code>Chicago_Bulls</code> 可能有助于找到 <code>live_in</code> 的概率，因为 <code>live_in</code> 芝加哥的同时还有其他运动员 <code>play_for</code> <code>Chicago_Bulls</code> 。</p>
+<p>最后为了结合两种加权机制，采用了 double-view attention，将（2）公式更改为：</p>
+<script type="math/tex; mode=display">
+\mathbf{e}_{i}^{O}=\sum_{\left(r, e_{j}\right) \in N_{\mathcal{K}}(i)}\left(\alpha_{j \mid i, q}^{\mathrm{Logic}}+\alpha_{j \mid i, q}^{\mathrm{NN}}\right) T_{r}\left(\mathbf{e}_{j}^{I}\right)</script><h3 id="Training-Objective"><a href="#Training-Objective" class="headerlink" title="Training Objective"></a>Training Objective</h3><p>训练模型需要 正三元组和负三元组。对正三元组随机破坏来获得 负三元组:</p>
+<script type="math/tex; mode=display">
+\Delta_{(s, q, o)}^{\prime}=\left\{\left(s^{\prime}, q, o\right) \mid s^{\prime} \in \mathcal{E}\right\} \cup\left\{\left(s, q, o^{\prime}\right) \mid o^{\prime} \in \mathcal{E}\right\}</script><p>为了鼓励 Decoder 对正三元组给出高分，对负三元组给出低分，对每个三元组 $(s,q,o)$ 应用 基于 margin 的 rank loss:</p>
+<script type="math/tex; mode=display">
+l^{O}(s, q, o)=\left[\gamma-\phi^{O}(s, q, o)+\phi^{O}\left(s^{\prime}, q, o^{\prime}\right)\right]_{+}</script><p>其中，$[x]_+=max{0,x}$ ，$\gamma$ 是有关 margin 的超参数 </p>
+<script type="math/tex; mode=display">
+\min \sum_{(s, q, o) \in \Delta} \sum_{\left(s^{\prime}, q, o^{\prime}\right) \in \Delta_{(s, q, o)}^{\prime}} l^{O}(s, q, o)</script><h4 id="Subtask-on-Input-Embeddings"><a href="#Subtask-on-Input-Embeddings" class="headerlink" title="Subtask on Input Embeddings"></a>Subtask on Input Embeddings</h4><p>上述培训目标仅优化聚合器的输出，即输出实体。然而，输入实体嵌入 $\mathbf{s}^{I}$ 并不直接知道整个KG的结构。为了使输入嵌入和聚合更有意义，作者为 LAN 设置了一个子任务。</p>
+<p>首先定义了第二个评分函数，它类似于上面的评分函数，不同之处在于: $\mathbf{w}_{a}$ 的输入嵌入 $\mathbf{e}^{I}$ 用于表示 subject 和 object，即</p>
+<script type="math/tex; mode=display">
+\phi^{I}(s, q, o)=-\left|\mathbf{s}^{I}+\mathbf{q}-\mathbf{o}^{I}\right|_{L 1} .</script><p>查询关系 $q$ 的嵌入由与第一个评分函数相同的嵌入矩阵 $\mathbf{w}_{r}$ 获得。然后为子任务定义了类似于上面的公式: 基于 margin 的 rank loss $l^{I}(s, q, o)$。最后，<strong>将子任务与主任务相结合</strong>，重新制定了 LAN 的整个 Training Objective</p>
+<script type="math/tex; mode=display">
+\min \sum_{(s, q, o) \in \Delta} \sum_{\left(s^{\prime}, q, o^{\prime}\right) \in \Delta_{(s, q, o)}^{\prime}}\left[l^{O}(s, q, o)+l^{I}(s, q, o)\right] .</script><h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><h3 id="Configurations"><a href="#Configurations" class="headerlink" title="Configurations"></a>Configurations</h3><p>对于两个KG任务，需要构建 unseen entities 数据集：</p>
+<ol>
+<li>Sampling unseen entities. 随机分别按不同比例抽取数据构成新测试集 $\mathcal{T}$，然后构造不可见实体的数据集 $\mathcal{U’}$. 其中 $\mathcal{T}$ 中是 subjects 和 objects 的实体加到  $\mathcal{U’}$ 中。如果一个实体在原数据集  $\mathcal{U}$ 中没有邻居节点，就删掉。</li>
+</ol>
+<blockquote>
+<p>我觉得 subjects 和 objects 就是头实体 &amp; 尾实体.</p>
+</blockquote>
+<ol>
+<li><p>Filtering and splitting data sets. 确保看不见的实体不会出现在最终的训练集或验证集中。我们将原始的训练集分成两个数据集，新的训练集和验证集。</p>
+<p>过滤和分割数据集。第二步是确保看不见的实体不会出现在最终的训练集或验证集中。我们将原始的训练集分成两个数据集，新的训练集和辅助集。对于原始训练集中的三元组（s，r，o），如果s，o∈  E、 它被添加到新的训练集中。如果是∈ U∧ o∈ E或s∈ E∧ o∈ U、  它被添加到辅助集合中，作为T中不可见实体的现有邻居。最后，对于原始验证集中的三元组（s，r，o），如果∈ U或o∈ U、 它将从验证集中删除。 </p>
+</li>
+</ol>
+<h3 id="Triplet-classification"><a href="#Triplet-classification" class="headerlink" title="Triplet classification"></a>Triplet classification</h3><p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220106152223375.png" alt="image-20220106152223375" style="zoom:60%;" /></p>
+<p>一方面，与平均值相比，LSTM 的性能较差，尽管平均值涉及的参数较少。这说明了为KG设计邻域聚合器时，排列不变性的必要性。另一方面，LAN 在所有数据集上取得最佳效果，证明了其有效性。</p>
+<h3 id="Link-Prediction"><a href="#Link-Prediction" class="headerlink" title="Link Prediction"></a>Link Prediction</h3><p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220106201114787.png" alt="image-20220106201114787" style="zoom:80%;" /></p>
+<p>从实验结果中可以看到，LSTM 性能最差。LAN 在  Hits@k 指标表现最好，而 Mean Rank 指标下的表现不好，这是因为 MR 的指标对于排名较低的位置更敏感，所以出现了 ==MRR== 指标，这样就可以看到 LAN 带来的持续改进。可以看到 MRR 指标下LAN的 有效性。</p>
+<h4 id="Necessity-of-Query-Relation-Awareness"><a href="#Necessity-of-Query-Relation-Awareness" class="headerlink" title="Necessity of Query Relation Awareness"></a>Necessity of Query Relation Awareness</h4><p>需要确认 aggregator 是否感知查询关系。Query-Attention 与 LAN 一样，只是删除了 logic rule mechanism。Global-Attention 也是注意网络，除了 Neural Network Mechanism 公式中的 $\mathbf{z}_{q}$ 用零向量掩盖。</p>
+<p>实验结果如图，Global-Attention 优于 MEAN，证明了不管查询是什么，注意力机制都可以有效地识别全局重要的邻居。但 Query-Attention 优于 Global-Attention，证明了查询关系感知的重要性。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220106212544942.png"   style="zoom:50%;" /></p>
+<h4 id="Effectiveness-of-Logic-Rule-Mechanism"><a href="#Effectiveness-of-Logic-Rule-Mechanism" class="headerlink" title="Effectiveness of Logic Rule Mechanism"></a>Effectiveness of Logic Rule Mechanism</h4><p>为了验证 Logic Rule Mechanism 的有效性，作者设置了只有  Mechanism 的模型。实验结果如表4，Logic Rules Only 模型比其他两个有显著优势，说明了 Logic Rule Mechanism 在为邻居分配有意义权重方面的有效性。 </p>
+<h4 id="Generalization-to-Other-Scoring-Functions"><a href="#Generalization-to-Other-Scoring-Functions" class="headerlink" title="Generalization to Other Scoring Functions"></a>Generalization to Other Scoring Functions</h4><p>为了验证 LAN 相对于基线的优越性是否可以推广到其他评分函数，作者对评分函数进行了替换。在不同的评分函数下，LAN 在所有评估指标上的表现都一致地优于 MEAN。而且可以看到，TransE 的效果均为最好。</p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220106212615422.png"  style="zoom: 50%;" /></p>
+<h4 id="Influence-of-the-Proportion-of-Unseen-Entities"><a href="#Influence-of-the-Proportion-of-Unseen-Entities" class="headerlink" title="Influence of the Proportion of Unseen Entities"></a>Influence of the Proportion of Unseen Entities</h4><p>可以合理地假设，当 Unseen Entities 与训练实体的比率增加时（即观察到的KG变得更稀疏），所有模型的性能都会恶化。</p>
+<p>为了确定 LAN 在稀疏KG上是否会受到较少的影响，作者对具有不同采样率R的数据集进行链接预测。结果如图3所示。可以看到，Unseen Entities 比例的增加肯定对所有模型都有负面影响。然而，LAN 的性能并没有像 MEAN 和 LSTM 那样急剧下降，这表明 LAN 在稀疏KG上<strong>更具鲁棒性</strong>。 </p>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220106215911416.png"  style="zoom:90%;" /></p>
+<h3 id="Case-Studies-on-Neighbors’-Weights"><a href="#Case-Studies-on-Neighbors’-Weights" class="headerlink" title="Case Studies on Neighbors’ Weights"></a>Case Studies on Neighbors’ Weights</h3><p>可视化LAN如何为邻居指定权重。从表6中可以看到：</p>
+<ol>
+<li>首先，通过查询关系，LAN 可以为具有更多相关关系的邻居赋予更高的权重。在第一种情况下，当查询是origin时，最上面的两个邻居由 <code>place_lived</code> 和 <code>breed_origin</code> 参与，这有助于暗示找到 <code>origin</code>。 </li>
+<li>此外，在所有这三种情况下，具有关系 <code>gender</code> 的邻居获得的权重最低，因为它们与查询关系无关。</li>
+<li>其次，LAN 可以将更高的权重赋予信息量更大的相邻实体。当查询关系是 <code>profession</code> 时，邻居 <code>Aristotle</code>, <code>Metaphysics</code>  and <code>Aesthetics</code> 都是和答案 <code>Philosopher</code> 相关的。</li>
+<li>第三个例子：权重最高的是 <code>(institution, University of Calgary)</code>，因为查询关系 <code>placed_live</code> 帮助aggregator专注于邻居关系 <code>institution</code> ，然后 邻居实体 <code>University of Calgary</code> 帮助找到答案 <code>Calgary</code></li>
+</ol>
+<p><img src="https://gitee.com/stuxiaozhang/blogimage/raw/master/img/机器学习/image-20220106220513216.png" alt=""></p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>作者制定了有效的邻域聚合器所需的三个特征。为了满足这三个特点，我们提出了LAN，它以排列不变的方式将不同的权重赋予实体的邻居，同时考虑邻居的冗余和查询关系。权值是在粗略的关系层次上根据逻辑规则估计的，在近邻层次上根据神经注意网络估计的。实验表明，LAN在两个典型的KG完成任务上显著优于基线模型。 </p>
+<div class="note note-primary">
+            <p>我觉得 Logic Rule Mechanism 有没有可能再复杂点？</p>
+          </div>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+      <tags>
+        <tag>GNN</tag>
+        <tag>KG</tag>
+        <tag>LAN</tag>
       </tags>
   </entry>
 </search>
