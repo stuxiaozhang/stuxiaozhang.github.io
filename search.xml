@@ -1759,64 +1759,66 @@
   <entry>
     <title>KMP算法</title>
     <url>/2022/04/03/KMP%E7%AE%97%E6%B3%95/</url>
-    <content><![CDATA[<h1 id="kmp算法">KMP算法</h1>
-<h2 id="kmp算法-思路">KMP算法 思路</h2>
-<p>KMP 是一个字符串匹配算法。使用场景是这样的：给定一个模式串 s，以及一个模板串 p。模板串 p 在模式串 s 中多次作为子串出现。求出 p 在 s 中所有出现的位置的起始下标。</p>
-<p>读完这个题，我们首先能想到的方式就是一个暴力的动作hh。就是两个指针扫就完了。暴力的做法就是对于每一个 i，都去和 j 一起往后扫描看二者是否相等，不等的话就继续下一个 i（把p串往后移一位）。</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt;= n; i ++ )<br>&#123;<br>    <span class="hljs-keyword">bool</span> flag = <span class="hljs-literal">true</span>;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">1</span>; j &lt;= m; j ++ )<br>    &#123;<br>        <span class="hljs-keyword">if</span>(s[i + j - <span class="hljs-number">1</span>] != p[j])<br>        &#123;<br>            flag = <span class="hljs-literal">false</span>;<br>            <span class="hljs-keyword">break</span>;<br>        &#125;<br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d &quot;</span>, i);<br>&#125;<br></code></pre></td></tr></table></figure>
+    <content><![CDATA[<h2 id="kmp算法-思路">KMP算法 思路</h2>
+<p>KMP 是一个字符串匹配算法。使用场景是这样的：给定一个主串 s，以及一个子串 p。子串 p 在主串 s 中多次作为子串出现。求出子串 p 在 s 中所有出现的位置的起始下标。（n为子串p的长度，m为主串s串的长度）</p>
+<p>读完这个题，我们首先能想到的方式就是一个暴力的动作hh。就是两个指针扫就完了。暴力的做法就是对于每一个 i，都去和 j 一起往后扫描看二者是否相等，不等的话就继续下一个 i（把 p串 往后移一位）。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt;= m; i ++ )<br>&#123;<br>    <span class="hljs-keyword">bool</span> flag = <span class="hljs-literal">true</span>;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">1</span>; j &lt;= n; j ++ )<br>    &#123;<br>        <span class="hljs-keyword">if</span>(s[i + j - <span class="hljs-number">1</span>] != p[j])<br>        &#123;<br>            flag = <span class="hljs-literal">false</span>;<br>            <span class="hljs-keyword">break</span>;<br>        &#125;<br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d &quot;</span>, i);<br>&#125;<br></code></pre></td></tr></table></figure>
 <p>KMP 算法是对暴力的这种一一对比的方法进行了优化，时间复杂度由 <span class="math inline">\(O(n^2)\)</span> 降低为 <span class="math inline">\(O(m + n)\)</span>。</p>
-<p><strong>KMP 核心思想</strong>：在每次匹配不相等时，不是把p串往后移一位，而是把p串往后移动至下一次可以和前面部分匹配的位置，这样就可以跳过大多数的失配步骤。而每次p串移动的步数就是通过查找 Next[ ] 数组确定的。</p>
+<p><strong>KMP 核心思想</strong>：在每次匹配不相等时，不是把 p串 往后移一位，而是把 p串 往后移动至下一次可以和前面部分匹配的位置，这样就可以跳过大多数的失配步骤。而每次p串移动的步数就是通过查找 Next[ ] 数组确定的。</p>
 <p>即，KMP 算法分为两步：</p>
 <ol type="1">
 <li>计算 Next 数组（针对子串 p 而言）</li>
-<li>子串 p 和 模式串 s 进行匹配</li>
+<li>子串 p 和 主串 s 进行匹配</li>
 </ol>
 <h3 id="next-数组的性质">Next 数组的性质</h3>
 <p>首先要清楚几个定义：</p>
 <ul>
 <li>“非平凡前缀”：指除了最后一个字符以外，一个字符串的全部头部组合。</li>
 <li><p>“非平凡后缀”：指除了第一个字符以外，一个字符串的全部尾部组合。</p></li>
-<li><p><strong>Next 数组存储的是 p 中以 j (下标从1开始) 结尾的真后缀能匹配 p 的前缀的最大长度。</strong> (或者说 p 的每个最长公共前后缀中的前缀的尾坐标)</p>
-<p>即 <code>p[1, j] = p[i - j + 1, i]</code></p></li>
+<li><p><strong><span class="math inline">\(Next[i]\)</span> 表示子串 p 中以 j (下标从1开始) 结尾的非平凡后缀能匹配 p 的前缀的最大长度。</strong> (或者说 <span class="math inline">\(j\)</span> 是 p 的每个最长公共前后缀中的前缀的尾坐标)</p>
+<p>即 <span class="math inline">\(Next[i]=j\)</span> 表示：<code>p[1, j] = p[i - j + 1, i]</code></p></li>
 </ul>
 <p><strong>Next 数组的性质：</strong></p>
-<p><code>Next[i] = j</code></p>
+<p><code>Next[i] = j</code>：<code>p[1, j] = p[i - j + 1, i]</code></p>
 <p><img src="https://cdn.acwing.com/media/article/image/2020/04/28/6828_2f9f9aa689-KMP_1.png" /></p>
-<p><code>Next[j]=k</code></p>
+<p><code>Next[j] = k</code>：<code>p[1, k] = p[j - k + 1, j]</code></p>
 <p><img src="https://cdn.acwing.com/media/article/image/2020/04/28/6828_333abd1289-KMP_2.png" /></p>
-<p>就是说，若以 i 结尾的真后缀能匹配 p 的前缀的最大长度为 <code>Next[i]</code>，那么它能匹配的次长前缀长度为 <code>Next[Next[i]]</code>，以此类推，<code>Next[Next[Next[i]]]⋯</code> 直至匹配长度为 0 为止。</p>
-<p>这是一条很重要的性质，是KMP算法的关键，它与模式串 PP 在主串 SS 中发生失配时的下一步操作有关。</p>
+<p>就是说，若以 i 结尾的非平凡后缀能匹配 p 的前缀的最大长度为 <code>Next[i]</code>，那么它能匹配的次长前缀长度为 <code>Next[Next[i]]</code>，以此类推，<code>Next[Next[Next[i]]]⋯</code> 直至匹配长度为 0 为止。</p>
+<p>这是一条很重要的性质，是KMP算法的关键，它与子串 p 在主串 p 中发生失配时的下一步操作有关。</p>
 <h3 id="kmp-匹配过程">KMP 匹配过程</h3>
-<p>下面模拟演示 <code>Next[ ]</code> 在匹配过程中的作用。</p>
-<p>已知主串 s 和模式串 p，且 p 的 <code>Next[ ]</code> 数组已经求出来了，当前主串 s 匹配到下标 i−1 位置，模式串 p 匹配到下标 j 位置，即满足 <span class="math inline">\(S[i−j:i−1]==P[1:j]\)</span>，如下图所示：</p>
+<p>下面模拟 <span class="math inline">\(Next[ ]\)</span> 在匹配过程中的作用。</p>
+<p>已知主串 s 和子串 p。且 p 的 <span class="math inline">\(Next[]\)</span> 数组已经求出来了，当前主串 s 匹配到下标 i−1 位置，子串 p 匹配到下标 j 位置，即满足 <span class="math inline">\(S[i−j:i−1]==P[1:j]\)</span>，如下图所示：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220404112803.png" /></p>
 <ol type="1">
 <li><span class="math inline">\(S[i]==P[j+1]\)</span>，则 j 后移一位，表示这一位匹配成功.
 <ul>
-<li>此时如果 j 到达了 p 串的末尾，说明 p 在 s 中出现了，在 s 中的起始下标为 <span class="math inline">\(i−|P|+1\)</span>。</li>
+<li><p>此时如果 j 到达了 p 串的末尾，说明 p 在 s 中出现了，在 s 中的起始下标为 <span class="math inline">\(i−|P|+1\)</span>。</p>
+<p>Note：j 接下来不是回到 p串 起始处重新在 s 中找下一个位置，而是 继续从 <span class="math inline">\(j = Next[j]\)</span> 的位置继续匹配。</p>
+<p>举个栗子，比如子串是 <span class="math inline">\(abcdabcd\)</span>，主串是 <span class="math inline">\(abcdabcdabfg...\)</span>。在匹配到 <span class="math inline">\(s[8] == p[7 + 1]\)</span> 的时候，j 后移一位，刚好 <span class="math inline">\(j == m\)</span>，找到一个匹配的输出。此时 j 无需从 p 的起始再开始，而是从 <span class="math inline">\(j = Next[8] = 4\)</span> 开始继续看二者的下一位比较即可。</p></li>
 <li>如果还没到，继续看 s 的下一位，即 <code>i ++</code></li>
 </ul></li>
 <li><span class="math inline">\(S[i]≠P[j+1]\)</span>，发生失配，此时不需要从头开始匹配。因为 s 和 p 一路匹配过来的，所以 3串 和 2 串是相同的。通过 Next 数组知道 1串 和 2串 是相同的，所以可以推出 1串和 3串 是相同的。所以下一次匹配完全不用从 s 串的下一位开始，直接从相同缀的下一位开始匹配就行了。如下图所示：</li>
 </ol>
 <p><img src="https://cdn.acwing.com/media/article/image/2020/04/28/6828_3c59de6e89-KMP_4.png" /></p>
-<p>上述移动的过程，就是令 <span class="math inline">\(j=Next[j]\)</span>。然后我们只需要再比较 <span class="math inline">\(S[i]\)</span> 与 <span class="math inline">\(P[j+1]\)</span> 是否匹配即可。如果不匹配就需要不断回退 <span class="math inline">\(j=Next[j]\)</span>，其实就是不断用 p 中已经能与 s 中以 <span class="math inline">\(i−1\)</span> 结尾的后缀匹配的前缀，减少中间多余匹配过程，在不断失配的过程中，所使用的 p 的前缀长度递减，直至为 0。如果经过某次 j 的回退，满足了 <span class="math inline">\(S[i]==P[j+1]\)</span>，那么 j 就可以后移了。图中表现的是，经过一次回退，就能成功匹配的情况（都是蓝色的小方块）。</p>
 <ul>
-<li>如何用代码描述模式串 p 移动的过程呢？</li>
+<li>如何用代码描述子串 p 移动的过程呢？</li>
 </ul>
-<p>我理解：大家所说的 失配后 j 回退的过程，我将其看作将 p 向后移动的过程。也就是说这两个动作是相反的。</p>
+<p>我理解：大家所说的 <strong>失配后 j 回退的过程，我将其看作将 p 向后移动的过程</strong>。也就是说这两个动作是相反的。</p>
+<p>p 向后移动的过程，就是令 <span class="math inline">\(j=Next[j]\)</span>。然后我们只需要再比较 <span class="math inline">\(S[i]\)</span> 与 <span class="math inline">\(P[j+1]\)</span> 是否匹配即可。如果不匹配就需要不断回退 <span class="math inline">\(j=Next[j]\)</span>，其实就是不断用 p 中已经能与 s 中以 <span class="math inline">\(i−1\)</span> 结尾的后缀匹配的前缀，减少中间多余匹配过程，在不断失配的过程中，所使用的 p 的前缀长度递减，直至为 0。如果经过某次 j 的回退，满足了 <span class="math inline">\(S[i]==P[j+1]\)</span>，那么 j 就可以后移了。图中表现的是，经过一次回退，就能成功匹配的情况（都是蓝色的小方块）。</p>
 <p>举个例子：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220404153407.png" /></p>
 <p>以上就是 KMP 算法的匹配过程，代码如下：</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// n为模式串p的长度，m为主串s串的长度 </span><br><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>, j = <span class="hljs-number">0</span>; i &lt;= m; i++) &#123;<br>    <span class="hljs-keyword">while</span> (j &amp;&amp; s[i] != p[j + <span class="hljs-number">1</span>]) j = Next[j]; <span class="hljs-comment">// 失配j就不断回退</span><br>    <span class="hljs-comment">//如果j有对应p串的元素， 且s[i] != p[j+1], 则失配， 移动p串</span><br>    <span class="hljs-comment">//用while是由于移动后可能仍然失配，所以要继续移动直到匹配或整个p串移到后面（j = 0)</span><br>    <br>    <span class="hljs-keyword">if</span> (s[i] == p[j + <span class="hljs-number">1</span>]) j++; <span class="hljs-comment">// 匹配成功j后移 </span><br>    <span class="hljs-keyword">if</span>(s[i] == p[j+<span class="hljs-number">1</span>]) j++;<br>    <span class="hljs-comment">//当前元素匹配，j移向p串下一位</span><br>    <span class="hljs-keyword">if</span>(j == m)<br>    &#123;<br>        <span class="hljs-comment">//匹配成功，进行相关操作</span><br>        j = ne[j];  <span class="hljs-comment">//继续匹配下一个子串</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">// n为子串p的长度，m为主串s串的长度 </span><br><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>, j = <span class="hljs-number">0</span>; i &lt;= m; i++) &#123;<br>    <span class="hljs-keyword">while</span> (j &amp;&amp; s[i] != p[j + <span class="hljs-number">1</span>]) j = Next[j]; <span class="hljs-comment">// 失配j就不断回退</span><br>    <span class="hljs-comment">//如果j有对应p串的元素， 且s[i] != p[j+1], 则失配， 移动p串</span><br>    <span class="hljs-comment">//用while是由于移动后可能仍然失配，所以要继续移动直到匹配或整个p串移到后面（j = 0)</span><br>    <br>    <span class="hljs-keyword">if</span> (s[i] == p[j + <span class="hljs-number">1</span>]) j++; <span class="hljs-comment">//当前元素匹配，j移向p串下一位</span><br>    <span class="hljs-keyword">if</span> (j == n)  <span class="hljs-comment">// p在s中完整出现</span><br>    &#123;<br>        <span class="hljs-comment">//匹配成功，进行相关操作</span><br>        j = Next[j];  <span class="hljs-comment">//继续匹配下一个子串</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 <h3 id="next-数组求解">Next 数组求解</h3>
-<p>理解了上述匹配过程，<code>Next[ ]</code> 的求解就不难理解了。我们可以把 <code>Next[ ]</code> 的求解过程看成是两个相同的串 p 匹配的过程。</p>
-<p>首先对于 p 串，显然有 <span class="math inline">\(Next[1]=0\)</span>（因为只考虑..真..前/后缀），然后两个指针 <span class="math inline">\(i=2,j=0\)</span> 开始，考虑 <span class="math inline">\(P[i]\)</span> 与 <span class="math inline">\(P[j+1]\)</span> 是否匹配，如果不匹配，那么 <span class="math inline">\(j=Next[j]\)</span> 不断回退，直到回退到匹配长度为 0 或者某一个 j 能满足 <span class="math inline">\(P[i]==P[j+1];\)</span> 如果 <span class="math inline">\(P[i]==P[j+1]\)</span> ，j 后移，说明以 p 中以 i 结尾的真后缀能匹配 p 的前缀的最大长度为 j，因此 <span class="math inline">\(Next[i]=j\)</span>。</p>
+<p>理解了上述匹配过程，<span class="math inline">\(Next[ ]\)</span> 的求解就不难理解了。我们可以把 <span class="math inline">\(Next[ ]\)</span> 的求解过程看成是两个相同的串 p 匹配的过程。</p>
+<p>首先对于 p 串，显然有 <span class="math inline">\(Next[1]=0\)</span>（因为只考虑非平凡前/后缀），然后两个指针 <span class="math inline">\(i=2,j=0\)</span> 开始，考虑 <span class="math inline">\(P[i]\)</span> 与 <span class="math inline">\(P[j+1]\)</span> 是否匹配，如果不匹配，那么 <span class="math inline">\(j=Next[j]\)</span> 不断回退，直到回退到匹配长度为 0 或者某一个 j 能满足 <span class="math inline">\(P[i]==P[j+1];\)</span> 如果 <span class="math inline">\(P[i]==P[j+1]\)</span> ，j 后移，说明以 p 中以 i 结尾的非平凡后缀能匹配 p 的前缀的最大长度为 j，因此 <span class="math inline">\(Next[i]=j\)</span>。</p>
 <p>举个例子：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220403111436.png" /></p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">2</span>, j = <span class="hljs-number">0</span>; i &lt;= m; i++)<br>&#123;<br>    <span class="hljs-keyword">while</span>(j &amp;&amp; p[i] != p[j+<span class="hljs-number">1</span>]) j = next[j];<br><br>    <span class="hljs-keyword">if</span>(p[i] == p[j+<span class="hljs-number">1</span>]) j++;<br>    next[i] = j;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">2</span>, j = <span class="hljs-number">0</span>; i &lt;= n; i++)<br>&#123;<br>    <span class="hljs-keyword">while</span>(j &amp;&amp; p[i] != p[j+<span class="hljs-number">1</span>]) j = Next[j];<br><br>    <span class="hljs-keyword">if</span>(p[i] == p[j+<span class="hljs-number">1</span>]) j++;<br>    Next[i] = j;  <span class="hljs-comment">// 更新Next</span><br>&#125;<br></code></pre></td></tr></table></figure>
 <h3 id="总结">总结</h3>
 <p>其实 KMP的核心就是匹配的时候不必每次都从下一个 i 开始，只要从后缀（最长的公共串）开始继续匹配即可。而 Next 数组记录了每个 i 对应的最长公共前后缀的长度(也可以说是前缀的尾坐标)。</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> N = <span class="hljs-number">1e6</span> + <span class="hljs-number">10</span>;<br><br><span class="hljs-keyword">char</span> s[N], p[N];<br><span class="hljs-keyword">int</span> ne[N];<br><span class="hljs-keyword">int</span> n, m;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; n &gt;&gt; p + <span class="hljs-number">1</span> &gt;&gt; m &gt;&gt; s + <span class="hljs-number">1</span>;<br>    <span class="hljs-comment">// p+1，s+1是让读入之后字符串的下标会从1开始。也可以写成scanf(“%s”, p + 1)</span><br>    <br>    <span class="hljs-comment">// 求 Next 数组</span><br>    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">2</span>, j = <span class="hljs-number">0</span>; i &lt;= n; i ++ )<br>    &#123;<br>        <span class="hljs-comment">// 不等于</span><br>        <span class="hljs-keyword">while</span>(j &amp;&amp; p[i] != p[j + <span class="hljs-number">1</span>]) j = ne[j];<br>        <br>        <span class="hljs-comment">// 等于</span><br>        <span class="hljs-keyword">if</span>(p[i] == p[j + <span class="hljs-number">1</span>]) j ++ ;<br>        ne[i] = j;<br>    &#125;<br>    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>, j = <span class="hljs-number">0</span>; i &lt;= m ; i ++ )<br>    &#123;<br>        <span class="hljs-keyword">while</span>(j &amp;&amp; s[i] != p[j + <span class="hljs-number">1</span>]) j = ne[j];<br>        <br>        <span class="hljs-keyword">if</span>(s[i] == p[j + <span class="hljs-number">1</span>]) j ++ ;<br>        <br>        <span class="hljs-keyword">if</span>(j == n)<br>        &#123;<br>            <span class="hljs-built_in">cout</span> &lt;&lt; i - n &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;<br>            j = ne[j];<br>        &#125;<br>    &#125;<br>    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>KMP 模板：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> N = <span class="hljs-number">1e6</span> + <span class="hljs-number">10</span>;<br><br><span class="hljs-keyword">char</span> s[N], p[N];<br><span class="hljs-keyword">int</span> ne[N];<br><span class="hljs-keyword">int</span> n, m;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; n &gt;&gt; p + <span class="hljs-number">1</span> &gt;&gt; m &gt;&gt; s + <span class="hljs-number">1</span>;<br>    <span class="hljs-comment">// p+1，s+1是让读入之后字符串的下标会从1开始。也可以写成scanf(“%s”, p + 1)</span><br>    <br>    <span class="hljs-comment">// 求 Next 数组</span><br>    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">2</span>, j = <span class="hljs-number">0</span>; i &lt;= n; i ++ )<br>    &#123;<br>        <span class="hljs-comment">// 不等于</span><br>        <span class="hljs-keyword">while</span>(j &amp;&amp; p[i] != p[j + <span class="hljs-number">1</span>]) j = ne[j];<br>        <br>        <span class="hljs-comment">// 等于</span><br>        <span class="hljs-keyword">if</span>(p[i] == p[j + <span class="hljs-number">1</span>]) j ++ ;<br>        ne[i] = j;<br>    &#125;<br>    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>, j = <span class="hljs-number">0</span>; i &lt;= m ; i ++ )<br>    &#123;<br>        <span class="hljs-keyword">while</span>(j &amp;&amp; s[i] != p[j + <span class="hljs-number">1</span>]) j = ne[j];<br>        <br>        <span class="hljs-keyword">if</span>(s[i] == p[j + <span class="hljs-number">1</span>]) j ++ ;<br>        <span class="hljs-keyword">if</span>(j == n)<br>        &#123;<br>            <span class="hljs-built_in">cout</span> &lt;&lt; i - n &lt;&lt; <span class="hljs-string">&quot; &quot;</span>;<br>            j = ne[j];<br>        &#125;<br>    &#125;<br>    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>算法</category>
