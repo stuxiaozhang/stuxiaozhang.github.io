@@ -63,18 +63,34 @@
 <p>笔记本上需要加 fn 键，复制是 <code>ctrl + fn + insert</code>，粘贴是 <code>shift + fn +insert</code></p>
 </blockquote>
 <h2 id="tmux">tmux</h2>
-<h3 id="功能">功能：</h3>
+<p>tmux主要是用来远程ssh上去服务器交互用</p>
+<h3 id="功能">功能</h3>
 <ol type="1">
 <li>分屏。</li>
 <li><strong>允许断开Terminal连接后，继续运行进程</strong>。</li>
 </ol>
-<h3 id="结构">结构：</h3>
+<h3 id="结构">结构</h3>
 <p>一个 tmux 可以包含多个 session，一个 session 可以包含多个 window，一个 window 可以包含多个 pane。</p>
-<h3 id="实例">实例：</h3>
+<h3 id="实例">实例</h3>
 <figure class="highlight coffeescript"><table><tr><td class="code"><pre><code class="hljs coffeescript">tmux:<br>	session <span class="hljs-number">0</span>:<br>		<span class="hljs-built_in">window</span> <span class="hljs-number">0</span>:<br>			pane <span class="hljs-number">0</span><br>			pane <span class="hljs-number">1</span><br>			pane <span class="hljs-number">2</span><br>			...<br>		<span class="hljs-built_in">window</span> <span class="hljs-number">1</span><br>		<span class="hljs-built_in">window</span> <span class="hljs-number">2</span><br>		...<br>	session <span class="hljs-number">1</span><br>	session <span class="hljs-number">2</span><br>	...<br></code></pre></td></tr></table></figure>
-<p>操作：</p>
+<h3 id="常用的操作">常用的操作</h3>
 <ol type="1">
-<li><p><code>tmux</code>：新建一个session，其中包含一个window，window中包含一个pane，pane里打开了一个shell对话框。</p></li>
+<li><code>tmux</code>：新建一个session，其中包含一个window，window中包含一个pane，pane里打开了一个shell对话框。</li>
+<li><code>tmux new -s name</code>：新建一个名为 name 的 session</li>
+<li><code>tmux ls</code>：显示已有tmux列表</li>
+<li><code>tmux attach -t name</code>：从终端打开之前挂起的session。</li>
+<li><code>ctrl + b</code>，再按<code>d</code> 挂起session，就是退化该会话，但不会关闭会话。</li>
+<li><code>tmux kill-session -t name</code>：关闭名为 name 会话（销毁会话）</li>
+<li><code>tmux rename -t name newname</code>：更名</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406155813.png" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406155817.png" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406155830.png" /></p>
+<h3 id="tmux使用时出现的问题">tmux使用时出现的问题</h3>
+<p>1、conda 的环境用不了</p>
+<p>首先退出并关闭会话，在终端退出conda环境，新建进入会话，在tmux会话中激活所需conda环境方可生效。</p>
+<h3 id="操作-在ubuntu都是-ctrl-b">操作 （在ubuntu都是 <code>ctrl + b</code>）</h3>
+<ol type="1">
 <li><p>按下<code>Ctrl + a</code>后手指松开，然后按<code>%</code>：将当前pane左右平分成两个pane。</p></li>
 <li><p>按下<code>Ctrl + a</code>后手指松开，然后按<code>&quot;</code>（注意是双引号&quot;）：将当前pane上下平分成两个pane。</p></li>
 <li><p><code>Ctrl + d</code>：关闭当前pane；如果当前window的所有pane均已关闭，则自动关闭window；如果当前session的所有window均已关闭，则自动关闭session。</p></li>
@@ -84,7 +100,6 @@
 <li><p>按住<code>ctrl + a</code>的同时按方向键，可以调整pane之间分割线的位置。</p></li>
 <li><p>按下<code>ctrl + a</code>后手指松开，然后按<code>z</code>：将当前pane全屏/取消全屏。</p></li>
 <li><p>按下<code>ctrl + a</code>后手指松开，然后按<code>d</code>：挂起当前session。</p></li>
-<li><p><code>tmux a</code>：打开之前挂起的session。</p></li>
 <li><p>按下<code>ctrl + a</code>后手指松开，然后按<code>s</code>：选择其它session。 方向键 —— 上：选择上一项 session/window/pane 方向键 —— 下：选择下一项 session/window/pane 方向键 —— 右：展开当前项 session/window 方向键 —— 左：闭合当前项 session/window</p></li>
 <li><p>按下<code>Ctrl + a</code>后手指松开，然后按<code>c</code>：在当前session中创建一个新的window。</p></li>
 <li><p>按下<code>Ctrl + a</code>后手指松开，然后按<code>w</code>：选择其他window，操作方法与(12)完全相同。</p>
@@ -100,13 +115,13 @@
 <li><p>按下Ctrl + a后松开手指，然后按<code>]</code>，会将剪贴板中的内容粘贴到光标处</p></li>
 </ol>
 <h2 id="vim-教程">vim 教程</h2>
-<h3 id="功能-1">功能：</h3>
+<h3 id="功能-1">功能</h3>
 <ol type="1">
 <li><p>命令行模式下的文本编辑器。</p></li>
 <li><p>根据文件扩展名自动判别编程语言。支持代码缩进、代码高亮等功能。</p></li>
 <li><p>使用方式：<code>vim filename</code> 如果已有该文件，则打开它。 如果没有该文件，则打开个一个新的文件，并命名为filename</p></li>
 </ol>
-<h3 id="模式">模式：</h3>
+<h3 id="模式">模式</h3>
 <ol type="1">
 <li><p>一般命令模式</p>
 <p>默认模式。命令输入方式：类似于打游戏放技能，按不同字符，即可进行不同操作。可以复制、粘贴、删除文本等。</p></li>
@@ -115,7 +130,7 @@
 <li><p>命令行模式</p>
 <p>在一般命令模式里按下<code>: / ?</code>三个字母中的任意一个，会进入命令行模式。命令行在最下面。 可以查找、替换、保存、退出、配置编辑器等。</p></li>
 </ol>
-<h3 id="操作">操作：</h3>
+<h3 id="操作">操作</h3>
 <ol type="1">
 <li><p><code>i</code>：进入编辑模式</p></li>
 <li><p><code>ESC</code>：进入一般命令模式</p></li>
@@ -1804,7 +1819,7 @@
 <li>如何用代码描述子串 p 移动的过程呢？</li>
 </ul>
 <p>我理解：大家所说的 <strong>失配后 j 回退的过程，我将其看作将 p 向后移动的过程</strong>。也就是说这两个动作是相反的。</p>
-<p>p 向后移动的过程，就是令 <span class="math inline">\(j=Next[j]\)</span>。然后我们只需要再比较 <span class="math inline">\(S[i]\)</span> 与 <span class="math inline">\(P[j+1]\)</span> 是否匹配即可。如果不匹配就需要不断回退 <span class="math inline">\(j=Next[j]\)</span>，其实就是不断用 p 中已经能与 s 中以 <span class="math inline">\(i−1\)</span> 结尾的后缀匹配的前缀，减少中间多余匹配过程，在不断失配的过程中，所使用的 p 的前缀长度递减，直至为 0。如果经过某次 j 的回退，满足了 <span class="math inline">\(S[i]==P[j+1]\)</span>，那么 j 就可以后移了。图中表现的是，经过一次回退，就能成功匹配的情况（都是蓝色的小方块）。</p>
+<p>或者说，p 向后移动的过程，看成 j 回退的过程，即 令 <span class="math inline">\(j=Next[j]\)</span>。然后我们只需要再比较 <span class="math inline">\(S[i]\)</span> 与 <span class="math inline">\(P[j+1]\)</span> 是否匹配即可。如果不匹配就需要不断回退 <span class="math inline">\(j=Next[j]\)</span>，其实就是不断用 p 中已经能与 s 中以 <span class="math inline">\(i−1\)</span> 结尾的后缀匹配的前缀，减少中间多余匹配过程，在不断失配的过程中，所使用的 p 的前缀长度递减，直至为 0。如果经过某次 j 的回退，满足了 <span class="math inline">\(S[i]==P[j+1]\)</span>，那么 j 就可以后移了。图中表现的是，经过一次回退，就能成功匹配的情况（都是蓝色的小方块）。</p>
 <p>举个例子：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220404153407.png" /></p>
 <p>以上就是 KMP 算法的匹配过程，代码如下：</p>
@@ -1826,6 +1841,154 @@
       </categories>
       <tags>
         <tag>KMP算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Neural Architecture Search 入门</title>
+    <url>/2022/04/05/Search/</url>
+    <content><![CDATA[<h1 id="neural-architecture-search-入门">Neural Architecture Search 入门</h1>
+<p>超参数：指的是搭建神经网络之前需要手动设置的一些数值。</p>
+<ul>
+<li>神经网络结构超参数：比如卷积层数，卷积核数量，卷积核大小...</li>
+<li>优化算法超参数：SGD/Adam等等，学习率，batch大小，epoches的数量...</li>
+</ul>
+<p>神经结构搜索的早期方法主要是基于强化学习或进化算法，指导神经网络的搜索。大体的过程如图中的早期NAS架构所示，首先定义好搜索空间，通过搜索策略采样得到一个网络结构，进行性能评估并反馈给搜索策略，重复上述过程，直至得到一个表现最佳的神经网络结构。近年来，基于权重共享(weight-sharing)的结构搜索方法兴起，在这类方法中，搜索策略和性能评估是高度相关的。于是，现阶段的NAS架构主要是在搜索空间定义好的基础上，进行结构搜索与优化，继而得到性能最优的网络结构。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405184326.png" style="zoom: 80%;" /></p>
+<p>NAS：寻找最优的网络结构使得验证集准确率最大化。</p>
+<h2 id="搜索空间-search-space">搜索空间 search space</h2>
+<p>Search Space：包含所有可能的结构，如：卷积，池化，跳跃连接等等。需要先指定搜索空间，然后做搜索。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405185525.png" style="zoom: 33%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405175857.png" style="zoom: 33%;" /></p>
+<h2 id="搜索策略-search-strategy">搜索策略 search strategy</h2>
+<p>搜索策略(search strategy)：寻找到一个神经网络，并能够最大化性能指标，例如在验证集上的准确率。</p>
+<p>现阶段的搜索策略主要包含5种方法，分别为随机搜索、贝叶斯优化、进化算法、强化学习和基于梯度的方法。从历史上看，前4种搜索方式在一定程度上实现了神经结构搜索，但无法满足大多数研究人员的要求。于是，基于梯度的方法是目前的主流方向，革命性地将离散的结构搜索方式建模为一种连续松弛的搜索方式。尤其是，同以往在某个特定层固定操作相比，这种基于梯度的方法能够计算一系列操作的凸组合，灵活性更高。</p>
+<p>下图是随机搜索的图例：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405195632.png" style="zoom:33%;" /></p>
+<h2 id="section"></h2>
+<h2 id="nas-via-rnn-rl">NAS via RNN + RL</h2>
+<h3 id="rnn-for-generating-cnn-architectures">RNN for Generating CNN Architectures</h3>
+<p>介绍一篇论文：Neural Architecture Search with reinforcement learning ICLR 2017。主要是用了 RNN + RL 来做 NAS。</p>
+<p>初始状态 <span class="math inline">\(h_0\)</span> 向量和初始输入 <span class="math inline">\(x_0\)</span> 向量输入到 RNN 网络里，输出一个 向量 <span class="math inline">\(h_1 = tanh(W \cdot[h_0;x_0] + b)\)</span>，<span class="math inline">\(h_1\)</span> 输入到 一个 softmax 分类器。softmax分类器是指1个或多个全连接层+softmax函数。输出 <span class="math inline">\(p_1\)</span> 得到这一步任务的输出，就是几个概率值。选出最大的概率值，对应的方案就是这一步的输出。然后将结果进行 one hot 表示，得到了这一步的输出 <span class="math inline">\(a_1\)</span>.</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405195642.png" style="zoom: 33%;" /></p>
+<p>接下来做 embedding，将 one hot 向量映射成一个稠密向量。embedding 的结果记作 <span class="math inline">\(x_1\)</span>。通过 embedding 层的过程就是将 one hot 向量 通过一个参数矩阵，映射成一个稠密向量。参数矩阵刚开始随机初始化，之后根据训练数据进行学习。 embedding 层的参数可以在相同任务中重复利用。这是一步的过程。将上一层的隐藏状态 <span class="math inline">\(h_1\)</span> 和 <span class="math inline">\(a_1\)</span> 作为下一步的输入，就进行了下一步的动作。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405195650.png" style="zoom: 33%;" /></p>
+<p>关于 softmax 分类器：每一步的 softmax 分类器都是独立的，不可以和其他步的公用。任务不一样不应该共用softmax分类器，因为1. 每一步的任务是不同的，2. 输出的向量维度都不一样。</p>
+<p>第一步运行完后，得到了第一层的超参数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405195659.png" style="zoom: 33%;" /></p>
+<p>RNN 如此运行60步，每一步生成一个超参数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405195712.png" style="zoom: 33%;" /></p>
+<p>这个东西就叫做 Controller RNN。接下来训练它，目的是让生成的CNN 结构能最大化验证集的准确率。</p>
+<h3 id="训练-controller-rnn">训练 Controller RNN</h3>
+<p>Controller RNN 运行60步，生成20个卷积层的超参数。按照超参数来搭建一个CNN。假设只搜索卷积层的超参数，其他类型的层都手动设置。搭建好CNN后进行训练。训练后计算验证集上的准确率。用准确率来更新 Controller RNN 的参数。</p>
+<p>整体的流程表示：</p>
+<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220405162426866.png" alt="image-20220405162426866" style="zoom:33%;" /></p>
+<h3 id="motivation">Motivation</h3>
+<p>一个优化问题：对于目标函数 <span class="math inline">\(r\)</span>，<span class="math inline">\(\theta\)</span> 是它的参数，优化目标是找 <span class="math inline">\(\theta\)</span> 使得目标函数的值最大。如果目标函数 <span class="math inline">\(r\)</span> 是 <span class="math inline">\(\theta\)</span> 的可微函数，就很容易，计算函数 <span class="math inline">\(r\)</span> 关于 <span class="math inline">\(\theta\)</span> 的梯度，然后梯度上升就好了。但是 函数 <span class="math inline">\(r\)</span> 关于 <span class="math inline">\(\theta\)</span> 不可微，就无法计算函数 <span class="math inline">\(r\)</span> 关于 <span class="math inline">\(\theta\)</span> 的梯度。</p>
+<p>在我们的问题中，目标函数 <span class="math inline">\(r\)</span> 是 CNN 在验证集上的准确率，而优化的变量 <span class="math inline">\(\theta\)</span> 是 Controller RNN 的参数， <span class="math inline">\(r\)</span> 不是关于 <span class="math inline">\(\theta\)</span> 的函数，也就不可微。</p>
+<p>所以想到了 强化学习，但是 RL 也有问题，需要大量的训练才能收集奖励。</p>
+<h3 id="basic-idea">Basic Idea</h3>
+<p>目标：改进 Controller RNN 使得验证集准确率逐渐提高。</p>
+<p><strong>Reward</strong>：验证集准确率</p>
+<p><strong>Policy function</strong>：Controller RNN。用 policy gradient ascent 来更新策略函数。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220405180218.png"  style="zoom: 33%;" /></p>
+<p>在前59步看不到验证集准确率，在第60步后才能看到，所以让前59步奖励都是0，第60步的奖励为准确率。</p>
+<p>Return (aka cumulative reward)：$ u_t = r_t+r_{t+1} + ... + r_{59} + r_{60}$</p>
+<p>所以，所有 return 都相等： <span class="math inline">\(u_1=u_2=...=u_60=ValAcc\)</span></p>
+<h3 id="reinforce-algorithm">REINFORCE Algorithm</h3>
+<p>近似策略梯度： <span class="math display">\[
+\frac{\partial \log \pi\left(\mathbf{a}_{t+1} \mid\left[\mathbf{h}_{t}, \mathbf{x}_{t}\right] ; \boldsymbol{\theta}\right)}{\partial \boldsymbol{\theta}} \cdot u_{t}
+\]</span> 用近似策略梯度更新参数 <span class="math inline">\(\theta\)</span> <span class="math display">\[
+\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}+\beta \cdot \sum_{t=1}^{60} \frac{\partial \log \pi\left(\mathbf{a}_{t+1} \mid\left[\mathbf{h}_{t}, \mathbf{x}_{t}\right] ; \boldsymbol{\theta}\right)}{\partial \boldsymbol{\theta}} \cdot u_{t}
+\]</span></p>
+<h3 id="recap">Recap</h3>
+<ul>
+<li>用 Controller RNN 生成20个卷积层的超参数（20*3=60个）。</li>
+<li>搭建出CNN；训练CNN；在验证集计算CNN准确率；把准确率作为 reward</li>
+<li>REINFORCE Algorithm 用 reward 来更新策略函数 Controller RNN</li>
+<li>将这个过程重复上万次</li>
+</ul>
+<h3 id="缺点">缺点</h3>
+<ol type="1">
+<li>更新一次 Controller RNN，需要从头训练 CNN，训练一次就很长时间了。想要训练好 RNN，至少得训练 10000+ 次CNN。</li>
+<li>用 RNN 训练 CNN 找超参数，但 RNN 自己本身就有很多超参数，比如循环层的层数， <span class="math inline">\(x/h\)</span> 向量的维度。调RNN 的超参数也需要很多时间。</li>
+</ol>
+]]></content>
+      <categories>
+        <category>papers</category>
+      </categories>
+      <tags>
+        <tag>NAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>高精度</title>
+    <url>/2022/03/23/%E9%AB%98%E7%B2%BE%E5%BA%A6/</url>
+    <content><![CDATA[<h1 id="高精度">高精度</h1>
+<p>高精度的模板包括高精度的加法、减法、乘法、除法。它们在输入输出时的处理方式是一样的，只是在核心的模拟计算的过程不同，在写板子的时候记得模拟一下过程，并多想想特殊情况，比如乘0这种情况会有前导0，等等。</p>
+<p>输入输出：</p>
+<ol type="1">
+<li>存储：用 $ $ 存储，第0位存个位，第1位存十位....以此类推。这样存储的好处是：如果相加有进位，刚好加到下一位，尤其是对于最高位，如果最高位有进位，在末位直接补更方便。</li>
+<li>所以在读入数字时，一定要<strong>倒序读入</strong>。运算过后，也要倒序输出。</li>
+<li>因为大数，需要按照字符串读进来，在存入数组时，要将字符转为数字，例如：<code>&quot;6&quot; - &quot;0&quot;</code> 就变成数字6。</li>
+</ol>
+<h2 id="高精度加法">高精度加法</h2>
+<ul>
+<li><span class="math inline">\(C = A + B, len(A / B) &lt;= 10^6\)</span></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406112720.PNG" /></p>
+<h3 id="note">Note</h3>
+<ul>
+<li>注意在算到最后，也就是最高位的计算时，<strong>还要判断 t 是否有进位，如果有还要加进去！</strong></li>
+</ul>
+<h3 id="code">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">add</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;A, <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;B)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(A.size() &lt; B.size()) <span class="hljs-keyword">return</span> add(B, A);<br><br>    <span class="hljs-built_in">vector</span> &lt;<span class="hljs-keyword">int</span>&gt; C;<br><br>    <span class="hljs-keyword">int</span> t = <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; A.size(); i ++ )<br>    &#123;<br>        t += A[i];<br>        <span class="hljs-keyword">if</span>(i &lt; B.size()) t += B[i];<br>        C.push_back(t % <span class="hljs-number">10</span>);<br>        t /= <span class="hljs-number">10</span>;<br>    &#125;<br>    <span class="hljs-keyword">if</span>(t) C.push_back(t);<br>    <span class="hljs-keyword">return</span> C;<br><br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">string</span> a, b;  <span class="hljs-comment">//按字符串形式输入123456</span><br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; A, B;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; a &gt;&gt; b;<br>	<br>     <span class="hljs-comment">//按照 ‘6’‘5’‘4’‘3’‘2’‘1’ 读入</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = a.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) A.push_back(a[i]-<span class="hljs-string">&#x27;0&#x27;</span>);<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = b.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) B.push_back(b[i]-<span class="hljs-string">&#x27;0&#x27;</span>);<br><br>    <span class="hljs-built_in">vector</span> &lt;<span class="hljs-keyword">int</span>&gt; C = add(A, B);<br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = C.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span> ; i -- ) <span class="hljs-built_in">cout</span>&lt;&lt; C[i];<br>    <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-built_in">endl</span>;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="高精度减法">高精度减法</h2>
+<ul>
+<li><span class="math inline">\(C = A - B, A&gt;= B, A/B &gt;= 0,len(A / B) &lt;= 10^6\)</span></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406143444.png" /></p>
+<h3 id="note-1">Note</h3>
+<ul>
+<li><p>注意 同一位上的两个数相减如果为负，要向前借一位，这里表示为 <span class="math inline">\(t=1\)</span></p></li>
+<li><p>减法存在<strong>前导0</strong>的问题，比如 <span class="math inline">\(13-12=01\)</span>，记得删掉：<code>while(C.size() &gt; 1 &amp;&amp; C.back() == 0) C.pop_back();</code></p></li>
+<li><p>减法要注意 <span class="math inline">\(sub()\)</span> 函数实现的是大的减小的，所以在计算前要先调整 <span class="math inline">\(A\)</span> 和 <span class="math inline">\(B\)</span>，实现一个 <span class="math inline">\(cmp\)</span> 函数</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">//判断是否有 A &gt;= B</span><br><span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">cmp</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;A, <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;B)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(A.size() != B.size()) <span class="hljs-keyword">return</span> A.size() &gt; B.size();<br>	<br>    <span class="hljs-comment">// 位数相等，从最高位开始 一位一位 倒序比较！</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = A.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- )&#123;<br>        <span class="hljs-keyword">if</span> (A[i] != B[i]) <br>            <span class="hljs-keyword">return</span> A[i] &gt; B[i];<br>    &#125;<br>    <span class="hljs-comment">// 如果两数相等，b</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="code-1">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-comment">//判断是否有 A &gt;= B</span><br><span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">cmp</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;A, <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;B)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">if</span>(A.size() != B.size()) <span class="hljs-keyword">return</span> A.size() &gt; B.size();<br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = A.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- )&#123;<br>        <span class="hljs-keyword">if</span> (A[i] != B[i]) <br>            <span class="hljs-keyword">return</span> A[i] &gt; B[i];<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">sub</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;A, <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;B)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">vector</span> &lt;<span class="hljs-keyword">int</span>&gt; C;<br>    <span class="hljs-keyword">int</span> t = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; A.size(); i ++ )<br>    &#123;<br>        t = A[i] - t;<br>        <span class="hljs-keyword">if</span>(i &lt; B.size()) t = t - B[i];<br>        C.push_back((t + <span class="hljs-number">10</span>) % <span class="hljs-number">10</span>);<br>        <span class="hljs-keyword">if</span>(t &lt; <span class="hljs-number">0</span>) t = <span class="hljs-number">1</span>;<br>        <span class="hljs-keyword">else</span> t = <span class="hljs-number">0</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">while</span>(C.size() &gt; <span class="hljs-number">1</span> &amp;&amp; C.back() == <span class="hljs-number">0</span>) C.pop_back();<br>    <span class="hljs-keyword">return</span> C;<br>&#125;<br><br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">string</span> a, b;<br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; A, B;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; a &gt;&gt; b;<br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = a.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) A.push_back(a[i] - <span class="hljs-string">&#x27;0&#x27;</span>);<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = b.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) B.push_back(b[i] - <span class="hljs-string">&#x27;0&#x27;</span>);   <br><br>    <span class="hljs-built_in">vector</span> &lt;<span class="hljs-keyword">int</span>&gt; C;<br><br>    <span class="hljs-keyword">if</span>(cmp(A, B)) C = sub(A, B);<br>    <span class="hljs-keyword">else</span>&#123;<br>        C = sub(B, A);<br>        <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">&quot;-&quot;</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = C.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) <span class="hljs-built_in">cout</span> &lt;&lt; C[i];<br>    <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-built_in">endl</span>;<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="高精度乘法">高精度乘法</h2>
+<ul>
+<li><span class="math inline">\(C = A * b, A &gt;= 0, b &gt; 0\)</span>，这里的高精乘是指<strong>高精度乘以低精度</strong>。</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406162613.png" /></p>
+<h3 id="note-2">Note</h3>
+<ul>
+<li>也要判断 t 是否有进位，<strong>t 如果非0 需要进位</strong>！</li>
+<li>乘法也存在<strong>前导0问题</strong>，比如 <span class="math inline">\(13 * 0 = 00\)</span>，要删掉。</li>
+</ul>
+<h3 id="code-2">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;vector&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">mul</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;A, <span class="hljs-keyword">int</span> b)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; C;<br>    <span class="hljs-keyword">int</span> t = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; A.size(); i ++ )<br>    &#123;<br>        t += A[i] * b;<br>        C.push_back(t % <span class="hljs-number">10</span>);<br>        <br>        t /= <span class="hljs-number">10</span>;<br>    &#125;<br>    <br>    <span class="hljs-keyword">if</span>(t) C.push_back(t);<br>    <br>    <span class="hljs-keyword">while</span>(C.size() &gt; <span class="hljs-number">1</span> &amp;&amp; C.back() == <span class="hljs-number">0</span>) C.pop_back();  <br>    <span class="hljs-keyword">return</span> C;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; A, C;<br>    <span class="hljs-built_in">string</span> a;<br>    <span class="hljs-keyword">int</span> b;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; a &gt;&gt; b;<br><br>    <span class="hljs-keyword">if</span>(b == <span class="hljs-number">0</span>) <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">&quot;0&quot;</span> &lt;&lt; <span class="hljs-built_in">endl</span>;<br>    <span class="hljs-keyword">else</span><br>    &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = a.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) A.push_back(a[i] - <span class="hljs-string">&#x27;0&#x27;</span>); <br><br>        C = mul (A, b);<br><br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = C.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- )  <span class="hljs-built_in">cout</span> &lt;&lt; C[i];<br>    &#125;  <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="高精度除法">高精度除法</h2>
+<ul>
+<li><span class="math inline">\(A / b = C ... r, A &gt;= 0, b &gt; 0\)</span></li>
+</ul>
+<figure>
+<img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220406163042.png" alt="1E95D4539E9920A00D7497DAD487D1BD" /><figcaption>1E95D4539E9920A00D7497DAD487D1BD</figcaption>
+</figure>
+<h3 id="note-3">Note</h3>
+<ul>
+<li>除法存在一个和其他三种不一样的问题：其他三种都是倒序读入从低位开始算。但是，除法需要从高位开始算，这个不能变。所以还要<strong>倒序变回正序计算</strong>！然后因为通用的输出还是倒序输出，又得把刚计算得到的结果再变成倒序，再倒序输出就是正序啦！</li>
+<li>除法也存在前导0的问题。</li>
+</ul>
+<h3 id="code-3">code</h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;vector&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;algorithm&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-function"><span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; <span class="hljs-title">div</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; &amp;A, <span class="hljs-keyword">int</span> b, <span class="hljs-keyword">int</span> &amp;r)</span>  <span class="hljs-comment">// y</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; C;<br>    r = <span class="hljs-number">0</span>;<br>    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = A.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- )<br>    &#123;<br>        r = r * <span class="hljs-number">10</span> + A[i];<br>        C.push_back(r / b);<br>        r %= b;<br>    &#125;<br>    <br>    reverse(C.begin(),C.end());<br>    <br>    <span class="hljs-keyword">while</span>(C.size() &gt; <span class="hljs-number">1</span> &amp;&amp; C.back() == <span class="hljs-number">0</span>) C.pop_back();<br>    <br>    <span class="hljs-keyword">return</span> C;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-built_in">string</span> a;<br>    <span class="hljs-keyword">int</span> b;<br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; A;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; a &gt;&gt; b;<br>    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = a.size() - <span class="hljs-number">1</span>; i &gt;= <span class="hljs-number">0</span>; i -- ) A.push_back(a[i] - <span class="hljs-string">&#x27;0&#x27;</span>);<br>    <br>    <span class="hljs-keyword">int</span> r;<br>    <span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt; C = div(A, b, r);<br>    <br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = C.size() - <span class="hljs-number">1</span>; i &gt;=<span class="hljs-number">0</span>; i -- ) <span class="hljs-built_in">cout</span> &lt;&lt; C[i];<br>    <span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-built_in">endl</span> &lt;&lt; r &lt;&lt; <span class="hljs-built_in">endl</span>;<br>    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>基础算法</category>
+      </categories>
+      <tags>
+        <tag>高精度</tag>
       </tags>
   </entry>
 </search>
