@@ -1634,7 +1634,7 @@
   </entry>
   <entry>
     <title>模拟链表</title>
-    <url>/2022/03/20/%E6%A8%A1%E6%8B%9F%E9%93%BE%E8%A1%A8/</url>
+    <url>/2022/04/01/%E6%A8%A1%E6%8B%9F%E9%93%BE%E8%A1%A8/</url>
     <content><![CDATA[<p>关于链表的题，一般都是写成结构体：</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Node</span> &#123;</span><br>    <span class="hljs-keyword">int</span> val;<br>    Node *next;<br>&#125;<br></code></pre></td></tr></table></figure>
 <p>面试用的比较多。每次都需要 new 一个新节点，要调用 new 函数。</p>
@@ -2110,6 +2110,39 @@ b[n]=a[n]-a[n-1]
       </categories>
       <tags>
         <tag>差分</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>位运算</title>
+    <url>/2022/03/29/%E4%BD%8D%E8%BF%90%E7%AE%97/</url>
+    <content><![CDATA[<h1 id="位运算">位运算</h1>
+<p>位运算的作用：返回 x 的最后一位1：<code>lowbit(x) = x &amp; -x</code></p>
+<h2 id="x-k-1x-的二进制表示"><span class="math inline">\(x &gt;&gt; k \&amp; 1\)</span>：x 的二进制表示</h2>
+<p>问题：整数 <span class="math inline">\(n\)</span> 的二进制表示中，第 <span class="math inline">\(k\)</span> 位数字是几？</p>
+<p><span class="math inline">\(&gt;&gt;\)</span> 是右移运算符。假设x=5，那么x的二进制为0101，<span class="math inline">\(x&gt;&gt;1\)</span> 表示x右移1位，即把最右边一位的1删掉，变为010，此时x=2； 仍然设x=5，二进制0101，<span class="math inline">\(x&gt;&gt;2\)</span> 表示x右移2位，把最右边两位的01去掉，变为01，此时x=1。<span class="math inline">\(x&gt;&gt;=1\)</span> 等价于 <span class="math inline">\(x=x&gt;&gt;1\)</span>，跟 <span class="math inline">\(x+=1\)</span> 等价于 <span class="math inline">\(x=x+1\)</span> 是一个道理</p>
+<blockquote>
+<p><span class="math inline">\(x &gt;&gt;= 1\)</span> 相当于 <span class="math inline">\(x = x / 2\)</span></p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220409190225.png" style="zoom: 40%;" /></p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;<br><span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> k = <span class="hljs-number">31</span>; k &gt;= <span class="hljs-number">0</span> ; k -- ) <span class="hljs-built_in">cout</span> &lt;&lt; (x &gt;&gt; k &amp; <span class="hljs-number">1</span>);  =&gt; <span class="hljs-number">1010</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> n;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; n;<br>    <br>    <span class="hljs-keyword">while</span>(n -- )<br>    &#123;<br>        <span class="hljs-keyword">int</span> x;<br>        <span class="hljs-built_in">cin</span> &gt;&gt; x;<br>        <br>        <span class="hljs-keyword">int</span> res = <span class="hljs-number">0</span>;<br>        <br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> k = <span class="hljs-number">31</span>; k &gt;= <span class="hljs-number">0</span>; k -- ) <br>        &#123;<br>            <span class="hljs-keyword">if</span> (x &gt;&gt; k &amp; <span class="hljs-number">1</span>) res ++ ;<br>        &#125;<br>        <span class="hljs-built_in">cout</span> &lt;&lt; res &lt;&lt; <span class="hljs-string">&#x27; &#x27;</span>;<br>    &#125;<br>    <br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="lowbitx返回x的最后一位1">lowbit(x)：返回x的最后一位1</h2>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220409192144.png" style="zoom: 50%;" /></p>
+<h3 id="模板">模板</h3>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">lowbit</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">return</span> x &amp; -x;<br>&#125;<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>例： x = 1010 lowbit(x) = 10 x = 101000 lowbit(x) = 1000</p>
+</blockquote>
+<h2 id="例题">例题</h2>
+<h3 id="acwing-801.-二进制中1的个数"><a href="https://www.acwing.com/problem/content/description/803/">AcWing 801. 二进制中1的个数</a></h3>
+<figure class="highlight c++"><table><tr><td class="code"><pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">lowbit</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">return</span> x &amp; -x;<br>&#125;<br><br><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span> <span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>    <span class="hljs-keyword">int</span> n;<br>    <span class="hljs-built_in">cin</span> &gt;&gt; n;<br>    <br>    <span class="hljs-keyword">while</span>(n -- )<br>    &#123;<br>        <span class="hljs-keyword">int</span> x;<br>        <span class="hljs-built_in">cin</span> &gt;&gt; x;<br>        <br>        <span class="hljs-keyword">int</span> res = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">while</span> (x) &#123;<br>            x -= lowbit(x);<br>            res ++ ;<br>        &#125;<br>        <br>        <span class="hljs-built_in">cout</span> &lt;&lt; res &lt;&lt; <span class="hljs-string">&#x27; &#x27;</span>;        <br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>基础算法</category>
+      </categories>
+      <tags>
+        <tag>位运算</tag>
       </tags>
   </entry>
 </search>
