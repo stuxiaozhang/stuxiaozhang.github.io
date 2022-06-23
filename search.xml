@@ -3640,7 +3640,7 @@ b[n]=a[n]-a[n-1]
 <li><strong>每个阶段的构建块参数都不能改变</strong>。这种编码策略只能在发现给定CNN的连接时进行查看，不能改变给定CNN的深度。</li>
 </ol>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220608111012.png" alt=""></p>
-<h2 id="CNNGA"><a href="#CNNGA" class="headerlink" title="CNNGA"></a>CNNGA</h2><h3 id="算法框架"><a href="#算法框架" class="headerlink" title="算法框架"></a>算法框架</h3><p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220608114053.png" style="zoom: 80%;" /></p>
+<h2 id="CNN-GA"><a href="#CNN-GA" class="headerlink" title="CNN-GA"></a>CNN-GA</h2><h3 id="算法框架"><a href="#算法框架" class="headerlink" title="算法框架"></a>算法框架</h3><p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220608114053.png" style="zoom: 80%;" /></p>
 <ol>
 <li>在进化过程中，用作者提出的变长编码策略对预定义的构建块进行编码，使用预定义的总体大小随机初始化总体。</li>
 <li>当前生成的计数器初始化为零</li>
@@ -3708,7 +3708,7 @@ b[n]=a[n]-a[n-1]
 <li>已评估的架构可以通过另一代中的变异和交叉操作重新生成。注意，大规模进化的权重继承不能用于第二个考虑。</li>
 </ol>
 <p>通常，缓存系统应该认真对待其大小，并提供详细信息来讨论由重复密钥导致的冲突问题。在所提出的算法中，无需进行任何研究。首先，缓存组件类似于地图数据结构，其中该组件中的每个记录都是一个字符串，它将CNN的标识符和适应度值组合在一起。例如，“identifier1=98.12”等记录表示标识符为“identifier1”，其适应值为“98.12”。其次，正如我们所强调的，标识符由224个哈希代码计算，该哈希代码可以生成2224个不同的标识符。在实践中，包括所提出的算法在内的CNN体系结构算法仅评估数千个CNN。显然，我们不需要考虑冲突问题，因为冲突问题不会发生。第三，用于该算法的224哈希码实现将生成长度为32的标识符，而thefitness值是由长度为4的字符串表示的分类精度。缓存组件中的每条记录都是一个长度为37的字符串，使用UTF-8文件编码占据37个字节。显然，即使有数千条记录，缓存文件也只会占用很少的磁盘空间。因此，我们不需要关心缓存组件的大小。</p>
-<h3 id="生成子代"><a href="#生成子代" class="headerlink" title="生成子代"></a>生成子代</h3><p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220608114159.png" alt=""></p>
+<h3 id="3-生成子代"><a href="#3-生成子代" class="headerlink" title="3. 生成子代"></a>3. 生成子代</h3><p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220608114159.png" alt=""></p>
 <p>生成子代主要的遗传操作是交叉和突变：</p>
 <ol>
 <li><p>随机生成一个 $r$，根据 $r$ 的大小选择操作</p>
@@ -3738,15 +3738,13 @@ b[n]=a[n]-a[n-1]
 </li>
 </ol>
 <p>我认为总的来说，就是：提供不同的概率选择不同的变异操作集成了一个变异算子。</p>
-<h3 id="环境选择"><a href="#环境选择" class="headerlink" title="环境选择"></a>环境选择</h3><p>环境选择就是在本代种群中选出个体组成下一代种群。</p>
+<h3 id="4-环境选择"><a href="#4-环境选择" class="headerlink" title="4. 环境选择"></a>4. 环境选择</h3><p>环境选择就是在本代种群中选出个体组成下一代种群。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220608114211.png" style="zoom: 80%;" /></p>
 <ol>
 <li>首先从当前种群中，通过binary tournament selection选2个个体，选出其中更好的一个fitness更好的存入下一代。</li>
 <li>其次，从父代和子代中选出最佳的个体，检查它是否存入下一代 $P_{t + 1}$ ，如果没存就用最佳的个体取代下一代其中的最差的那个。</li>
 </ol>
 <p>原则上，只为下一代选择最佳个体很容易导致算法陷入局部最优。如果不明确地为下一代选择最佳个体，算法将不会收敛。<u>原则上，理想的种群不仅应该包含好的种群，还应该包含相对较差的种群，以增强多样性</u>。为此，二进制锦标赛选择通常用于此目的。然而，仅使用二进制锦标赛选择可能会错过最佳个体，导致算法没有朝着更好的方向进化。因此，我们明确地将最佳个体添加到下一个种群中，这是进化算法中一种特殊的精英策略 </p>
-<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>由于第一类同行竞争对手中最先进的CNN是手工设计的，因此我们主要比较分类精度和参数数量。对于其他两类中的算法，除了分类精度和参数数量之外，我们还比较了用于发现相应CNN的“GPU天数”。特别是，单位GPU日表示算法终止时在一个GPU上执行了一天，这反映了这些算法消耗的计算资源.</p>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220602204052420.png" alt="image-20220602204052420"></p>
 ]]></content>
       <categories>
         <category>Papers</category>
@@ -4319,6 +4317,255 @@ b[n]=a[n]-a[n-1]
       </categories>
       <tags>
         <tag>MyBatis</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【AE-CNN】Completely Automated CNN Architecture Design Based on Blocks</title>
+    <url>/2022/06/22/AE-CNN/</url>
+    <content><![CDATA[<h1 id="AE-CNN：Completely-Automated-CNN-Architecture-Design-Based-on-Blocks"><a href="#AE-CNN：Completely-Automated-CNN-Architecture-Design-Based-on-Blocks" class="headerlink" title="AE-CNN：Completely Automated CNN Architecture Design Based on Blocks"></a>AE-CNN：Completely Automated CNN Architecture Design Based on Blocks</h1><p>本文主要的思路是使用基于ResNet和DenseNet块的遗传算法自动进化CNN结构。</p>
+<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><ol>
+<li>该算法要求用户在基础CNN设计、调查数据集和GAs中提供任何必要的知识。由该算法设计的CNN结构可以直接使用，无需任何重新编译、预处理或后处理。</li>
+<li>采用变长编码方案搜索CNN的最佳深度。为了采用变长编码，我们设计了一种新的交叉算子和变异算子，并将其融入到所提出的算法中，以共同开发和探索最佳CNN结构中的搜索空间。 </li>
+<li>该算法基于ResNet块（RB）和DenseNet块（DB）设计了一种高效的编码策略，加快了体系结构的设计速度，并利用了有限的计算资源，同时取得了良好的性能。</li>
+</ol>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>基于进化算法的CNN体系结构设计算法仅利用了进化算法的部分原则优点，这无意中导致发现的CNN通常对所研究的问题没有很好的性能。例如，遗传CNN采用固定长度编码方案来表示CNN。然而，我们永远不知道CNN在解决新问题方面的最佳深度。</p>
+<p>为此，large-scale evolution利用可变长度编码方案，其中CNN可以自适应地改变其问题深度。然而，大规模进化在搜索过程中只使用变异算子，而不使用任何交叉算子。在进化算法中，交叉算子和变异算子起着局部搜索和全局搜索的互补作用。在不使用交叉算子的情况下，变异算子就像在不同的起始位置进行随机搜索一样。然而，大规模进化不使用交叉算子并不奇怪，因为交叉算子最初是为固定长度编码方案设计的。 </p>
+<h3 id="GA"><a href="#GA" class="headerlink" title="GA"></a>GA</h3><p>遗传算法的流程：</p>
+<p>1：初始化一组个体，每个个体通过所采用的编码策略代表问题的候选解决方案。</p>
+<p>2：根据编码信息和适应度函数评估群体中每个个体的适应度。</p>
+<p>3：从当前群体中选择有希望的亲本个体进行交配，然后使用交叉和变异算子生成后代。</p>
+<p>4：评估所产生后代的成熟度。</p>
+<p>5：从当前种群中选择一个表现良好的种群，然后用所选种群替换当前种群。</p>
+<p>6：如果不符合终止条件，则转到步骤3；否则，返回具有最佳适应度的个人作为问题的最佳解决方案。</p>
+<h3 id="Resnet-block"><a href="#Resnet-block" class="headerlink" title="Resnet block"></a>Resnet block</h3><p>Resnet block 由三个卷积层和一个跳跃层组成。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182034.png" style="zoom: 33%;" /></p>
+<p>在conv1上，使用1×1大小的滤波器减少了输入的空间大小，以降低conv2的计算复杂度。</p>
+<p>在conv2上，使用较大尺寸的过滤器（如3×3）来学习具有相同空间尺寸的特征。</p>
+<p>在conv3上，再次使用大小为1×1的过滤器，并增加空间大小以生成更多特征。</p>
+<h3 id="Dense-block"><a href="#Dense-block" class="headerlink" title="Dense block"></a>Dense block</h3><p>输入被添加，表示为⊕,  将conv3的输出作为 RD 的最终输出。注意，如果输入和conv3的输出的空间大小不相等，则对输入应用一组1×1卷积运算以实现与conv3的输出相同的空间大小，用于加法。 </p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182045.png" style="zoom:33%;" /></p>
+<p>在DB中，每个卷积层不仅接收来自输入数据的输入，还接收来自所有先前卷积层的输出。此外，还有一个参数k用于控制同一卷积层的输入和输出的空间大小。如果输入的空间大小是a，那么输出的空间大小是a+k，这是通过使用相应数量的滤波器进行卷积运算来实现的。 </p>
+<p>RBs和DBs能够缓解梯度消失问题的不利影响，基于此，深层架构能够有效学习输入数据的层次表示，进而提高最终分类精度。此外，DBs中的密集连接也能够重用低级特征，以提高对CNN顶层学习到的特征的辨别能力。主要基于这些优良特性，选择RBs和DBs作为该算法的构建块。</p>
+<h2 id="AE-CNN"><a href="#AE-CNN" class="headerlink" title="AE-CNN"></a>AE-CNN</h2><p>AE-CNN 算法的整体流程：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220622131240.png"  style="zoom: 67%;" /></p>
+<ol>
+<li>首先，使用预定义的大小N随机初始化总体。</li>
+<li>然后，评估个体的fitness。</li>
+<li>种群中的所有个体参与遗传算法的进化过程 ：<ol>
+<li>初始化一个空种群以包含子代</li>
+<li>通过二进制锦标赛选择两个父代</li>
+<li>通过交叉和变异操作从选定的父代中生成两个新的子代</li>
+</ol>
+</li>
+<li>评估种群中个体的fitness</li>
+<li>通过环境选择操作从当前种群（包含当前个体和生成的后代）中选择一个新种群，作为存活到下一个进化过程（即下一代）的父代解</li>
+<li>最后，从最终种群中选择的最佳个体，解码出来的就是最佳的CNN架构</li>
+</ol>
+<h3 id="1-Population-Initialization"><a href="#1-Population-Initialization" class="headerlink" title="1. Population Initialization"></a>1. Population Initialization</h3><p>种群初始化为以下进化过程提供了一个包含多个个体的基本种群。通常，所有个体以均匀分布的随机方式初始化，每个个体都应该代表一个CNN体系结构。 </p>
+<p>在该算法中，CNN是基于RBs、DBs和池层构建的，这是由于ResNet和DenseNet的显著成功，而在该算法中没有考虑全连接层。原因是，全连接的层由于其完全连接的性质，容易导致过拟合现象。为了减少这种现象，必须采用其他技术，如dropout。然而，这些技术也会产生需要仔细调整的参数，这将增加所提出算法的计算复杂性。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182105.png" style="zoom: 67%;" /></p>
+<blockquote>
+<p>第2行：CNN中的池化层对其输入数据执行降维，最常用的池化操作是将输入大小减半。为此，所使用的池化层数量需要限制为 $\left\lfloor\log _{2}(d)\right\rfloor$。例如，如果输入大小为32×32，使用的池层数不能大于6，因为6个池层会将输入数据的维数减少到1×1，而1×1维数上的一个额外池层会导致逻辑错误。</p>
+</blockquote>
+<p>提出的编码策略基于三种不同类型的单元及其在CNN中的位置。这些单元是RB单元（RBU）、DB单元（DBU）和池层单元（PU）。具体而言，RBU和DBU分别包含多个RBs和DBs，而PU仅由单个池层组成。理由是：</p>
+<ol>
+<li>通过将多个RBs或DBs放入RBU或DBU，与逐个堆叠RBs或DBs相比，CNN的深度可以显著改变，这将通过轻松改变CNN的深度来加速所提出算法的启发式搜索；</li>
+<li>一个由单个池层组成的PU比由多个池层组成的PU更灵活，因为多个后续池层的效果可以通过堆叠多个PU来实现。</li>
+</ol>
+<p>此外，为了便于算法实现，还添加了一个参数来表示单元类型。</p>
+<p>总之，RBU的编码信息是类型、RBs的数量、输入空间大小和输出空间大小，它们分别表示为type, amount, in, and out。另一方面，除了附加参数k之外，DBU的编码信息与RBU的编码信息相同。PU中只需要一个参数来编码池化类型。 </p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182114.png"  style="zoom: 50%;" /></p>
+<p>图3展示在编码包含九个单元的CNN时所提出的算法的示例。具体来说，块左上角的每个数字表示单元在CNN中的位置。如果类型分别为1、2或3，则单位为RBU、DBU或PU。注意到所提出的编码策略不限制每个个体的最大长度，这意味着所提出的算法可以通过所设计的可变长度编码策略自适应地找到具有适当深度的最佳CNN结构。</p>
+<h3 id="2-Fitness-Evaluation"><a href="#2-Fitness-Evaluation" class="headerlink" title="2. Fitness Evaluation"></a>2. Fitness Evaluation</h3><p>在AE-CNN中，解码后的CNN在训练数据上进行训练，在CNN训练后的验证数据上，fitness是最好的分类精度。 </p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623103614.png" style="zoom:40%;" /></p>
+<p>首先，将个体解码成对应的CNN架构。初始化CNN的权重，然后进行训练。在验证机上评估其精度。将精度作为fitness值。</p>
+<h3 id="3-Offspring-Generation"><a href="#3-Offspring-Generation" class="headerlink" title="3. Offspring Generation"></a>3. Offspring Generation</h3><p>子代应该继承父代的品质性状，比双亲具有更高的亲和力。为此，应选择身体状况最佳的个体作为父母个体。然而，采用最好的作为亲本很容易导致种群多样性的丧失，进而导致过早收敛，因此，由于陷入局部极小值，无法实现种群的最佳性能。所以使用二进制锦标赛选择算法。二元锦标赛选择从群体中随机选择两个个体，并选择一个具有较高fitness的个体作为一个父个体。通过再次重复此过程，选择另一个父个体，然后这两个父个体执行交叉操作。注意，在每个交叉操作之后生成两个后代，并且在每个世代中生成N个后代，即，在每个世代期间执行N/2次交叉操作，其中N表示种群大小。 </p>
+<blockquote>
+<p>锦标赛选择（Tournament Selection）：每次从种群中取一定数量（n）的个体(放回抽样)，选择其中适应度较好的进入子代种群。重复该操作直到种群规模到和原来的种群规模一样。几元锦标赛就代表一次性从总体中抽取几个个体，然后从中选择最优的个体保留到下一代种群。</p>
+</blockquote>
+<h4 id="Crossover-Operation"><a href="#Crossover-Operation" class="headerlink" title="Crossover Operation"></a>Crossover Operation</h4><p>交叉操作一般是指GA的局部搜索能力。</p>
+<p>在传统的GAs中，交叉操作是在两个长度相同的个体上进行的。基于该编码策略，该算法中的个体具有不同的长度，即对应的CNN具有不同的深度。所以不能使用传统的交叉算子。采用了单点交叉算子。原因是单点交叉在GP中得到了广泛应用。GP是另一类重要的进化算法，GP中的个体具有不同的长度。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182125.png" style="zoom:40%;" /></p>
+<p>注意，如果需要，会自动对生成的子代进行一些必要的更改。例如，当前单位的输入应等于前一单位的输出，其他级联调整是由此更改引起的。为了更好地理解交叉操作，图4中示出了一个示例，其中图4（a）示出了两个父代个体。假设这两个父个体的分离位置分别为第三和第四个单元，然后，图4（b）显示了相应的生成子个体，红色数字表示表示表示有效CNN的逻辑在交叉操作后所需的相应变化。 </p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182211.png" alt="image-20220623115002378" style="zoom: 50%;" /></p>
+<h4 id="Mutation-Operation"><a href="#Mutation-Operation" class="headerlink" title="Mutation Operation"></a>Mutation Operation</h4><p>变异操作通常在GAs中执行全局搜索。它以预定义的概率和允许的突变类型作用于一个生成的后代。根据提出的编码策略设计了可用的变异类型。在该算法中，可用的变异类型如下 ：</p>
+<ol>
+<li>添加（添加RBU、添加DBU或向所选位置添加PU）</li>
+<li>移除（在选定位置 remove unit）</li>
+<li>修改（在所选位置修改unit的编码信息）。 </li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623164628.png" style="zoom:40%;" /></p>
+<p>举一个“添加”的例子：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182403.png" style="zoom:50%;" /></p>
+<h3 id="4-Environmental-Selection"><a href="#4-Environmental-Selection" class="headerlink" title="4. Environmental Selection"></a>4. Environmental Selection</h3><p>在环境选择中，将从当前种群中选择N大小的个体种群，作为下一代的父代个体。理论上，一个好的种群同时具有收敛性和多样性的特征，以防止陷入局部极小值和过早收敛。在实践中，亲本个体应由最适合收敛的个体和适合度差异显著的个体组成。 N − 1通过二元锦标赛选择选择的个体，作为父个体，为新群体产生后代。 选择最好的一个作为下一代的父代是GAs中“精英主义”机制的一种实现，这可以防止种群的性能随着进化的进展而下降。 </p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182240.png" style="zoom: 40%;" /></p>
+<p>给定当前种群Pt和生成的后代种群Qt，使用第2-6行所示的二进制锦标赛选择来选择N个个体。然后，从Pt中选择最佳个体pbest（即具有最高适应度的个体）∪  Qt，然后检查pbest是否已选择为Pt+1。如果Pt+1中不存在从Pt+1中选择的随机值，则将其替换为pbest。注意到Qt中的后代应该在环境选择之前评估其fitness，因为二元锦标赛选择基于fitness。</p>
+<h2 id="Experiments"><a href="#Experiments" class="headerlink" title="Experiments"></a>Experiments</h2><p>实验的模型主要分为三类：完全手工设计，半自动设计和。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220623182306.png" alt=""></p>
+<ul>
+<li><p>AE-CNN的表现优于为手动设计的所有一流同行竞争对手。</p>
+</li>
+<li><p>半自动的设计：好于Genetic CNN；稍差于Hierarchical Evolution，但是只消耗了1/10GPUdays。Block-QNN-S在CIFAR10上的性能稍差，但在CIFAR100上的性能略好于AE-CNN，而AE-CNN消耗的GPU天数是Block-QNN-S消耗的GPU天数的1/3，而且AE-CNN发现的最佳CNN的参数数量比Block-QNN-S少。EAS和AE-CNN在CIFAR10上的分类错误几乎相同，而AE-CNN进化出的最佳CNN只有2.0M的参数，仅为EAS的1/11。</p>
+<p>总之，与半自动同行竞争对手相比，AE-CNN显示了竞争性能，但参数数量明显较少。</p>
+</li>
+<li><p>自动设计的模型中，在CIFAR10和CIFAR100数据集上，AE-CNN在分类错误、参数数量和GPU使用天数方面表现最佳。</p>
+<ul>
+<li>Large-scale Evolution 不应用交叉算子，交叉算子可以提供局部搜索能力。</li>
+<li>CGP-CNN采用固定长度编码策略来设计最佳的CNN架构。为了使编码策略有效，CGP-CNN必须在架构设计期间预先定义CNN的最大长度。事实上，CGP-CNN的预定义最大长度小于AE-CNN确定的最佳长度。</li>
+<li>基于强化学习设计了NAS和Meta-QNN。由于使用强化学习方法时不会计算fitness值，因此基于强化学习的方法通常比遗传算法消耗更多的计算资源，以获得相同的性能。预计，在可用计算资源的情况下，NAS和Meta-QNN的性能比AE-CNN差。 </li>
+</ul>
+</li>
+</ul>
+<p>​    </p>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+      <tags>
+        <tag>EANAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spring笔记</title>
+    <url>/2022/06/18/Spring%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="Spring笔记"><a href="#Spring笔记" class="headerlink" title="Spring笔记"></a>Spring笔记</h1><h2 id="一、什么是Spring？"><a href="#一、什么是Spring？" class="headerlink" title="一、什么是Spring？"></a>一、什么是Spring？</h2><h3 id="1、介绍"><a href="#1、介绍" class="headerlink" title="1、介绍"></a>1、介绍</h3><p>Spring它是一个容器，也是一个框架，它是整合其它框架的框架。Spring看到其他什么框架好用，它就会把它整合进来，比如MyBatis框架就被Spring看上了，然后就整合进Spring里面。</p>
+<p>Spring的核心是 <strong>控制反转IOC</strong> 和 <strong>面向切面编程AOP。</strong>它由20多个模块构成，它在很多领域都提供优秀的解决方案。</p>
+<p>Spring 根据代码的功能特点，使用 Ioc 降低业务对象之间耦合度。IoC 使得主业务在相互调用过程中，不用再自己维护关系了，即不用再自己创建要使用的对象了。而是由 Spring 容器统一管理，自动“注入”，注入即赋值。 而 AOP 使得系统级服务得到了最大复用，且不用再由程序员手工将系统级服务“混杂”到主业务逻辑中了，而是由 Spring 容器统一完成“织入”。</p>
+<h3 id="2、Spring的特点"><a href="#2、Spring的特点" class="headerlink" title="2、Spring的特点"></a>2、Spring的特点</h3><p>1) 轻量级<br>   由20多个模块构成，每个模块jar包都很小，小于1M，Spring核心包也就3M左右。<br>   编写代码比较自由，不用像MyBatis那样一定要写什么什么配置文件。</p>
+<p>2) 面向接口编程<br>   使用接口，就是面向灵活，项目的可扩展性好，可维护性都极高。接口不关心实现类的类型。使用时接口指向实现类，只要切换实现类即可切换整个功能。</p>
+<p>3) AOP:面向切面编程<br>   就是将公共的，通用的，重复的代码单独开发在一个切面中，在需要的时候再从切面中反织回去。底层的原理是动态代理。</p>
+<p>4) 整合其它框架</p>
+<p>   它整合后使其它框架更易用，比如整合了MyBatis框架</p>
+<h2 id="二、控制反转IOC"><a href="#二、控制反转IOC" class="headerlink" title="二、控制反转IOC"></a>二、控制反转IOC</h2><h3 id="1、什么是IOC（Inversion-of-Control）"><a href="#1、什么是IOC（Inversion-of-Control）" class="headerlink" title="1、什么是IOC（Inversion of Control）"></a>1、什么是IOC（Inversion of Control）</h3><p>控制反转IOC（Inversion of Control）是一个概念，是一种思想。由Spring容器进行对象的创建和依赖注入.程序员在使用时直接取出使用。<strong>由容器集中进行对象和创建和依赖管理。</strong></p>
+<p>Spring 根据代码的功能特点，使用 Ioc 降低业务对象之间耦合度。IoC 使得主业务在相互调用过程中，不用再自己维护关系了，即不用再自己创建要使用的对象了。而是由 Spring 容器统一管理，自动“注入”,注入即赋值。</p>
+<p><strong>正转</strong>：由程序员进行对象的创建和依赖注入称为正转.程序员说了算.</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">Student stu = <span class="hljs-keyword">new</span> Student();  ===&gt; 程序员自己创建对象<br>stu.setName(<span class="hljs-string">&quot;张三&quot;</span>);      ===&gt; 程序员自己进行赋值（依赖注入）<br>stu.setAge(<span class="hljs-number">22</span>);<br></code></pre></td></tr></table></figure>
+<p><strong>反转</strong>：由Spring容器进行创建对象和依赖注入称为反转，将控制权从程序员手中夺走，由Spring容器进行控制，称为反转。 容器说了算. </p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;stu&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.pojo.Student&quot;</span>&gt;</span>   ===&gt; Spring容器负责对象的创建<br>  <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;name&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;张三&quot;</span>&gt;</span>           ===&gt; Spring容器依赖注入值<br>  <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;age&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;22&quot;</span>&gt;</span> <br><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="2、基于xml的IOC"><a href="#2、基于xml的IOC" class="headerlink" title="2、基于xml的IOC"></a>2、基于xml的IOC</h3><p>对象的创建和注入依赖都在 <code>applicationContext.xml</code> 文件中的指定设置好。创建Spring容器的时候指明这个xml文件，Spring就会自动创建这个xml文件的对象并且注入好值。</p>
+<p>基于xml的IOC：</p>
+<ol>
+<li>创建对象 和 依赖注入，交给Spring容器管理完成</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;stu&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;org.example.pojo.Student&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>id：就是指明创建对象的名称</li>
+<li>class：就是对象对应的全类名，Spring底层会通过反射创建对象（只能是类，不能是接口）</li>
+</ul>
+<ol>
+<li><p>当启动Spring容器的时候：</p>
+<ol>
+<li><p>默认就会调用无参构造器创建此xml文件中的所有对象,所以<strong>必须提供无参构造器。</strong></p>
+</li>
+<li><p>相当于 <code>Student stu = new Student();</code></p>
+</li>
+</ol>
+</li>
+<li><p>同时会给创建的对象赋值</p>
+<ol>
+<li><strong>使用setter注入依赖</strong></li>
+<li><strong>使用构造器注入依赖</strong></li>
+</ol>
+</li>
+</ol>
+<h4 id="1-使用setter注入依赖"><a href="#1-使用setter注入依赖" class="headerlink" title="1. 使用setter注入依赖"></a>1. 使用setter注入依赖</h4><p>第一种：注入基本数据类型，使用 value 属性</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;stu&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;org.example.pojo.Student&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;name&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;张三&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;age&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;22&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>第二种：注入引用数据类型的数据，使用 ref 属性</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;school&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;school&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>此引用数据类型必须在此配置文件.xml种配置过bean，在此文件中的bean实例对象。</p>
+<p><strong>注意：使用setter注入必须提供无参的构造方法 和 <code>setXXX()</code> 方法。</strong></p>
+<h4 id="2-使用构造器注入依赖"><a href="#2-使用构造器注入依赖" class="headerlink" title="2. 使用构造器注入依赖"></a>2. 使用构造器注入依赖</h4><figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">Student stu = <span class="hljs-keyword">new</span> Student(<span class="hljs-string">&quot;张三&quot;</span>, <span class="hljs-number">22</span>);<br></code></pre></td></tr></table></figure>
+<ol>
+<li>使用构造方法的参数名称进行注入值</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;school&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.pojo3.School&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;name1&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;清华大学&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;address1&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;海淀区&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<ol>
+<li>使用构造方法参数的下标注入值</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;stu&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.pojo3.Student&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">index</span>=<span class="hljs-string">&quot;0&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;钱七&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">index</span>=<span class="hljs-string">&quot;1&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;22&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">index</span>=<span class="hljs-string">&quot;2&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;school&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<ol>
+<li>使用默认的构造方法的参数的<u>顺序</u>注入值</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;stuSequence&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.pojo3.Student&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;陈十&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;22&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">constructor-arg</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;school&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">constructor-arg</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h3 id="3、基于注解的IOC"><a href="#3、基于注解的IOC" class="headerlink" title="3、基于注解的IOC"></a>3、基于注解的IOC</h3><p>也称为DI(Dependency Injection)，它是IOC的具体实现的技术.</p>
+<p>基于注解的IOC,必须要在Spring的核心配置文件中添加包扫描.</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">“com.bjpowernode.s01”</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<ul>
+<li>药: 创建对象并依赖注入</li>
+<li>汤: xml 注解annotation</li>
+</ul>
+<blockquote>
+<p>换汤不换药~</p>
+</blockquote>
+<h4 id="1-创建对象的注解"><a href="#1-创建对象的注解" class="headerlink" title="1. 创建对象的注解"></a>1. 创建对象的注解</h4><ul>
+<li><code>@Component</code>:可以创建任意对象.创建的对象的默认名称是类名的驼峰命名法.也可以指定对象的名称 <code>@Component(“指定名称”)</code></li>
+<li><code>@Controller</code>:专门用来创建控制器的对象(Servlet),这种对象可以接收用户的请求,可以返回处理结果给客户端.</li>
+<li><code>@Service</code>:专门用来创建业务逻辑层的对象,负责向下访问数据访问层,处理完毕后的结果返回给界面层.</li>
+<li><code>@Repository</code>:专门用来创建数据访问层的对象,负责数据库中的增删改查所有操作.</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">案例:<br><span class="hljs-meta">@Component(&quot;stu&quot;)</span>  <span class="hljs-comment">// 交给Spring去创建对象,就是在容器启动时创建</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Student</span> </span>&#123;<br>    <span class="hljs-meta">@Value(&quot;张三&quot;)</span>  ===&gt; 简单类型的值注入<br>    <span class="hljs-keyword">private</span> String name;<br>    <br>    <span class="hljs-meta">@Value(&quot;22&quot;)</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> age;<br>    ...<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="2-依赖注入的注解"><a href="#2-依赖注入的注解" class="headerlink" title="2. 依赖注入的注解"></a>2. 依赖注入的注解</h4><h5 id="简单类型-8种基本类型-String-的注入"><a href="#简单类型-8种基本类型-String-的注入" class="headerlink" title="简单类型(8种基本类型+String)的注入"></a>简单类型(8种基本类型+String)的注入</h5><ul>
+<li><code>@Value</code>：用来给简单类型注入值 </li>
+</ul>
+<h5 id="引用类型的注入"><a href="#引用类型的注入" class="headerlink" title="引用类型的注入"></a>引用类型的注入</h5><ol>
+<li><p><code>@Autowired</code>:使用<u>类型</u>注入值,从整个Bean工厂中搜索同源类型的对象进行注入. 同源类型也可注入. </p>
+<p>什么是同源类型: </p>
+<ol>
+<li>被注入的类型(Student中的school)与注入的类型是<u>完全相同的类型</u>  </li>
+<li>被注入的类型(Student中的school：父)与注入的类型(子)是<u>父子类</u>  </li>
+<li>被注入的类型(Student中的school接口)与注入的类型(实现类)是<u>接口和实现类的类型</u>  </li>
+</ol>
+</li>
+</ol>
+<p>注意：在有父子类的情况下,使用按类型注入,就意味着有多个可注入的对象.此时按照名称进行二次筛选,选中<strong>与被注入对象相同名称的对象进行注入</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220620103521.png" style="zoom:67%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220620103434.png" alt=""></p>
+<ol>
+<li><code>@Autowired</code></li>
+</ol>
+<p><code>@Qualifier(&quot;名称&quot;)</code>：使用<u>名称</u>注入值,从整个Bean工厂中搜索相同名称的对象进行注入. </p>
+<p><strong>注意:如果有父子类的情况下,直接按名称进行注入值.</strong></p>
+<p>举个例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 创建School对象</span><br><span class="hljs-meta">@Component(&quot;schoolNew&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">School</span> </span>&#123;<br>    <span class="hljs-comment">// 简单类型的数据注入</span><br>    <span class="hljs-meta">@Value(&quot;清华大学&quot;)</span><br>    <span class="hljs-keyword">private</span> String schoolName;<br>    <span class="hljs-meta">@Value(&quot;北京&quot;)</span><br>    <span class="hljs-keyword">private</span> String address;<br>    ...<br>&#125;<br>    <br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Student</span> </span>&#123;<br>    <span class="hljs-meta">@Value(&quot;测试&quot;)</span><br>    <span class="hljs-keyword">private</span> String stuName;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> age;<br> <br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">     * 引用数据类型的数据注入采用 @Autowired和@Qualifier(&quot;名称&quot;)注解</span><br><span class="hljs-comment">     * Spring会自动去bean工厂中找@Qualifier(&quot;名称&quot;)指定名称的对象进行注入，赋值给school引用</span><br><span class="hljs-comment">     * 我们已经使用注解创建了School对象。</span><br><span class="hljs-comment">     * */</span><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-meta">@Qualifier(&quot;schoolNew&quot;)</span><br>    <span class="hljs-keyword">private</span> School school;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220620104852.png" alt=""></p>
+<h4 id="添加包扫描的方式"><a href="#添加包扫描的方式" class="headerlink" title="添加包扫描的方式"></a>添加包扫描的方式</h4><p>1)单个包扫描(推荐使用)</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">&quot;com.bjpowernode.controller&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">&quot;com.bjpowernode.service.impl&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">&quot;com.bjpowernode.dao&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>2)多个包扫描,多个包之间以逗号或空格或分号分隔</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">&quot;com.bjpowernode.controller com.bjpowernode.service ,com.bjpowernode.dao&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>3)扫描根包(不推荐)</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">&quot;com.bjpowernode&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>会降低容器启动的速度,导致多做无用功.</p>
+<h2 id="三、三层架构项目的分析"><a href="#三、三层架构项目的分析" class="headerlink" title="三、三层架构项目的分析"></a>三、三层架构项目的分析</h2><blockquote>
+<p>界面层view和controller</p>
+<p>业务逻辑层service</p>
+<p>数据持久层bean和dao/mapper</p>
+</blockquote>
+<p><strong>controller 调用业务逻辑层，业务逻辑层调用数据访问层，数据访问层插入数据到数据库中</strong></p>
+<h3 id="1、-普通的三层项目"><a href="#1、-普通的三层项目" class="headerlink" title="1、 普通的三层项目"></a>1、 普通的三层项目</h3><figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 数据访问层的实现类</span><br><span class="hljs-comment"> */</span><br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersMapperImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UsersMapper</span> </span>&#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users u)</span> </span>&#123;<br>        System.out.println(u.getUname() + <span class="hljs-string">&quot;用户增加成功！&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 业务逻辑层的实现类</span><br><span class="hljs-comment"> */</span><br><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UsersService</span> </span>&#123;<br><br>    <span class="hljs-comment">// 切记：在所有的业务逻辑层中都必定有数据访问层的对象！</span><br>    <span class="hljs-keyword">private</span> UsersMapper usersMapper = <span class="hljs-keyword">new</span> UsersMapperImpl();<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users users)</span> </span>&#123;<br>        <span class="hljs-comment">// 调用数据持久层将注册的信息插入到底层数据库</span><br>        <span class="hljs-keyword">return</span> usersMapper.insert(users);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之界面层的controller</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersController</span> </span>&#123;<br><br>    <span class="hljs-comment">// 如何去访问业务逻辑层？ 就是创建对象</span><br>    <span class="hljs-comment">// 切记：所有的界面层都会有业务逻辑层的对象</span><br>    <span class="hljs-keyword">public</span> UsersService usersService = <span class="hljs-keyword">new</span> UsersServiceImpl();<br><br>    <span class="hljs-comment">// 界面层的功能实现，对外提供访问的功能</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users users)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> usersService.insert(users);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="2、基于xml的IOC三层架构项目（Spring接管对象）"><a href="#2、基于xml的IOC三层架构项目（Spring接管对象）" class="headerlink" title="2、基于xml的IOC三层架构项目（Spring接管对象）"></a>2、基于xml的IOC三层架构项目（Spring接管对象）</h3><p>由Spring管理三层架构项目中的对象创建，包含界面层、业务逻辑层和数据访问层的对象创建。要创建的对象以及依赖信息在 <code>applicationContext.xml</code> 文件中配置。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之数据访问层</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersMapperImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UsersMapper</span> </span>&#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users u)</span> </span>&#123;<br>        System.out.println(u.getUname() + <span class="hljs-string">&quot;用户增加成功！&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之业务逻辑层</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UsersService</span></span>&#123;<br> <br>    <span class="hljs-comment">// 这个数据访问层的对象userMapper交给Spring创建了,因此这个依赖也交给Spring注入(需要提供setXXX方法)</span><br>    <span class="hljs-comment">// private UserMapper userMapper = new UserMapperImpl();</span><br>    <span class="hljs-keyword">private</span> UserMapper userMapper;<br> <br>    <span class="hljs-comment">// 交给Spring去依赖注入值，必须提供无参构造方法和setXXX()方法</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setUserMapper</span><span class="hljs-params">(UserMapper userMapper)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.userMapper = userMapper;<br>    &#125;<br><br>	<span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users users)</span> </span>&#123;<br>        <span class="hljs-comment">// 调用数据持久层将注册的信息插入到底层数据库</span><br>        <span class="hljs-keyword">return</span> usersMapper.insert(users);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之界面层的controller</span><br><span class="hljs-comment"> */</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServlet</span> </span>&#123;<br>    <span class="hljs-comment">// 面向接口编程</span><br>    <span class="hljs-comment">// 这个业务逻辑层的对象userService交给Spring创建了,因此这个依赖也交给Spring注入(需要提供setXXX方法)</span><br>    <span class="hljs-comment">// private UserService userService = new UserServiceImpl();</span><br>    <span class="hljs-keyword">private</span> UserService userService;<br> <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setUserService</span><span class="hljs-params">(UserService userService)</span> </span>&#123;<br>        <span class="hljs-keyword">this</span>.userService = userService;<br>    &#125;<br>    <br>    <span class="hljs-comment">// 界面层的功能实现，对外提供访问的功能</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users users)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> usersService.insert(users);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p> <code>applicationContext.xml</code>：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://www.springframework.org/schema/beans&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;</span>&gt;</span><br> <br>    <span class="hljs-comment">&lt;!--创建项目中需要的各种对象--&gt;</span><br> <br>    <span class="hljs-comment">&lt;!--创建数据访问层的对象--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;uMapper&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.mapper.UsersMapperImpl&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br> <br>    <span class="hljs-comment">&lt;!--创建业务逻辑层的对象，实现类对象赋给接口引用（多态）--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;uService&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.service.impl.UsersServiceImpl&quot;</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;usersMapper&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;uMapper&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br> <br>    <span class="hljs-comment">&lt;!--创建界面层的对象--&gt;</span><br>    <span class="hljs-comment">&lt;!--创建界面层的对象--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">bean</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;uController&quot;</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;com.bjpowernode.controller.UsersController&quot;</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">property</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;usersService&quot;</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">&quot;uService&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">property</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">bean</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>测试： </p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span>&#123;<br>    <span class="hljs-comment">// 创建Spring容器对象同时启动容器,创建里面的所有对象</span><br>    ApplicationContext ac = <span class="hljs-keyword">new</span> ClassPathXmlApplicationContext(<span class="hljs-string">&quot;applicationContext.xml&quot;</span>);<br><br>    <span class="hljs-comment">// 从Spring容器中获取界面控制层的userController对象</span><br>    UserServlet uerController = (UserServlet) ac.getBean(<span class="hljs-string">&quot;uerController&quot;</span>);<br>    <br>    <span class="hljs-comment">// 测试功能</span><br>    <span class="hljs-keyword">int</span> num = usersController.insert(<span class="hljs-keyword">new</span> Users(<span class="hljs-number">200</span>,<span class="hljs-string">&quot;王五&quot;</span>, <span class="hljs-number">12</span>));<br>    System.out.println(num);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="3、基于注解的IOC三层架构项目（Spring接管对象）"><a href="#3、基于注解的IOC三层架构项目（Spring接管对象）" class="headerlink" title="3、基于注解的IOC三层架构项目（Spring接管对象）"></a>3、基于注解的IOC三层架构项目（Spring接管对象）</h3><p>由Spring管理三层架构项目中的对象创建，包含界面层、业务逻辑层和数据访问层的对象创建。要创建的对象以及依赖信息都直接使用注解配置即可。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之数据访问层</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@Repository</span> <span class="hljs-comment">// 此注解说明交给Spring用来创建数据访问层的对象</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersMapperImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UsersMapper</span> </span>&#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users u)</span> </span>&#123;<br>        System.out.println(u.getUname() + <span class="hljs-string">&quot;用户增加成功！&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125;<br> <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">UsersMapperImpl</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;UsersMapperImpl的无参构造方法。。。。&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之业务逻辑层</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@Service</span> <span class="hljs-comment">// 此注解说明交给Spring来专门创建Service业务逻辑层的对象</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UserServiceImpl</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">UserService</span></span>&#123;<br>    <span class="hljs-comment">/*</span><br><span class="hljs-comment">    * 依赖注入也交给Spring</span><br><span class="hljs-comment">    * */</span><br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> UserMapper userMapper;<br>	<span class="hljs-comment">// private UserMapper userMapper = new UserMapperImpl();</span><br> <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users users)</span> </span>&#123;<br>        <span class="hljs-comment">// 调用数据持久层将注册的信息插入到底层数据库</span><br>        <span class="hljs-keyword">return</span> usersMapper.insert(users);<br>    &#125;<br> <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">UsersServiceImpl</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;UsersServiceImpl的无参构造方法。。。。&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 三层架构之界面层的controller</span><br><span class="hljs-comment"> */</span><br><br><span class="hljs-meta">@Controller</span> <span class="hljs-comment">// 此注解说明交给Spring专门用来创建界面层之控制层的对象</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">UsersController</span> </span>&#123;<br>    <span class="hljs-comment">// 面向接口编程</span><br> <br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> UserService userService;<br>	<span class="hljs-comment">// private UserService userService = new UserServiceImpl();</span><br> <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">insert</span><span class="hljs-params">(Users users)</span> </span>&#123;<br>        <span class="hljs-keyword">return</span> usersService.insert(users);<br>    &#125;<br> <br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">UsersController</span><span class="hljs-params">()</span> </span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;UsersController的无参构造方法。。。。&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">beans</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://www.springframework.org/schema/beans&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">xmlns:context</span>=<span class="hljs-string">&quot;http://www.springframework.org/schema/context&quot;</span></span><br><span class="hljs-tag">       <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd&quot;</span>&gt;</span><br> <br>    <span class="hljs-comment">&lt;!--指明要Spring扫描的包--&gt;</span><br>    <span class="hljs-comment">&lt;!--只要是基于注解开发，必须包扫描--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">context:component-scan</span> <span class="hljs-attr">base-package</span>=<span class="hljs-string">&quot;com.bjpowernode&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">context:component-scan</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">beans</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>测试： </p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">test1</span><span class="hljs-params">()</span></span>&#123;<br>    <span class="hljs-comment">// 创建并启动容器</span><br>    ApplicationContext ac = <span class="hljs-keyword">new</span> ClassPathXmlApplicationContext(<span class="hljs-string">&quot;applicationContext.xml&quot;</span>);<br>    <span class="hljs-comment">// 取出对象</span><br>    UsersController usersController = (UsersController) ac.getBean(<span class="hljs-string">&quot;usersController&quot;</span>);<br>    <br>    usersController.insert(<span class="hljs-keyword">new</span> Users(<span class="hljs-number">100</span>, <span class="hljs-string">&quot;haha&quot;</span>, <span class="hljs-number">23</span>));<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220620115551.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
       </tags>
   </entry>
 </search>
