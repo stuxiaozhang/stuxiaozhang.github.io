@@ -3478,8 +3478,10 @@ b[n]=a[n]-a[n-1]
   <entry>
     <title>【CGP-CNN】A Genetic Programming Approach to Designing Convolutional Neural Network  Architectures</title>
     <url>/2022/04/28/%E3%80%90CGP-CNN%E3%80%91A%20Genetic%20Programming%20Approach%20to%20Designing%20Convolutional%20Neural%20Network%20%20Architectures/</url>
-    <content><![CDATA[<h1 id="【CGP-CNN】A-Genetic-Programming-Approach-to-Designing-Convolutional-Neural-Network-Architectures"><a href="#【CGP-CNN】A-Genetic-Programming-Approach-to-Designing-Convolutional-Neural-Network-Architectures" class="headerlink" title="【CGP-CNN】A Genetic Programming Approach to Designing Convolutional Neural Network  Architectures"></a>【CGP-CNN】A Genetic Programming Approach to Designing Convolutional Neural Network  Architectures</h1><p>在本文中，作者设计基于遗传编程的CNN架构。使用笛卡尔遗传编程（CGP）编码方案，一种直接编码方案，来表示CNN的结构和连通性。这种表示法的优点是它的灵活性；它可以表示可变长度的网络结构和跳过连接。此外，作者采用了功能相对较高的模块，如卷积块和张量拼接，作为CGP中的节点函数，以减少搜索空间。为了评估CGP所代表的体系结构，以普通方式使用训练数据集训练网络。 </p>
-<h2 id="CGP-编码"><a href="#CGP-编码" class="headerlink" title="CGP 编码"></a>CGP 编码</h2><p>遗传规划(Genetic Programming，GP) ：是在遗传算法基础上发展起来的优化算法，属于进化算法中的一种。GP 模拟达尔文生物进化的基本原理，采用树形结构来表示个体，采用选择、交叉、变异作为操作算子，动态地改变个体所代表的程序结构，根据个体适应度筛选、演化，在庞大的解空间中寻找最优解。</p>
+    <content><![CDATA[<h1 id="cgp-cnna-genetic-programming-approach-to-designing-convolutional-neural-network-architectures">【CGP-CNN】A Genetic Programming Approach to Designing Convolutional Neural Network Architectures</h1>
+<p>在本文中，作者设计基于遗传编程的CNN架构。使用笛卡尔遗传编程（CGP）编码方案，一种直接编码方案，来表示CNN的结构和连通性。这种表示法的优点是它的灵活性；它可以表示可变长度的网络结构和跳过连接。此外，作者采用了功能相对较高的模块，如卷积块和张量拼接，作为CGP中的节点函数，以减少搜索空间。为了评估CGP所代表的体系结构，以普通方式使用训练数据集训练网络。</p>
+<h2 id="cgp-编码">CGP 编码</h2>
+<p>遗传规划(Genetic Programming，GP) ：是在遗传算法基础上发展起来的优化算法，属于进化算法中的一种。GP 模拟达尔文生物进化的基本原理，采用树形结构来表示个体，采用选择、交叉、变异作为操作算子，动态地改变个体所代表的程序结构，根据个体适应度筛选、演化，在庞大的解空间中寻找最优解。</p>
 <p>笛卡尔遗传规划 CGP：GP 个体在演化过程中存在基因型意外增长的情况，即膨胀问题。然后出现了笛卡尔遗传规划(Cartesian Genetic Programming，CGP)。CGP 是一种不受程序膨胀影响的多输入多输出模型。CGP 中的个体，不再采用树形结构，而是使用二维有向图表示，每个 CGP 个体具有定长基因型。</p>
 <p>标准 CGP 中，个体采用二维有向无环图的形式来表示。在个体基因型中，图中的每一个节点都被一组整数来表示。这组整数指明了该节点的操作函数，以及节点数据的传送方向。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220505163022.png" style="zoom:67%;" /></p>
@@ -3487,30 +3489,34 @@ b[n]=a[n]-a[n-1]
 <p>由于 CGP 个体初始化及其演化过程的随机性，不能保证每一个节点都被后继节点连接，故而在 CGP 个体在从基因型编译成表现型的过程中，会有一部分网络节点被忽略，不在表现型中体现作用。在这种情况下，在表现型中起作用的节点被称之为活跃节点(active node)，反之则被称为非活跃节点(inactive node)。有研究认为这种非活跃节点的冗余，非常有益于进化搜索的过程</p>
 <p>在标准 CGP 中，有三个可以由用户选择的参数：列数(columns)、行数(rows)和连接度(level-back)，分别用 Nc，Nr，l 表示。列数 Nc 和行数 Nr 决定 CGP 个体网络的排布方式，和基因型长度：Ln=Nr×Nr。连接度𝑙决定了这个二维有向图的连接性，𝑙表示当前节点最多能够与前 l 列的节点相连，即如果 l=1，则该图中每个节点都只能与前列节点相连，如果 l=2，则每个节点只能与它左侧最近两列中的节点相连。当 l=Nc 时，全图的节点能够与任何一个位于自己前列的节点相连。标准 CGP 中，不允许节点的同列连接。</p>
 <p>CGP的问题：在标准 CGP 中，仅使用点突变作为操作算子，种群多样性较低，种群演化结果依赖初始化个体优劣、搜索能力不足。标准 CGP 个体采用定长基因型，基因型的长度依靠经验值，无法适应未知规模的问题。由此两点分析，标准 CGP 种群的演化效率，存在提升的空间。</p>
-<h2 id="CGP-CNN"><a href="#CGP-CNN" class="headerlink" title="CGP-CNN"></a>CGP-CNN</h2><p>CGP-CNN 中，使用二维拓扑结构的 CGP 表示 CNN 结构，并采用一系列功能强大的 CNN 模块作为每个节点可选用的函数。CGP 编码的 CNN 在演化过程中解码并搭建 CNN，并使用训练集数据进行训练，将验证集上的 CNN 精度作为演化过程中 CGP 个体的适应度值 fitness。在演化过程中，通过操作算子，CGP 个体不断演化迭代，所表示的 CNN 也逐步提升在验证集上的进度。在达到演化停止条件后，终止演化进程，解码得到的 CNN 即为最佳个体，对其进行再训练，在测试集上测试最终精度。 </p>
+<h2 id="cgp-cnn">CGP-CNN</h2>
+<p>CGP-CNN 中，使用二维拓扑结构的 CGP 表示 CNN 结构，并采用一系列功能强大的 CNN 模块作为每个节点可选用的函数。CGP 编码的 CNN 在演化过程中解码并搭建 CNN，并使用训练集数据进行训练，将验证集上的 CNN 精度作为演化过程中 CGP 个体的适应度值 fitness。在演化过程中，通过操作算子，CGP 个体不断演化迭代，所表示的 CNN 也逐步提升在验证集上的进度。在达到演化停止条件后，终止演化进程，解码得到的 CNN 即为最佳个体，对其进行再训练，在测试集上测试最终精度。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220429173524.png" style="zoom: 67%;" /></p>
 <p>作者使用CGP编码方案，将程序表示为在计算节点上定义有向无环图，用于CNN架构表示。</p>
 <p>在 CGP 中，个体基因型为一系列整数，它们被用来表示二维图中节点的操作、节点之间的链接以及输入与输出的指向。</p>
-<p>genotype 基因型由固定长度的整数组成，每个基因都有关于节点类型和连接的信息。genotype 第一位表示选用的节点类型，23位表示的是节点的输入。若该节点处的函数只需要一个输入，则只有第一个连接基因生效。虽然 CGP 中的基因型是固定长度的表示，但 phenotype 网络中的节点数量不同，因为并非所有节点都连接到输出节点。图2左侧的5号节点是一个非活动节点。 </p>
+<p>genotype 基因型由固定长度的整数组成，每个基因都有关于节点类型和连接的信息。genotype 第一位表示选用的节点类型，23位表示的是节点的输入。若该节点处的函数只需要一个输入，则只有第一个连接基因生效。虽然 CGP 中的基因型是固定长度的表示，但 phenotype 网络中的节点数量不同，因为并非所有节点都连接到输出节点。图2左侧的5号节点是一个非活动节点。</p>
 <p>下图所示为一种 CGP-CNN 的编码方式，其中左边是 Genotype，右边是CNN架构图，节点5是一个未激活的节点。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220429173545.png" alt=""></p>
-<h3 id="CGP-CNN的节点类型"><a href="#CGP-CNN的节点类型" class="headerlink" title="CGP-CNN的节点类型"></a>CGP-CNN的节点类型</h3><p>CGP-CNN算法中包括 6 种节点类型，分别是 ConvBlock、ResBlock、Max Pooling、Average Pooling、Concatenation 和  Summation。这些节点操作由行、列 和通道的大小定义成三维(3D)张量。</p>
-<ol>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220429173545.png" /></p>
+<h3 id="cgp-cnn的节点类型">CGP-CNN的节点类型</h3>
+<p>CGP-CNN算法中包括 6 种节点类型，分别是 ConvBlock、ResBlock、Max Pooling、Average Pooling、Concatenation 和 Summation。这些节点操作由行、列 和通道的大小定义成三维(3D)张量。</p>
+<ol type="1">
 <li>ConvBlock 由标准卷积处理组成，步长为1，然后是批量归一化和ReLU激活函数，其中，卷积块不进行降维，因此，采用零值填充来保持前后特征图维度不变，并且具有不同大小的 KernelSize 和不同的 Channel 数。</li>
-<li>ResBlock 由卷积处理、批量归一化、ReLU函数和张量求和组成。ResBlock 架构如图所示，输入的行和列大小与卷积后的 ConvBlock 保持一致。在 ResBlock 中，M×N×C的输入特征映射被变换为M×N×C’的输出映射，并且具有不同大小的KernelSize和不同的输出Channel数。</li>
+<li>ResBlock 由卷积处理、批量归一化、ReLU函数和张量求和组成。ResBlock 架构如图所示，输入的行和列大小与卷积后的 ConvBlock 保持一致。在 ResBlock 中，M×N×C的输入特征映射被变换为M×N×C'的输出映射，并且具有不同大小的KernelSize和不同的输出Channel数。</li>
 </ol>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220429173536.png" style="zoom:50%;" /></p>
-<ol>
+<ol start="3" type="1">
 <li>Pooling 池化层执行 Max Pooling 和 Average Pooling 的操作，使用 2 × 2 的 Kernel，步长 Stride = 2。</li>
 <li>Concatenation 将不同特征图进行合并，如果特征图大小不同，则对更大的特征图进行 MaxPooling 完成下采样，从而实现特征图大小一致。</li>
 <li>Summation 主要用于 skip-connection 的特征图元素两两相加，当特征图大小不同时，对更大的特征图进行最大池化完成下采样，从而实现特征图大小一致。</li>
 </ol>
-<h3 id="CGP-CNN-的编码方式"><a href="#CGP-CNN-的编码方式" class="headerlink" title="CGP-CNN 的编码方式"></a>CGP-CNN 的编码方式</h3><p>基于进化算法的神经网络架构在应用时，通常有直接编码和间接编码2种编码形式。直接编码主要将神经元的数量和链接情况作为基因类型，而间接编码主要表达网络架构的生成规则。</p>
+<h3 id="cgp-cnn-的编码方式">CGP-CNN 的编码方式</h3>
+<p>基于进化算法的神经网络架构在应用时，通常有直接编码和间接编码2种编码形式。直接编码主要将神经元的数量和链接情况作为基因类型，而间接编码主要表达网络架构的生成规则。</p>
 <p>CGP-CNN 算法采用笛卡尔基因编程这种直接编码的方式，从而表示CNN的结构和连通性。CGP-CNN 算法具有灵活性，可以表示可变长度的网络结构和跳远链接。</p>
-<h3 id="CGP-CNN-的进化过程"><a href="#CGP-CNN-的进化过程" class="headerlink" title="CGP-CNN 的进化过程"></a>CGP-CNN 的进化过程</h3><p>CGP-CNN算法的变异方式有2种：第1种是强制突变，为了有效地使用计算资源，需要在每一代并行地评估一些候选解决方案，因此，在使用变异操作时，要保证至少有一个活动节点改变之后出现后选解，此时称为强制突变。第2种是中性突变，为了维持对CGP进化的有效性，如果后代的适应度值没有得到改善，可以通过使用中性突变的方式重新对父代执行变异操作，在中性突变过程中，只改变非活动节点的基因而不改变Phenotype。</p>
+<h3 id="cgp-cnn-的进化过程">CGP-CNN 的进化过程</h3>
+<p>CGP-CNN算法的变异方式有2种：第1种是强制突变，为了有效地使用计算资源，需要在每一代并行地评估一些候选解决方案，因此，在使用变异操作时，要保证至少有一个活动节点改变之后出现后选解，此时称为强制突变。第2种是中性突变，为了维持对CGP进化的有效性，如果后代的适应度值没有得到改善，可以通过使用中性突变的方式重新对父代执行变异操作，在中性突变过程中，只改变非活动节点的基因而不改变Phenotype。</p>
 <p>使用点突变（point mutation）作为遗传算子，方法与标准CGP相同。每个节点的类型和连接根据突变率随机更改为有效值。标准的CGP突变可能只影响非活动的node。在这种情况下，phenotype表型（代表CNN结构）不会因突变而改变，也不需要再次进行适应性评估。</p>
 <p>在上述策略中使用了改进的（1+λ）进化策略（实验中λ=2）。改进算法的步骤如下：</p>
-<ol>
+<ol type="1">
 <li>随机生成一个初始个体作为父代个体P，训练以P表示的CNN，然后指定验证精度作为适应度。</li>
 <li>通过将强制突变应用于P，生成一组λ子代C。</li>
 <li>并行训练子代C代表的λ CNN，并将验证精度指定为适应度。</li>
@@ -3518,14 +3524,15 @@ b[n]=a[n]-a[n-1]
 <li>从P和C集合中选择一个精英个体，然后用精英个体替换P。</li>
 <li>返回步骤2，直到满足停止条件。</li>
 </ol>
-<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>CGP-CNN算法验证了在自动构建CNN架构时，可以使用笛卡尔基因编程的方式，并且基本单元可以采用如 ConvBlock、ＲesBlock 这样的构建块。</p>
+<h2 id="summary">Summary</h2>
+<p>CGP-CNN算法验证了在自动构建CNN架构时，可以使用笛卡尔基因编程的方式，并且基本单元可以采用如 ConvBlock、ＲesBlock 这样的构建块。</p>
 <p>但是，为了得到效果更好的网络结构，在进化过程中，CGP-CNN 算法需要消耗很多资源，因此，后续将重点研究降低计算资源消耗的方法，或者在进化过程中通过减少多余的CNN结构来实现进化算法的优化。例如，随着生成的进行，增加神经网络的训练数据。此外，为了简化CNN结构，可以考虑将<strong>正则化</strong>技术应用到优化过程中。此外，还可以通过<strong>删除冗余或效率较低的层</strong>来手动简化获得的CNN架构。另一个未来的工作是将所提出的方法应用于其他图像数据集和任务。</p>
 ]]></content>
       <categories>
         <category>Papers</category>
       </categories>
       <tags>
-        <tag>EANAS</tag>
+        <tag>CGP-CNN</tag>
       </tags>
   </entry>
   <entry>
@@ -4818,11 +4825,11 @@ b[n]=a[n]-a[n-1]
         <category>Papers</category>
       </categories>
       <tags>
-        <tag>EANAS</tag>
+        <tag>AE-CNN</tag>
       </tags>
   </entry>
   <entry>
-    <title>EvoCNN：Evolving Deep Convolutional Neural Networks for Image Classification</title>
+    <title>【EvoCNN】Evolving Deep Convolutional Neural Networks for Image Classification</title>
     <url>/2022/06/27/%E3%80%90EvoCNN%E3%80%91/</url>
     <content><![CDATA[<h1 id="evocnnevolving-deep-convolutional-neural-networks-for-image-classification">EvoCNN：Evolving Deep Convolutional Neural Networks for Image Classification</h1>
 <h2 id="basic-idea">Basic Idea</h2>
@@ -4861,10 +4868,10 @@ b[n]=a[n]-a[n-1]
 <li>选择最佳个体并解码到相应的CNN（第10行）进行最终训练</li>
 </ol>
 <h3 id="gene-encoding-strategy">Gene Encoding Strategy</h3>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220627223108655.png" alt="image-20220627223108655" style="zoom:50%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130157.png" style="zoom:50%;" /></p>
 <p>图2中示出了三条长度不同于 EvoCNN 的染色体的示例，这三层中所有表示的信息在表I中。</p>
 <p>通常，一个卷积或全连接层中可能存在成千上万的连接权重，这些连接权重不能全部由染色体显式表示，也不能通过GAs有效优化。因此，在 EvoCNN 中，仅使用两个实数统计指标<font color="red">（<strong>即连接权重的标准差和平均值</strong>）</font>来表示众多权重参数，这可以通过GAs轻松实现。当收到最佳平均值和标准差时，从相应的高斯分布中采样连接权重。</p>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220627223440037.png" alt="image-20220627223440037" style="zoom: 50%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130210.png" style="zoom: 50%;" /></p>
 <h3 id="population-initialization">Population Initialization</h3>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220627225941.png" style="zoom: 77%;" /></p>
 <p>种群初始化将每条个体（染色体）分为两部分。第一部分包括卷积层和池化层，另一部分是全连接层。基于CNN架构的约定，第一部分从一个卷积层开始。第二部分只能添加在第一部分的末尾。</p>
@@ -4906,7 +4913,7 @@ b[n]=a[n]-a[n-1]
 </ol>
 <h3 id="slack-binary-tournament-selection">Slack Binary Tournament Selection</h3>
 <p>标准二进制锦标赛选择的松弛版本，用于为所提出的 EvoCNN 方法中的交叉操作选择父代个体。</p>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220628110302214.png" alt="image-20220628110302214" style="zoom:60%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130243.png" style="zoom:60%;" /></p>
 <p>简而言之，采用了两组比较。个体平均值之间的比较涉及一个阈值α，参数（连接权重）数量之间的比较涉及另一个阈值β。如果无法通过这些比较选择父代个体，则选择标准差较小的个体。</p>
 <p>深层CNN中存在大量的参数，容易导致过拟合问题。因此，当两个个体的平均值之差小于阈值α时，进一步考虑参数的数量。参数数目的微小变化对CNN的性能影响不大。因此，还引入了β。</p>
 <p>通过迭代执行此选择，将选择父代个体并将其存储到匹配池中。在提出的EvoCNN方法中，匹配池的大小设置为等于种群大小。</p>
@@ -4919,7 +4926,7 @@ b[n]=a[n]-a[n-1]
 <li>储存子代，从匹配池中取出父代个体，并执行步骤1-3，直到匹配池清空。</li>
 </ol>
 <h4 id="crossover">Crossover</h4>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220628111757424.png" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130259.png" /></p>
 <p>Crossover 的四个操作：</p>
 <ol type="a">
 <li><p>Unit Collection phase（UC）：在交叉的第一步，从每个染色体收集卷积层、池层和全连接层，并在每个染色体（a）中以相同的顺序对它们进行堆叠，收集到三个不同的列表中。</p></li>
@@ -4930,7 +4937,7 @@ b[n]=a[n]-a[n-1]
 <h4 id="mutation">Mutation</h4>
 <p>突变操作可以在一条染色体的每个单位位置上进行。对于选定的突变点，可以添加、删除或修改一个单元，每个单元都具有相同的概率。在单元添加的情况下，可以以1/3的相等概率添加卷积层、池层或完全连接层。如果变异是为了修改现有单元，则特定的修改取决于单元类型。所有编码信息在单元中会发生变化（表一中可以看到每种单元类型的编码信息）。请注意，所有编码的构成都用实数表示，采用了==模拟二进制交叉（SBX）和多项式变异。==</p>
 <h3 id="environmental-selection">Environmental Selection</h3>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220628113338629.png" alt="image-20220628113338629" style="zoom:45%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130313.png" style="zoom:45%;" /></p>
 <p>环境选择中，强调了精英主义和多样性。</p>
 <p>首先选择一部分具有良好平均值的个体，然后改进的二元锦标赛选择来选择剩余个体。通过这两种策略，同时考虑了精英主义和多样性，预计这将共同提高 EvoCNN 方法的性能。</p>
 <p>请注意，在锦标赛选择开始之前（算法5的第3行），选定的精英将被移除，而出于多样性目的而选定的个体将保留在当前群体中，以便根据社区惯例进行下一轮锦标赛选择（算法5的第4–8行）。</p>
@@ -4940,22 +4947,23 @@ b[n]=a[n]-a[n-1]
 <p>注意，在将个体解码到相应的CNN期间，将ReLU非线性层添加到每个卷积层和完全连接层。</p>
 </blockquote>
 <h2 id="experiments">Experiments</h2>
-<p><img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220629224445951.png" alt="image-20220629224445951" style="zoom: 43%;" /></p>
-<figure>
-<img src="C:/Users/HP/AppData/Roaming/Typora/typora-user-images/image-20220629224509882.png" alt="image-20220629224509882" /><figcaption>image-20220629224509882</figcaption>
-</figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130325.png" style="zoom: 43%;" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220712130337.png" /></p>
 ]]></content>
       <categories>
         <category>Papers</category>
       </categories>
       <tags>
-        <tag>EANAS</tag>
+        <tag>EvoCNN</tag>
       </tags>
   </entry>
   <entry>
     <title>【Genetic CNN】</title>
     <url>/2022/04/25/%E3%80%90Genetic%20CNN%E3%80%91/</url>
     <content><![CDATA[<h1 id="genetic-cnn">Genetic CNN</h1>
+<ul>
+<li>ICCV 2017</li>
+</ul>
 <p>Genetic CNN 将遗传算法用于神经网络架构搜索，论文首先提出了一种能表示神经网络架构的编码方案，在此编码方案上初始化种群，对种群进行选择、变异、交叉，从而抛弃性能差的神经网络架构并产生新的神经网络架构，论文将训练好的架构在验证集上的准确率作为评判网络性能好坏的指标。</p>
 <h2 id="basic-idea">Basic Idea</h2>
 <p>核心思想是提出一种编码方法，用固定长度的二进制字符串表示每个网络结构。通过生成一组随机个体来初始化遗传算法。在每一次生成中，定义标准的遗传操作，例如选择，变异和交叉，以产生有竞争能力的个体并消除弱势的个体。每个个体的（适应度函数）取决于参考数据集上的识别准确率。为此，对每个个体（即网络结构）执行独立于遗传算法的完整训练过程。在固定次数的迭代之后，遗传过程就结束了。</p>
@@ -5027,13 +5035,13 @@ b[n]=a[n]-a[n-1]
         <category>Papers</category>
       </categories>
       <tags>
-        <tag>EANAS</tag>
+        <tag>Genetic CNN</tag>
       </tags>
   </entry>
   <entry>
-    <title>【CNN_GA】Automatically Designing CNN Architectures Using Genetic Algorithm for Image  Classification</title>
+    <title>【CNN-GA】Automatically Designing CNN Architectures Using Genetic Algorithm for Image  Classification</title>
     <url>/2022/06/08/%E3%80%90CNN-GA%E3%80%91/</url>
-    <content><![CDATA[<h1 id="cnn_gaautomatically-designing-cnn-architectures-using-genetic-algorithm-for-image-classification">CNN_GA：Automatically Designing CNN Architectures Using Genetic Algorithm for Image Classification</h1>
+    <content><![CDATA[<h1 id="cnn-gaautomatically-designing-cnn-architectures-using-genetic-algorithm-for-image-classification">CNN-GA：Automatically Designing CNN Architectures Using Genetic Algorithm for Image Classification</h1>
 <p>Genetic CNN 的问题：</p>
 <ol type="1">
 <li><strong>阶段的数量是手动预定义的</strong>。从这种编码策略中可以清楚地看到，<u>需要多次手动干预</u>，例如每个阶段和总阶段中构建块的数量。由于这些数字与发现的CNN的深度有关，因此需要预定义这些参数，以获得CNN的适当深度。</li>
@@ -5183,7 +5191,7 @@ b[n]=a[n]-a[n-1]
         <category>Papers</category>
       </categories>
       <tags>
-        <tag>EANAS</tag>
+        <tag>CNN-GA</tag>
       </tags>
   </entry>
   <entry>
@@ -5651,6 +5659,45 @@ b[n]=a[n]-a[n-1]
       </categories>
       <tags>
         <tag>SpringMVC</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【Large-Scale Evolution】Large-Scale Evolution of Image Classifiers</title>
+    <url>/2022/07/12/%E3%80%90Large-Scale%20Evolution%E3%80%91Large-Scale%20Evolution%20of%20Image%20Classifiers/</url>
+    <content><![CDATA[<h1 id="large-scale-evolution-of-image-classifiers">Large-Scale Evolution of Image Classifiers</h1>
+<ul>
+<li>ICML 2017</li>
+</ul>
+<p>论文的思路就是用(稍微)改进的进化算法，使其可以用于 NAS。论文对当前的进化算法少量改造，结合前所未有的算力进行神经网络结构搜索，在CIFAR-10上达到了很不错的准确率。论文十分注重搜索算法的简单性，从性能很差的无卷积模型开始，进化算法需要在一个几乎不受约束的搜索空间中进化成复杂的卷积网络。这篇文章的大概意思是想证明一下，使用进化算法做出来的神经网络结构，在图像分类上不会低于人工精心设计的结构，并且最后结果也给了验证。</p>
+<p>只使用了变异，没使用交叉操作，并且tournament selection的时候直接把那个不好的个体给kill掉了。</p>
+<h2 id="method">Method</h2>
+<h3 id="算法">算法</h3>
+<p>改进的进化算法流程： 1. 种群中的每个个体都有基因编码 2. 种群中的每个个体都是训练好的神经网络架构，其适应度为该神经网络架构在验证集上的准确率 3. 选择：使用二元锦标赛算法，每次随机选择两个个体。不同的是，适应度较小的个体直接从种群中移除 4. 变异：从种群中选择两个适应度最高的神经网络架构作为父母，产生两个后代，分别与两个父代的架构⼀致。对产生的两个后代架构进行变异操作 5. 训练新产生的后代，并将其在验证集上的准确率作为适应度函数</p>
+<p>为了加速计算，使用massively-parallel, lock-free的并行计算，许多worker在不同电脑上进行独立的异步操作，仅使用共享文件系统来保证种群内容一致，每个个体为一个文件夹。种群数量为1000，worker一般为种群数量的四分之一。</p>
+<h3 id="编码和变异">编码和变异</h3>
+<p>网络结构编码为图(DNA)，节点表示3维tensor或激活方法，tensor的3维分别表示图片的空间坐标以及channel数，激活方法作用与节点上，可以为BN+RELU或无激活，边表示identity connections（跳跃连接）或卷积(包含可变异参数)。当节点连接多条边时，将其中一条非identity connection的边作为主边，对其它边进行像素的最近邻差值以及维度的裁剪和填充，最后进行element-wise sum。在每次繁衍过程中，随机选取以下一种变异方式：</p>
+<ol type="1">
+<li>改变学习率 Learning Rate</li>
+<li>模型保持不变，但是继续训练一段时间（由于训练继续，模型参数还是会有所变化）</li>
+<li>重置所有参数Weights（可能可以逃出局部最优值）</li>
+<li>插入卷积层（卷积核大小 3x3， 步长随机1 或 2，通道数和输入通道数一样， 最后在随机决定是否加上 Batch-Normalization 和 ReLU）</li>
+<li>移除卷积层</li>
+<li>改变卷积层的步长（只能改成2的幂）</li>
+<li>随机改变卷积层的通道数（注意与之相连的通道数也要随之一起改变）</li>
+<li>卷积核大小</li>
+<li>插入一对一层（卷积核大小 1x1， 步长随机1 或 2，通道数和输入通道数一样， 最后在随机决定是否加上 Batch-Normalization 和 ReLU）</li>
+<li>Add-skip 加入skip层，注意这个不是真正的跳过了 而是把之前某一层的结果和后来某一层的结果相加输出给后面一层（当然前提是相加的这两层必须size 和 channel 个数要一样）</li>
+<li>Remove-skip 移除skip层</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220715115856.png" /></p>
+<hr />
+<p>感觉论文中对于图的描述不是很清楚，可以阅读代码进一步了解。但是这个就是一个进化算法+NAS的开端，文章思路比较简单。</p>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+      <tags>
+        <tag>Large-Scale Evolution</tag>
       </tags>
   </entry>
 </search>
