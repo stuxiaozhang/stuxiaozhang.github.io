@@ -5700,4 +5700,98 @@ b[n]=a[n]-a[n-1]
         <tag>Large-Scale Evolution</tag>
       </tags>
   </entry>
+  <entry>
+    <title>【Regularized Evo】Regularized Evolution for Image Classifier Architecture Search</title>
+    <url>/2022/07/17/Regularized%20Evolution%20for%20Image%20Classifier%20Architecture%20Search/</url>
+    <content><![CDATA[<h1 id="regularized-evolution-for-image-classifier-architecture-search">Regularized Evolution for Image Classifier Architecture Search</h1>
+<ul>
+<li>AAAI 2019</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+      <tags>
+        <tag>Regularized Evo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Understanding and Simplifying One-Shot Architecture Search</title>
+    <url>/2022/07/15/Understanding%20and%20Simplifying%20One-Shot%20Architecture%20Search/</url>
+    <content><![CDATA[<h1 id="understanding-and-simplifying-one-shot-architecture-search">Understanding and Simplifying One-Shot Architecture Search</h1>
+<ul>
+<li>ICML 2018</li>
+</ul>
+<p>本文重在探究<strong>为什么One-Shot模型中的权重能被众多不同的架构共享，并且是有效的</strong>。通过实验分析，证明了在没有超网络或RL的情况下，从复杂的搜索空间中有效地识别有效的网络结构是可能的。</p>
+<h2 id="basic-idea">Basic Idea</h2>
+<p>这篇论文是基于参数共享的，作者训练了一个可以表述所有子结构的大网络。搜索空间的大小随选择的数量呈指数增长，而one-shot模型的大小仅呈线性增长。相同的权重用于评估许多不同的体系结构，从而将运行体系结构搜索所需的资源减少了数量级。</p>
+<p>但是作者基于此也提出了一个问题：<u>为什么不同的结构可以共享一个权重集合？</u>即，一组固定的权重可以在广泛的体系结构中很好地工作的想法也是违反直觉的。SMASH（采用超网）和ENAS（采用RL控制器）也尝试解决这个问题。而本文作者的<strong>目标是了解权重共享在体系结构搜索方法中所起的作用</strong>。而实验表明，要获得好的结果，既不需要超网，也不需要RL控制器。为此作者训练了一个大的one-shot模型，包含了搜索空间里的每个可能的操作。然后剔除一些操作，测量其对模型预测准确率的影响。作者发现网络自动将其能力集中在对产生良好预测最有用的操作上。剔除不太重要的操作对模型的预测的影响很小，而剔除很重要的操作对模型预测的影响很大。实际上，可以通过观察网络结构在训练集中无标签样例的行为，来预测网络在验证集上的准确率。</p>
+<h2 id="one-shot-architecture-search">One-Shot Architecture Search</h2>
+<p>One-Shot Model 四步：</p>
+<ol type="1">
+<li>设计一个搜索空间，允许使用单个 One-Shot Model 表示各种架构。</li>
+<li>训练 One-Shot Model ，使其预测架构的验证精度。</li>
+<li>使用预先训练的 One-Shot Model 评估验证集上的候选架构。</li>
+<li>从头开始重新训练最有前途的架构，并在测试集上评估其性能。</li>
+</ol>
+<h3 id="search-space-design">1. Search Space Design</h3>
+<p>给 One-Shot Model 设计一个良好的搜索空间的要求：</p>
+<ol type="1">
+<li>搜索空间应该足够大和有表现力，以捕获各种候选架构。</li>
+<li>One-Shot Model 产生的验证集精度必须能够预测独立模型训练产生的精度。</li>
+<li>在有限资源条件（即内存和时间）下，one-shot应该足够小。</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716120154.png" style="zoom: 50%;" /></p>
+<p>如上例所示：不同于分别训练三个模型，作者训练一个包括了这三个操作的模型（one-shot model），然后在验证阶段，选择性地剔除其中两个操作的输出，来模拟仅包含输入2的网络。一般而言，可以选择enable或disable输入连接的任何组合。这样，搜索空间的大小随输入的跨连接的数量呈指数增长，而one-shot模型的大小呈线性增长。在concat后总是进行 <span class="math inline">\(1×1\)</span> 卷积，无论有多少输入跨连接，卷积中的输出滤波器的数量都保持不变。之后对 <span class="math inline">\(1×1\)</span> 卷积的输出运用不同的操作，并将结果sum起来。在评估阶段，可以将其中的一些操作置零或者从网络中删除。在上例中，操作方式有3x3卷积、5x5卷积、最大池化和Identity，但只有5x5卷积操作留了下来。</p>
+<p>这个方法对于更大的模型也是适用的，如下图。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716103322.png" /></p>
+<p>网络可以看做有几个相同的cell堆叠在一起组成的（图左1），每一个cell中有固定数目的<em>choice block</em>（图左2），这些<em>choice block</em>的输入来自于前驱cell的输出和同一个cell下前驱<em>choice block</em>的输出。作者设置的cell中有4个<em>choice block</em>，即 <span class="math inline">\(N_{choice}= 4\)</span>（图里好像只画了3个），每个<em>choice block</em>最多可以从五个可能的输入中进行选择：两个来自前驱cell的输出，最多三个来自同一个cell下前驱<em>choice block</em>的输出（例如图左2最下面五个输入进行concat）。每个<em>choice block</em>包括七种操作（图左3），有identity(应该是跳跃连接)，3x3深度可分离卷积，5x5深度可分离卷积，7x7深度可分离卷积、1x7卷积跟7x1卷积，最大池化，平均池化。</p>
+<h3 id="training-the-one-shot-model">2. Training the One-Shot Model</h3>
+<p>One-shot模型是用带动量的SGD训练的标准大型神经网络。为了确保特定架构的one-shot模型精度与stand-alone模型精度之间良好关联，需要讨论以下几个方面。</p>
+<p><strong>互相适应的鲁棒性（Robustness to Co-adaptation）</strong>： 在评估阶段，我们通过zero out一些连接，得到了一些特定的结构。尽管移除了不重要的操作，也可能会导致模型的预测性能严重下降，one-shot模型和独立模型之间的准确率的关系也会退化。为了解决这个问题，作者引入了<strong>path dropout机制</strong>，训练one-shot模型的时候，在每一批次中随机将一些操作剔除。在训练开始 disable path dropout，随着训练的进行逐步线性的增加 dropout rate，这样可以达到了一个较好的结果。在训练结束时dropout rate 设置为 <span class="math inline">\(r^{1/k}\)</span>，其中 <span class="math inline">\(0&lt;r&lt;1\)</span> 为一个超参数，<span class="math inline">\(k\)</span> 为给定一个操作下输入路径的数量。<u>fan-in的值越大，dropout rate越高</u>。对于一个cell，不同的operation的都是彼此独立的剔除（这样有益处），对于一个model包含多个cell，则相同的operation将被一并剔除。</p>
+<p><strong>Stabilizing Model Training</strong>：在早期实验中，模型的训练非常的不稳定，作者发现小心的使用BN可以使训练稳定，文章中采用了BN-Relu-Conv这种规则。因为在评估阶段会剔除一些操作，这样就是BN统计量发生了变化，因此批BN在评估时的应用方式与在训练时完全相同——动态计算batch的统计信息。</p>
+<p>作者发现如果在单个批处理中为每个示例剔除掉相同的路径，one-shot模型训练就会变得不稳定。相反如果每个示例剔除不同路径，它是可以稳定的。因此对于不同的样本子集，作者dropout不同的操作：作者将一个batch的样本分成多个小batch（文中称为ghost batch），一个batch有1024个样本，分成32个ghost batch，每个有32个样本，每个ghost batch剔除不同的操作。</p>
+<p><strong>Preventing Over-regularization</strong>：让L2正则化只对选择的子模型做正则化。</p>
+<h3 id="evaluating-candidate-architectures">3. Evaluating Candidate Architectures</h3>
+<p>训练了one-shot模型后，使用它来评估许多不同架构在held-out验证集的性能。作者在实验中， 按照论文 <code>SMASH:One-shot model architecture search through hypernet-works</code> 的方法，从固定的概率分布中进行独立的结构采样。作者也注意到，随机采样也可以用进化算法和基于神经网络的强化学习代替。</p>
+<h3 id="final-model-selection-and-training">4. Final Model Selection and Training</h3>
+<p>完成搜索之后，从头训练表现最好的结构，同时也可以扩展架构以增加其性能，也可以缩小架构以减少计算成本。作者在实验中，增加了过滤器的数量来扩展架构。</p>
+<h2 id="experiments">Experiments</h2>
+<h3 id="dropout-rate的影响">1. Dropout Rate的影响</h3>
+<p>和vanilla SGD相比，仅引入了一个新的超参数 Dropout Rate，需要细心调节以实现one-shot模型与stand-alone模型之间精度的良好关系。为了证明其重要性，为此作者训练了具有不同Dropout Rate的One shot模型，且在训练过程中Dropout Rate保持稳定。结果如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716140704.png" /></p>
+<p>从图中可以发现当Dropout Rate过低时（大多数路径在训练步骤都保留了），少数架构的准确度比较高，大多数的架构的精度非常低，One-shot模型准备不足，无法在评估时将模型的大部分路径清零。</p>
+<p>当Dropout Rate过高时，尽管架构的准确率有所增加，但是one-shot模型将最有用的capacity集中到最有用路径上的程度大大降低了。模型较浅时，高Dropout Rate会产生不错的结果，然而，随着搜索空间越来越复杂，模型越来越深，使用高Dropout Rate变得越来越成问题。</p>
+<h3 id="实验结果对比">2. 实验结果对比</h3>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716144029.png" style="zoom: 60%;" /></p>
+<p>实验结果可以看到，与SMASH和除一种ENAS变体外的所有ENAS，算是具有竞争力，效果还不错。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716181907.png" /></p>
+<h2 id="理解-one-shot-模型">理解 One-shot 模型</h2>
+<blockquote>
+<p>来自 https://www.cnblogs.com/marsggbo/p/13195496.html</p>
+</blockquote>
+<p>由上图我们可以看到（以最左图为例），one-shot模型的准确率从0.1~0.8， 而stand-alone（即retrain之后的子模型）的准确率范围却只是0.92~0.945。为什么one-shot模型之间的准确率差别会更大呢？</p>
+<p>文章对此给出了一个猜想：<strong>one-shot模型会学习哪一个操作对模型更加有用，而且最终的准确率也是依赖于这些操作的</strong>。换句话说：</p>
+<ul>
+<li>在移除一些不太重要的操作时，可能会使one-shot模型准确率有所降低，但是最后对stand-alone模型性能的预测影响不大。</li>
+<li>而如果把一些最重要的操作移除之后，不仅对one-shot模型影响很大，对最后的stand-alone模型性能的预测影响也大。</li>
+</ul>
+<p>为了验证这一猜想，文章做了如下实验：</p>
+<p>首先将几乎保留了所有操作的(dropout概率是 <span class="math inline">\(r=10^{−8}\)</span>)模型叫做<strong>reference architectures</strong>，注意这里用的是复数，也就是说这个reference architectures有很多种，即有的是移除了不太重要的操作后的结构，有的时移除了非常重要的操作候的结构，那么不同结构的准确率应该是不一样的。不过在没有retrain的情况下，什么操作都没有移除的one-shot模型（All on）应该是最好的（或者是表现靠前的，这里我们认为是最好的）。</p>
+<p>注意这里的移除某些操作后得到的模型还是One-shot模型，而不是采样后的模型。采样后的模型是指从这个完整的one-shot中按照某种策略得到的模型。文中把这种模型叫做<strong>candidate architectures</strong>。</p>
+<p>我们以分类任务为例，假设<strong>reference architectures</strong>对某个样本的预测输出是 <span class="math inline">\((p_1,p_2,...,p_n)\)</span>，其中 <span class="math inline">\(n\)</span> 表示类别数量；而<strong>candidate architectures</strong>的输出为 <span class="math inline">\((q_1,q_2,...,q_n)\)</span>。注意candidate architecture的输出应该是没有retrain的结果。</p>
+<p>所以如果上面的猜想是正确的，那么表现最好的<strong>candidate architecture</strong>的预测应该要和所有操作都保留的one-shot模型的预测结果要十分接近。文中使用<strong>对称散度</strong>来判断相似性，散度公式为 <span class="math inline">\(D_{\mathrm{KL}}(p \| q)=\sum_{i=1}^{n} p_{i} \log \frac{p_{i}}{q_{i}}\)</span> ，那么对称散度就是<span class="math inline">\(D_{\mathrm{KL}}(p \| q)+D_{\mathrm{KL}}(q \| p)\)</span>。对称散度结果是在64个随机样本上得到的平均值，散度值越接近于0，表示二者输出越相近。</p>
+<p>最后的结果如图示，可以看到在训练集上散度值低的模型（即预测值和保留大多数操作的完整模型很接近），在验证集上的准确率也相对高一些。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716181807.png" /></p>
+<blockquote>
+<p>这块也没太理解。。。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>papers</category>
+      </categories>
+      <tags>
+        <tag>G-NAS</tag>
+      </tags>
+  </entry>
 </search>
