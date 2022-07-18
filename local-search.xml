@@ -8,7 +8,7 @@
     <link href="/2022/07/17/Regularized%20Evolution%20for%20Image%20Classifier%20Architecture%20Search/"/>
     <url>/2022/07/17/Regularized%20Evolution%20for%20Image%20Classifier%20Architecture%20Search/</url>
     
-    <content type="html"><![CDATA[<h1 id="regularized-evolution-for-image-classifier-architecture-search">Regularized Evolution for Image Classifier Architecture Search</h1><ul><li>AAAI 2019</li></ul>]]></content>
+    <content type="html"><![CDATA[<h1 id="regularized-evolution-for-image-classifier-architecture-search">Regularized Evolution for Image Classifier Architecture Search</h1><ul><li>AAAI 2019</li></ul><h2 id="basic-idea">Basic Idea</h2><ol type="1"><li>对锦标赛选择进化算法进行了修改，称为aging evolution or regularized evolution.</li><li>实现了一组最简单的突变，允许在NASNet搜索空间中进化</li><li></li></ol><h2 id="method">Method</h2><h3 id="search-space">Search Space</h3><p>这篇用了NASNet作为搜索空间。NASNet</p><p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718130522.png" style="zoom:50%;" /></p>]]></content>
     
     
     <categories>
