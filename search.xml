@@ -3477,7 +3477,7 @@ b[n]=a[n]-a[n-1]
   </entry>
   <entry>
     <title>【CGP-CNN】A Genetic Programming Approach to Designing Convolutional Neural Network  Architectures</title>
-    <url>/2022/04/28/%E3%80%90CGP-CNN%E3%80%91A%20Genetic%20Programming%20Approach%20to%20Designing%20Convolutional%20Neural%20Network%20%20Architectures/</url>
+    <url>/2022/05/30/%E3%80%90CGP-CNN%E3%80%91A%20Genetic%20Programming%20Approach%20to%20Designing%20Convolutional%20Neural%20Network%20%20Architectures/</url>
     <content><![CDATA[<h1 id="cgp-cnna-genetic-programming-approach-to-designing-convolutional-neural-network-architectures">【CGP-CNN】A Genetic Programming Approach to Designing Convolutional Neural Network Architectures</h1>
 <p>在本文中，作者设计基于遗传编程的CNN架构。使用笛卡尔遗传编程（CGP）编码方案，一种直接编码方案，来表示CNN的结构和连通性。这种表示法的优点是它的灵活性；它可以表示可变长度的网络结构和跳过连接。此外，作者采用了功能相对较高的模块，如卷积块和张量拼接，作为CGP中的节点函数，以减少搜索空间。为了评估CGP所代表的体系结构，以普通方式使用训练数据集训练网络。</p>
 <h2 id="cgp-编码">CGP 编码</h2>
@@ -4959,7 +4959,7 @@ b[n]=a[n]-a[n-1]
   </entry>
   <entry>
     <title>【Genetic CNN】</title>
-    <url>/2022/04/25/%E3%80%90Genetic%20CNN%E3%80%91/</url>
+    <url>/2022/05/25/%E3%80%90Genetic%20CNN%E3%80%91/</url>
     <content><![CDATA[<h1 id="genetic-cnn">Genetic CNN</h1>
 <ul>
 <li>ICCV 2017</li>
@@ -5701,31 +5701,6 @@ b[n]=a[n]-a[n-1]
       </tags>
   </entry>
   <entry>
-    <title>【Regularized Evo】Regularized Evolution for Image Classifier Architecture Search</title>
-    <url>/2022/07/17/Regularized%20Evolution%20for%20Image%20Classifier%20Architecture%20Search/</url>
-    <content><![CDATA[<h1 id="Regularized-Evolution-for-Image-Classifier-Architecture-Search"><a href="#Regularized-Evolution-for-Image-Classifier-Architecture-Search" class="headerlink" title="Regularized Evolution for Image Classifier Architecture Search"></a>Regularized Evolution for Image Classifier Architecture Search</h1><ul>
-<li>AAAI 2019</li>
-</ul>
-<h2 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h2><ol>
-<li>对锦标赛选择进化算法进行了修改，称为aging evolution or regularized evolution.</li>
-<li>实现了一组最简单的突变，允许在NASNet搜索空间中进化</li>
-<li></li>
-</ol>
-<h2 id="Method"><a href="#Method" class="headerlink" title="Method"></a>Method</h2><h3 id="Search-Space"><a href="#Search-Space" class="headerlink" title="Search Space"></a>Search Space</h3><p>这篇用了NASNet作为搜索空间。NASNet主要有两个motifis：</p>
-<ol>
-<li>Normal Cell</li>
-<li>Reduction Cell</li>
-</ol>
-<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718130522.png" style="zoom:50%;" /></p>
-]]></content>
-      <categories>
-        <category>Papers</category>
-      </categories>
-      <tags>
-        <tag>Regularized Evo</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Understanding and Simplifying One-Shot Architecture Search</title>
     <url>/2022/07/15/Understanding%20and%20Simplifying%20One-Shot%20Architecture%20Search/</url>
     <content><![CDATA[<h1 id="understanding-and-simplifying-one-shot-architecture-search">Understanding and Simplifying One-Shot Architecture Search</h1>
@@ -5775,10 +5750,10 @@ b[n]=a[n]-a[n-1]
 <h3 id="实验结果对比">2. 实验结果对比</h3>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716144029.png" style="zoom: 60%;" /></p>
 <p>实验结果可以看到，与SMASH和除一种ENAS变体外的所有ENAS，算是具有竞争力，效果还不错。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716181907.png" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716181907.png" style="zoom: 33%;" /></p>
 <h2 id="理解-one-shot-模型">理解 One-shot 模型</h2>
 <blockquote>
-<p>来自 https://www.cnblogs.com/marsggbo/p/13195496.html</p>
+<p>这一块来自于 https://www.cnblogs.com/marsggbo/p/13195496.html</p>
 </blockquote>
 <p>由上图我们可以看到（以最左图为例），one-shot模型的准确率从0.1~0.8， 而stand-alone（即retrain之后的子模型）的准确率范围却只是0.92~0.945。为什么one-shot模型之间的准确率差别会更大呢？</p>
 <p>文章对此给出了一个猜想：<strong>one-shot模型会学习哪一个操作对模型更加有用，而且最终的准确率也是依赖于这些操作的</strong>。换句话说：</p>
@@ -5792,7 +5767,7 @@ b[n]=a[n]-a[n-1]
 <p>我们以分类任务为例，假设<strong>reference architectures</strong>对某个样本的预测输出是 <span class="math inline">\((p_1,p_2,...,p_n)\)</span>，其中 <span class="math inline">\(n\)</span> 表示类别数量；而<strong>candidate architectures</strong>的输出为 <span class="math inline">\((q_1,q_2,...,q_n)\)</span>。注意candidate architecture的输出应该是没有retrain的结果。</p>
 <p>所以如果上面的猜想是正确的，那么表现最好的<strong>candidate architecture</strong>的预测应该要和所有操作都保留的one-shot模型的预测结果要十分接近。文中使用<strong>对称散度</strong>来判断相似性，散度公式为 <span class="math inline">\(D_{\mathrm{KL}}(p \| q)=\sum_{i=1}^{n} p_{i} \log \frac{p_{i}}{q_{i}}\)</span> ，那么对称散度就是<span class="math inline">\(D_{\mathrm{KL}}(p \| q)+D_{\mathrm{KL}}(q \| p)\)</span>。对称散度结果是在64个随机样本上得到的平均值，散度值越接近于0，表示二者输出越相近。</p>
 <p>最后的结果如图示，可以看到在训练集上散度值低的模型（即预测值和保留大多数操作的完整模型很接近），在验证集上的准确率也相对高一些。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716181807.png" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220716181807.png" style="zoom: 40%;" /></p>
 <blockquote>
 <p>这块也没太理解。。。</p>
 </blockquote>
@@ -5805,7 +5780,7 @@ b[n]=a[n]-a[n-1]
       </tags>
   </entry>
   <entry>
-    <title>Learning transferable architectures for scalable image recognition</title>
+    <title>【NASNet】Learning transferable architectures for scalable image recognition</title>
     <url>/2022/07/16/%E3%80%90NASNet%E3%80%91Learning%20transferable%20architectures%20for%20scalable%20image%20recognition/</url>
     <content><![CDATA[<h1 id="learning-transferable-architectures-for-scalable-image-recognition">Learning transferable architectures for scalable image recognition</h1>
 <ul>
@@ -5814,6 +5789,13 @@ b[n]=a[n]-a[n-1]
 <p>这篇文章出自Google Brain，是对他们之前发表在ICLR2017的论文《<a href="https://arxiv.org/abs/1611.01578v2">Neural Architecture Search with Reinforcement Learning</a>》的改进.</p>
 <blockquote>
 <p><a href="https://stuxiaozhang.github.io/2022/04/05/Neural%20Architecture%20Search%20with%20reinforcement%20learning/">简单的阅读笔记在这。</a></p>
+</blockquote>
+<blockquote>
+<p>我的想法：</p>
+<ol type="1">
+<li>为什么NASNet的cell必须是5个(小)块组成？这是不是有些局限？</li>
+<li>改进的ScheduledDropPath中，cell中的每个路径以一个在训练中呈线性增加的概率被丢弃。这块能不能有些改进？</li>
+</ol>
 </blockquote>
 <h2 id="basic-idea">Basic Idea</h2>
 <p>这篇文章研究了一种新的卷积结构设计范式，并描述了一种优化卷积结构的可扩展方法。作者认为直接将NAS或任何其他搜索方法应用于大型数据集的计算代价比较昂贵，所以文章建议先在一个代理数据集（例如较小的CIFAR-10数据集）上搜索一个好的体系结构，然后再迁移到ImageNet这样的大数据集上去。作者通过设计了一个NASNet搜索空间来实现这种可迁移性，使得体系结构的复杂性与网络的深度和输入图像的大小无关。更具体地说，搜索空间中的所有卷积网络都是由具有相同结构但不同权重的卷积层（或cell）组成的。所以说，搜索最佳卷积结构被简化为搜索最佳cell结构。这么做的优势在于比搜索整个网络结构快得多，而且更容易泛化到其他问题上去。</p>
@@ -5831,8 +5813,8 @@ b[n]=a[n]-a[n-1]
 <p>这篇文章采用的主要搜索方法还是<a href="https://arxiv.org/abs/1611.01578v2">他们团队前一篇论文《Neural Architecture Search with Reinforcement Learning》</a>提出的如图1所示的NAS框架。控制器为一个RNN，其采样不同结构的子网络。通过训练子网络直至收敛得到在验证集上的精度<span class="math inline">\(R\)</span>，用此精度更新控制器，从而控制器随着时间的推移可以生成更好的体系结构。这里控制器权重使用策略梯度（policy gradient）进行更新。</p>
 <p>这篇文章的主要贡献是设计了一个新的搜索空间NASNet，以便在CIFAR-10数据集上找到的最佳架构可以扩展到更大、更高分辨率的图像数据集上去。至于NASNet搜索空间的灵感来源，则是因为SOTA的CNN架构设计往往是由重复的motifs组成的，包括卷积滤波器组、非线性以及谨慎选择的连接的一个组合，比如ResNet中的残差模块，Inception中的Inception模块等。这些观察表明，控制器RNN可能预测用这些motifs表达的一般卷积cell。这个cell可以串联起来处理任意空间尺寸和滤波器深度的输入。本文的方法中，CNN的总体架构是手动预先确定的，它们由多次重复的卷积cell组成，每个卷积cell具有相同的结构，但权重不同。文中也提出了两种motifs，分别是Normal Cell和Reduction Cell，区别就是一个不用池化、一个用了：</p>
 <ol type="1">
-<li>Normal Cell：返回相同维度特征图的卷积单元</li>
-<li>Reduction Cell：返回特征图的卷积单元，其中特征图高度和宽度减少了两倍（用了stride=2的池化）</li>
+<li>Normal Cell：输出Feature Map和输入Feature Map的尺寸相同</li>
+<li>Reduction Cell：输出Feature Map对输入Feature Map进行了一次降采样，其中特征图高度和宽度减少了两倍（用了stride=2）</li>
 </ol>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220717102839.png" style="zoom: 70%;" /></p>
 <p>如图2所示，以CIFAR-10和ImageNet为例给了两种结构，因为ImageNet的图片尺寸更大，所以用了更多的Reduction Cell。而且每当空间尺寸减小时，输出中的滤波器数量加倍，以保持大致恒定的隐藏状态的维度。重要的是，文中将motif重复次数<span class="math inline">\(N\)</span>和初始卷积滤波器的数量视为自由参数（人为事先指定的），可以根据图像分类问题的规模进行调整。</p>
@@ -5840,7 +5822,11 @@ b[n]=a[n]-a[n-1]
 <p>如图为NASNet搜索空间示意图。网络的motifs是在称为block的阶段中递归构建的。每个block由控制器RNN选择一对隐藏状态（深灰色）、对这些隐藏状态执行的操作（黄色）和组合操作（绿色）组成。生成的隐藏状态保留在将在后续块上选择的潜在隐藏状态集中。</p>
 <p>所以实际中改变的就只是Normal和Reduction Cell的结构，这个正好可以用RNN进行搜索。cell的结构可以在如下定义的搜索空间内搜索。</p>
 <p>在NASNet的搜索空间中，每个cell接收两个初始隐藏状态<span class="math inline">\(h_i\)</span>和<span class="math inline">\(h_{i-1}\)</span>作为输入，这两个状态是前两个较低层或输入图像中两个cell的输出。给定这两个初始隐藏状态，控制器RNN递归预测卷积cell的其余结构（图3）。控制器对每个单元的预测被分组为B块，其中每个块有5个预测步骤，由5个不同的softmax分类器进行，对应于块元素的离散选择：</p>
-<p><strong>Step 1.</strong> 从<span class="math inline">\(h_{i}\)</span>、<span class="math inline">\(h_{i-1}\)</span>或在先前块中创建的隐藏状态集中选择隐藏状态。 <strong>Step 2.</strong> 从与Step 1相同的选项中选择第二个隐藏状态。 <strong>Step 3.</strong> 选择要应用于在Step 1中选择的隐藏状态的操作 <strong>Step 4.</strong> 选择要应用于在Step 2中选择的隐藏状态的操作 <strong>Step 5.</strong> 选择一种方法来组合Step 3和4的输出以创建新的隐藏状态</p>
+<p><strong>Step 1.</strong> 从<span class="math inline">\(h_{i}\)</span>、<span class="math inline">\(h_{i-1}\)</span>或在先前块中创建的隐藏状态集中选择隐藏状态。</p>
+<p><strong>Step 2.</strong> 从与Step 1相同的选项中选择第二个隐藏状态。</p>
+<p><strong>Step 3.</strong> 选择要应用于在Step 1中选择的隐藏状态的操作</p>
+<p><strong>Step 4.</strong> 选择要应用于在Step 2中选择的隐藏状态的操作</p>
+<p><strong>Step 5.</strong> 选择一种方法来组合Step 3和4的输出以创建新的隐藏状态</p>
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220717154853.png" /></p>
 <p>上图是用于递归构造卷积cell的一个block的控制器模型体系结构。 每个模块需要选择5个离散参数，每个参数对应于softmax层的输出。 右侧显示的示例构造块。 卷积cell包含B个块，因此控制器包含5B个softmax层，用于预测卷积cell的体系结构。实验中，B=5。</p>
 <p>该算法将新创建的隐藏状态附加到现有的隐藏状态集，作为后续块中的潜在输入。控制器RNN将上述5个预测步骤重复B次，对应于卷积cell中的B个块。在步骤3和4中，控制器RNN选择要应用于隐藏状态的操作从下面的操作中选择：</p>
@@ -5852,7 +5838,7 @@ b[n]=a[n]-a[n-1]
 <p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220717155130.png" /></p>
 <p>图5. 用CIFAR-10确定的B = 5个块的最佳卷积cell（NASNet-A）的体系结构。每个卷积单元都是B个块的结果。 单个块对应于两个基本操作（黄色）和一个组合操作（绿色）。</p>
 <p>在学习了卷积cell之后，可以探索几个超参数来为给定任务构建最终网络：（1）cell重复次数N和（2）初始卷积cell中的滤波器数。 选择初始滤波器的数量之后，只要stride为2，就将滤波器的数量加倍。</p>
-<p>然后作者在训练NASNet时，又发现了ScheduledDropPath，作为DropPath的一个改进版本，是NASNet的一种有效的正则化方法。在Drop-Path中，训练过程中每条路径以固定的概率被随机丢弃。 在这个<u>改进版本的ScheduledDropPath中，单元中的每个路径则以一个在训练过程中呈线性增加的概率被丢弃。</u></p>
+<p>然后作者在训练NASNet时，又发现了ScheduledDropPath，作为DropPath的一个改进版本，是NASNet的一种有效的正则化方法。在Drop-Path中，训练过程中每条路径以固定的概率被随机丢弃。 在这个<u>改进版本的ScheduledDropPath中，cell中的每个路径以一个在训练过程中呈线性增加的概率被丢弃。</u></p>
 <blockquote>
 <p>这块有没有可能试着改进一下？</p>
 </blockquote>
@@ -5875,6 +5861,93 @@ b[n]=a[n]-a[n-1]
       </categories>
       <tags>
         <tag>RL-NAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【Aging Evolution】Regularized Evolution for Image Classifier Architecture Search</title>
+    <url>/2022/07/17/%E3%80%90Aging%20Evolution%E3%80%91Regularized%20Evolution%20for%20Image%20Classifier%20Architecture%20Search/</url>
+    <content><![CDATA[<h1 id="regularized-evolution-for-image-classifier-architecture-search">Regularized Evolution for Image Classifier Architecture Search</h1>
+<ul>
+<li>AAAI 2019</li>
+</ul>
+<p>本文提出了老化进化Aging Evolution/Regularized Evolution。对标准锦标赛选择算法进行了修改，个体根据年龄被杀死，使得遗传算法更加偏爱年轻个体，本质就是一种正则化。实现了一组简单的突变，允许在NASNet搜索空间中进化，突变包括改变hidden state，或者改变option(conv、pool...)</p>
+<h2 id="thinking...">Thinking...</h2>
+<p>算法一开始需要随机初始化一批网络架构，有可能此类网络结构都是很糟糕的，没有利用任何先验知识，可能导致算法的运行结果很糟糕.</p>
+<p>作者发现，output顶点中的入边数越高，架构性能越好。可以作为未来改进方向？</p>
+<h2 id="basic-idea">Basic Idea</h2>
+<ol type="1">
+<li>本文提出了老化进化Aging Evolution/Regularized Evolution。对标准锦标赛选择算法进行了修改，个体根据年龄被杀死，使得遗传算法更加偏爱年轻个体。</li>
+<li>实现了一组简单的突变，允许在NASNet搜索空间中进化。该搜索空间将卷积神经网络结构与小有向图相关联，其中顶点表示隐藏状态，边表示常用的网络操作（如卷积或池化）。变异的操作有两种：改变hidden state，或者改变option。</li>
+</ol>
+<h2 id="method">Method</h2>
+<h3 id="search-space--nasnet">Search Space--NASNet</h3>
+<p>这篇用了NASNet作为搜索空间。NASNet主要有两种motifis：</p>
+<ol type="1">
+<li>Normal Cell：输出Feature Map和输入Feature Map的尺寸相同</li>
+<li>Reduction Cell：输出Feature Map对输入Feature Map进行了一次降采样，其中特征图高度和宽度减少了两倍（用了stride=2）</li>
+</ol>
+<p>NASNet主要由这两种cell构成。它们之间的唯一区别是Reduction Cell 减小了图像大小，而Normal Cell 保留了图像大小。每个cell接收来自上一个cell的直接输入和来自上上一个cell的跳跃输入。架构搜索过程的目标是这两种cell的架构。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718130522.png" style="zoom:50%;" /></p>
+<p>右图，每个cell有两个input activation tensors和一个output。cell由5个blocks组成，以虚线圈为例。1个block有两个隐藏状态作为输入，两个输入最开始是input images的两个copies，之后的cell的输入就是前两个cell的输出。两个隐藏状态分别选择两个操作op，op在一个固定集合中。最后选择一种方法来组合两个op的输出以创建新的隐藏状态。这就是一个block的过程。重复5次，也就是5个blocks后，就产生了一个cell。最后生成的网络体系结构就是由两种cell组成。一旦指定了结构，该模型仍然有两个自由参数可用于改变其大小（及其精度）：Normal Cell数（N）和卷积运算的输出滤波器数（F）。N和F是手动确定的。</p>
+<blockquote>
+<p>关于NASNet的详细介绍可以看<a href="https://stuxiaozhang.github.io/2022/07/16/%E3%80%90NASNet%E3%80%91Learning%20transferable%20architectures%20for%20scalable%20image%20recognition/">这篇笔记</a>。</p>
+</blockquote>
+<h4 id="cell结构的理解">Cell结构的理解</h4>
+<p>为什么要选择两个特征图（隐藏状态），对其进行op操作后相加呢？</p>
+<p>在某些情况下，这其实是一个残差结构，意味着在NASNet Search Space中进行搜索时，算法会自动探索如何添加残差结构，但是这种残差结构不一定就是何凯明大佬论文中所说的直接映射后相加，而是更加的灵活，可以是直接映射相加，也可以是施加了op操作相加，例如右图所示的0、1、3节点，就是经典的残差结构（0号节点比1号节点浅，1号节点通过avg操作得到一个新的特征图，设为temp，temp与比自己要浅的0号节点相加，就是一个经典的残差结构）</p>
+<blockquote>
+<p>什么时候我能有这样的理解呢？唉</p>
+</blockquote>
+<h3 id="evolutionary-algorithm">Evolutionary Algorithm</h3>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718161652.png" style="zoom: 67%;" /></p>
+<ol type="1">
+<li><p>首先，随机初始化种群，（完全）随机生成P个网络结构。然后生成size为P大小的种群。训练并评估。</p></li>
+<li>然后，每个cycle，从种群中随机选择S个个体形成候选父代种群Sample。</li>
+<li>从这个候选父代种群中，选择适应度值最高的作为父代个体。进行mutate的操作。生成新的子代个体，对其进行训练和评估适应度值。将其加入到种群中，即队列的最右侧</li>
+<li><p>去除种群中年龄“最大”的神经网络，其实就是队列最左边的元素</p></li>
+</ol>
+<h4 id="aging-evolution">Aging Evolution</h4>
+<p>原始的锦标赛选择算法是，移除候选父代种群Sample中最差的模型，作者把这种方法称为 non-aging evolution。作者改进了锦标赛选择算法，移除种群中最老的模型，把这种方法称为 aging evolution。老化进化允许更多地探索搜索空间，而不是像非老化进化那样过早地放大 好的模型。关于改进的锦标赛选择算法选择几个，<span class="math inline">\(S=1\)</span> 时简化为随机搜索，<span class="math inline">\(2\le S \le P\)</span> 导致不同贪婪程度的进化。</p>
+<p>Aging evolution算法模拟了自然界中的物种繁衍的操作</p>
+<ol type="1">
+<li>自然界中，表现优异的个体往往更加容易留下后代。Aging evolution算法通过采样形成一个候选集，选择候选集中准确率最高的神经网络（表现最优异的个体）进行繁衍，以此模拟这个过程</li>
+<li>在自然界中，年轻的个体相比于年老的个体一般具有更好的潜能，更有可能留下后代。Aging evolution算法每次会去除种群中一个最老的个体，并加入一个新个体，以此模拟这个过程</li>
+<li>在自然界中，后代往往会遗传父母的一些特征，并在此基础上进行变异。Aging evolution算法选定一个神经网络，对该神经网络进行MUTATE操作，得到的新神经网络的结构既有与父母神经网络相同的部分（遗传），又有不同的部分（变异），以此模拟这个过程</li>
+</ol>
+<h4 id="为什么aging-evolution表现好">为什么Aging Evolution表现好</h4>
+<p>作者认为Aging Evolution有利于抵抗训练噪声，训练噪声是指某些模型由于运气好，达到了较高的准确率，这种准确率并不是由于网络架构好引起的，在锦标赛算法中，此类模型可能存在于整个算法运行过程中，留下大量后代，由于后代更多，算法会更加偏好于此类架构，从而减少对于搜索空间的充分探索，而在Aging Evolution中，模型不断更新换代，即使某一类架构由于运气好达到了较好的准确率，最终也会被淘汰，并且采样数S的存在意味着运气好的架构不一定就能留下后代。</p>
+<p>由于种群更新换代的速度很快，种群整体更新频繁，只有让自己的后代不断保持较好的准确率，该类网络架构才能长期存在于种群之中，一定程度上抵抗训练噪声，即正则化。因此，Aging Evolution更加关注模型的架构，而不是模型本身，因为再高准确率的模型最终也会被淘汰</p>
+<p>论文构造了一个Toy Search space，在该搜索空间上使用了Aging Evolution，最终取得了较好的结果，由此证明了上述猜测</p>
+<blockquote>
+<p>所以这个Aging Evolution又叫Regularized Evolution，就是一种正则化方式。</p>
+</blockquote>
+<h4 id="mutation">Mutation</h4>
+<p>关于突变一共有三种，主要是前两种hidden state mutation，op mutation，还有identity（应该是保持不变吧）。</p>
+<ul>
+<li>hidden state mutation：首先随机选择是normal cell or reduction cell。选中后，在该cell的5个blocks中随机选择一个，再在该block中随机选择一个hidden state，被cell中的其他hidden state代替，注意不会形成环loop。</li>
+<li>op mutation：选择方式同上，只是这回在block中随机选择一个option，在option集合中随机一个替换。</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718170620.png" style="zoom:50%;" /></p>
+<h2 id="experiment">Experiment</h2>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718172828.png" /></p>
+<p>Reinforcement Learning (RL)、Random Search (RS)和本文的进化方法对比：</p>
+<ul>
+<li><p>右图可以看到，aging evolution的速度比RL和RS要快，并且探索到的模型准确率较高</p></li>
+<li><p>左图展示的是测试精度和模型计算成本。与RS相比，进化后的体系结构有类似的浮点运算量，但是精度更高。与RL相比，进化后的体系结构有类似的精度，但是有更低的浮点运算量。</p></li>
+</ul>
+<p>将验证精度最高的进化架构成为AmoebaNet-A，结构如下图。</p>
+<figure>
+<img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718172922.png" alt="image-20220718172922480" /><figcaption>image-20220718172922480</figcaption>
+</figure>
+<p>作者说AmoebaNet-A在CIFAR-10的验证精度最高。将AmoebaNet-A与其他模型在ImageNet数据集上一同比较：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220718172933.png" /></p>
+<p>AmoebaNet-A与相同数量的参数下的baseline表现相当。</p>
+]]></content>
+      <categories>
+        <category>Papers</category>
+      </categories>
+      <tags>
+        <tag>Aging Evolution</tag>
       </tags>
   </entry>
 </search>
