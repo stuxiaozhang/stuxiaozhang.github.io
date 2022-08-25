@@ -7818,4 +7818,545 @@ o_{m}^{(\ell)}= assemble \left(G_{m}^{(\ell)}, \boldsymbol{o}^{(\ell-1)}\right),
         <tag>RENAS</tag>
       </tags>
   </entry>
+  <entry>
+    <title>ElasticSearch7笔记</title>
+    <url>/2022/08/19/ElasticSearch%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="第1章-elasticsearch-概念">第1章 ElasticSearch 概念</h1>
+<h2 id="什么是restful">什么是RestFul</h2>
+<p><strong>REST</strong> : 表现层状态转化(Representational State Transfer)，如果一个架构符合REST原则，就称它为 RESTful 架构风格。</p>
+<p><strong>资源</strong>: 所谓&quot;资源&quot;，就是网络上的一个实体，或者说是网络上的一个具体信息</p>
+<p><strong>表现层</strong> :我们把&quot;资源&quot;具体呈现出来的形式，叫做它的&quot;表现层&quot;(Representation)。</p>
+<p>状态转化(State Transfer):如果客户端想要操作服务器，必须通过某种手段，让服务器端发生&quot;状态转 化&quot;(State Transfer)。而这种转化是建立在表现层之上的，所以就是&quot;表现层状态转化&quot;。</p>
+<blockquote>
+<p><strong><code>REST原则就是指一个URL代表一个唯一资源，并且通过HTTP协议里面四个动词:GET、POST、PUT、DELETE对应四种服务器端的基本操作: GET用来获取资源，POST用来添加资源(也可以用于更新资源)，PUT用来更新资源，DELETE用来删除资源。</code></strong></p>
+</blockquote>
+<h2 id="什么是全文检索">什么是全文检索</h2>
+<p><strong>全文检索是计算机程序通过扫描文章中的每一个词，对每一个词建立一个索引，指明该词在文章中出现的次数和位置。当用户查询时根据建立的索引查找，类似于通过字典的检索字表查字的过程。</strong></p>
+<ul>
+<li>索: 建立索引 文本----&gt; 切分 ----&gt; 词 文章出现过 出现多少次</li>
+<li>检索: 查询 关键词----&gt; 索引中 ----&gt; 符合条件文章 相关度排序</li>
+</ul>
+<hr />
+<p>全文检索（Full-Text Retrieval(检索)）以文本作为检索对象，找出含有指定词汇的文本。<strong>全面、准确和快速是衡量全文检索系统的关键指标。</strong></p>
+<p>关于全文检索，我们要知道：</p>
+<ul>
+<li><code>只处理文本、不处理语义</code></li>
+<li><code>搜索时英文不区分大小写</code></li>
+<li><code>结果列表有相关度排序</code></li>
+</ul>
+<h2 id="什么是elasticsearch">什么是Elasticsearch</h2>
+<p><strong>ElasticSearch</strong> 简称 <strong>ES</strong> ，<strong>是基于Apache Lucene构建的开源搜索引擎，是当前流行的企业级搜索引擎</strong>。Lucene本身就可以被认为迄今为止性能最好的一款开源搜索引擎工具包，但是lucene的API相对复杂，需要深厚的搜索理论。很难集成到实际的应用中去。<strong>但是ES是采用java语言编写，提供了简单易用的RestFul API，开发者可以使用其简单的RestFul API，开发相关的搜索功能，从而避免lucene的复杂性</strong>。</p>
+<p>目前 Elasticsearch 有很多地方超越了 Lucene，它不仅可以实现全文搜索功能，还可以完成以下工作：</p>
+<ul>
+<li>分布式实时文档存储，并将每一个字段都编入索引，使其可以被搜索。</li>
+<li>分布式实时分析与搜索引擎。</li>
+<li>可以扩展到上百台服务器，处理PB级别的结构化或非结构化数据。</li>
+<li>可以轻松地通过客户端或者任何你喜欢的程序语言与 Elasticsearch 的 RESTful API 进行通信</li>
+</ul>
+<h3 id="es的应用场景">ES的应用场景</h3>
+<p><strong>ES主要以<code>轻量级JSON</code>作为数据存储格式，这点与MongoDB有点类似，但它在读写性能上优于 MongoDB 。同时也支持地理位置查询 ，还方便地理位置和文本混合查询 。 以及在统计、日志类数据存储和分析、可视化这方面是引领者。</strong></p>
+<ul>
+<li>国外:</li>
+</ul>
+<p><strong>Wikipedia</strong>(维基百科)使用ES提供全文搜索并高亮关键字、StackOverflow(IT问答网站)结合全文搜索与地理位置查询、Github使用Elasticsearch检索1300亿行的代码。</p>
+<ul>
+<li>国内:</li>
+</ul>
+<p>百度(在云分析、网盟、预测、文库、钱包、风控等业务上都应用了ES，单集群每天导入30TB+数据， 总共每天60TB+)、新浪 、阿里巴巴、腾讯等公司均有对ES的使用。</p>
+<p><strong><code>使用比较广泛的平台ELK(ElasticSearch, Logstash, Kibana)</code></strong></p>
+<h2 id="elasticsearch相关术语">ElasticSearch相关术语</h2>
+<h3 id="接近实时nrt-near-real-time">接近实时(NRT — Near Real Time )</h3>
+<p>Elasticsearch是一个接近实时的搜索平台。这意味着，<strong>从索引一个文档直到这个文档能够被搜索到有一个轻微的延迟(通常是1秒内)</strong></p>
+<h3 id="索引index">索引(index)</h3>
+<p>索引是文档的容器，一类文档的集合，存储在分片Shard上</p>
+<p><strong>一个索引就是一个拥有几分相似特征的文档的集合</strong>。<strong>一个索引由一个名字来标识(必须全部是小写字母的)</strong>，<strong>并且当我们要对这个索引中的文档进行索引、搜索、更新和删除的时候，都要使用到这个名字</strong>。在一个集群中，如果你想，可以定义任意多的索引。</p>
+<ul>
+<li>索引类比关系数据库的db</li>
+<li>索引的Mapping定义文档字段类型，类比关系数据库的schema</li>
+<li>索引的Setting定义数据在分片上的分布</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/7d097077a5744f51bccf3f6c32820eee.png" /></p>
+<h3 id="映射mapping">映射(Mapping)</h3>
+<p><strong>映射是定义一个文档和它所包含的字段如何被存储和索引的过程</strong>。相当于数据库中的schema，用来约束字段的数据类型，每一种数据类型都有对应的使用场景。在默认配置下，ES可以根据插入的数据自动创建mapping，也可以手动创建mapping。mapping 中定义了一个文档所包含的所有 field 信息，每个文档都有映射，<strong>但是在大多数使用场景中，我们并不需要显示的创建映射，因为ES中实现了动态映射</strong>。我们在索引中写入一个下面的JSON文档</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">&#123;<br>    &quot;name&quot;:&quot;jack&quot;,<br>    &quot;age&quot;:18,<br>    &quot;birthDate&quot;: &quot;1991-10-05&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>在动态映射的作用下，name会映射成text类型，age会映射成long类型，birthDate会被映射为date类型，映射的索引信息如下。</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">&#123;<br>  &quot;mappings&quot;: &#123;<br>    &quot;_doc&quot;: &#123;<br>      &quot;properties&quot;: &#123;<br>        &quot;age&quot;: &#123;<br>          &quot;type&quot;: &quot;long&quot;<br>        &#125;,<br>        &quot;birthDate&quot;: &#123;<br>          &quot;type&quot;: &quot;date&quot;<br>        &#125;,<br>        &quot;name&quot;: &#123;<br>          &quot;type&quot;: &quot;text&quot;,<br>          &quot;fields&quot;: &#123;<br>            &quot;keyword&quot;: &#123;<br>              &quot;type&quot;: &quot;keyword&quot;,<br>              &quot;ignore_above&quot;: 256<br>            &#125;<br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="文档document">文档(document)</h2>
+<p><strong>一个文档是一个可被索引的最小单元，类似于表中的一条记录。</strong> 比如，你可以拥有某一个员工的文档,也可以拥有某个商品的一个文档。文档以采用了轻量级的数据交换格式JSON(Javascript Object Notation)来表示。</p>
+<ul>
+<li>文档类比关系数据库一条记录</li>
+<li>每个文档有一个唯一的ID，类比关系数据库主键ID</li>
+<li>json对象由filed构成，filed类比关系数据库column</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">&#123;<br>  &quot;_index&quot;: &quot;user&quot;,<br>  &quot;_type&quot;: &quot;_doc&quot;,<br>  &quot;_id&quot;: &quot;qbuOs4AB1VH6WaY_OsFW&quot;,<br>  &quot;_version&quot;: 1,<br>  &quot;_score&quot;: 1,<br>  &quot;_source&quot;: &#123;<br>    &quot;name&quot;: &quot;张三&quot;,<br>    &quot;address&quot;: &quot;广东省深圳市&quot;,<br>    &quot;remark&quot;: &quot;他是一个程序员&quot;,<br>    &quot;age&quot;: 28,<br>    &quot;salary&quot;: 8800,<br>    &quot;birthDate&quot;: &quot;1991-10-05&quot;,<br>    &quot;createTime&quot;: &quot;2019-07-22T13:22:00.000Z&quot;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>上图为 ES 一条文档数据，而一个文档不只有基础数据，它还包含了元数据(metadata)——关于文档的信息，也就是用下划线开头的字段，它是官方提供的字段：</p>
+<ul>
+<li>_index ：文档所属索引名称，即文档存储的地方。</li>
+<li>_type ：文档所属类型名（此处已默认为 _doc）。</li>
+<li>_id ：文档的唯一标识。在写入的时候，可以指定该 Doc 的 ID 值，如果不指定，则系统自动生成一个唯一的 UUID 值。</li>
+<li>_score ：顾名思义，得分，也可称之为相关性，在查询是 ES 会 根据一些规则计算得分，并根据得分进行倒排。除此之外，ES 支持通过 Function score query 在查询时自定义 score 的计算规则。</li>
+<li>_source ：文档的原始 JSON 数据。</li>
+</ul>
+<h3 id="es和db的关系">ES和DB的关系</h3>
+<p><img src="https://img-blog.csdnimg.cn/6ac5e490229248a9972034baa2f85315.png" /></p>
+<h1 id="第2章-es-索引映射文档">第2章 ES 索引、映射、文档</h1>
+<p>通过Kibana的Dev Tools来充当Elasticsearch客户端来操作ES</p>
+<h2 id="索引index的基本操作">索引(Index)的基本操作</h2>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /ems/       创建索引<br>DELETE /ems	 删除索引<br>DELETE /*		     删除所有索引<br></code></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /_cat/indices?v 			查看索引信息;<br><br>健康情况   状态   索引名  索引id  分片数  副本数  文档数量      删除文档数量  文档大小     主分片文档大小<br>health  status  index  uuid   pri    rep    docs.count docs.deleted store.size pri.store.size <br></code></pre></td></tr></table></figure>
+<h3 id="创建">创建</h3>
+<ol type="1">
+<li>创建索引</li>
+</ol>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /索引名 ====&gt; PUT /products<br></code></pre></td></tr></table></figure>
+<p>注意:</p>
+<ul>
+<li>ES中索引健康转态 red(索引不可用) 、yellow(索引可用,存在风险)、green(健康)</li>
+<li>默认ES在创建索引时回为索引创建1个副本索引和1个分片索引</li>
+</ul>
+<ol start="2" type="1">
+<li>创建索引 进行索引分片配置</li>
+</ol>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /products<br>&#123;<br>  &quot;settings&quot;: &#123;<br>    &quot;number_of_shards&quot;: 1, #指定主分片的数量<br>    &quot;number_of_replicas&quot;: 0 #指定副本分片的数量<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/cdd17ad7956b47fea7b2e94007c5b2eb.png" /></p>
+<h3 id="查询">查询</h3>
+<p>查询索引</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><code class="hljs awk">GET <span class="hljs-regexp">/_cat/i</span>ndices?v<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/9eea91355568451f9dce20d2d1fea624.png" /></p>
+<h3 id="删除">删除</h3>
+<p>删除索引</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">- DELETE /索引名 =====&gt; DELETE /products<br>- DELETE /*     `*代表通配符,代表所有索引`<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/ee76967f95714d7abeadef987d3367cf.png" /></p>
+<h2 id="映射mapping的基本操作">映射(mapping)的基本操作</h2>
+<h3 id="创建-1">创建</h3>
+<blockquote>
+<p>只有text类型才会进行分词,其他类型都不会分词</p>
+</blockquote>
+<p>字符串类型：keyword 关键字 关键词 、text 一段文本</p>
+<p>数字类型：integer, long</p>
+<p>小数类型：float, double</p>
+<p>布尔类型：boolean</p>
+<p>日期类型：date</p>
+<ol type="1">
+<li>创建索引&amp;映射</li>
+</ol>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /products<br>&#123; <br>  &quot;settings&quot;: &#123;<br>    &quot;number_of_shards&quot;: 1,<br>    &quot;number_of_replicas&quot;: 0<br>  &#125;, <br>  &quot;mappings&quot;: &#123;<br>    &quot;properties&quot;: &#123;<br>      &quot;title&quot;:&#123;<br>        &quot;type&quot;: &quot;keyword&quot;<br>      &#125;,<br>      &quot;price&quot;:&#123;<br>        &quot;type&quot;: &quot;double&quot;<br>      &#125;,<br>      &quot;created_at&quot;:&#123;<br>        &quot;type&quot;: &quot;date&quot;<br>      &#125;,<br>      &quot;description&quot;:&#123;<br>        &quot;type&quot;: &quot;text&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/107a7170500a4021beac7b2e39231d6a.png" /></p>
+<blockquote>
+<p>说明: ES中支持字段类型非常丰富，如：text、keyword、integer、long、ip 等。更多参见https://www.elastic.co/guide/en/elasticsearch/reference/7.15/mapping-types.html</p>
+</blockquote>
+<h3 id="查询-1">查询</h3>
+<p>查看某个索引的映射</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /索引名/_mapping =====&gt; GET /products/_mapping<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/54509eb2707e43dbad35894c7b14428e.png" /></p>
+<ul>
+<li>映射信息不能修改，删除。如果创建时出现问题，只能将索引删除掉。</li>
+</ul>
+<h2 id="文档document的基本操作">文档(document)的基本操作</h2>
+<h3 id="添加文档">添加文档</h3>
+<p><code>/索引/类型/id</code></p>
+<ul>
+<li>在es7.x类型为_doc, 已经舍弃了自定义type</li>
+<li>可以手动指定id，也可以不指定 自动生成</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">POST /products/_doc/1   #/索引/类型/id  #在es7.x类型为_doc, 已经舍弃了自定义type<br>&#123;<br>  &quot;id&quot;:1,<br>  &quot;title&quot;:&quot;小浣熊&quot;,<br>  &quot;price&quot;:0.5,<br>  &quot;created_at&quot;:&quot;2012-12-12&quot;,<br>  &quot;description&quot;:&quot;小浣熊挺好吃&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819143334.png" /></p>
+<h3 id="查询文档">查询文档</h3>
+<ul>
+<li>手动定义的id</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_doc/1<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819143910.png" /></p>
+<ul>
+<li>自动生成的id</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs HTTP">GET /products/_doc/巴拉巴拉懒得抄<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819143928.png" /></p>
+<h3 id="删除文档">删除文档</h3>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">DELETE /products/_doc/巴拉巴拉懒得抄<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819144057.png" /></p>
+<h3 id="更新文档">更新文档</h3>
+<ol type="1">
+<li>第一种方式 更新原有的数据。这种其实是<strong>先删除了原始文档，再重新添加的</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /products/_doc/1<br>&#123;<br>	&quot;title&quot;:&quot;小浣熊熊&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819144404.png" /></p>
+<p>查看文档：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819144513.png" /></p>
+<p>解决办法：</p>
+<ol type="1">
+<li>按照原文档格式重新写。<strong>这样删除了原始文档，再重新添加，传递全部字段进行更新。</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /products/_doc/1<br>&#123;<br>  &quot;id&quot;:1,<br>  &quot;title&quot;:&quot;小浣熊熊&quot;,<br>  &quot;price&quot;:0.5,<br>  &quot;created_at&quot;:&quot;2012-12-12&quot;,<br>  &quot;description&quot;:&quot;小浣熊挺好吃&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>基于指定字段进行更新。<strong>保留原字段进行更新。</strong>要用 <strong>POST</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">POST /products/_doc/1/_update<br>&#123;<br>	&quot;doc&quot;:&#123;<br>		&quot;price&quot;:1.6<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220819144941.png" /></p>
+<h3 id="批量操作-不是原子操作-_bulk">批量操作 (不是原子操作) _bulk</h3>
+<p><code>_bulk</code>(批量操作) 添加(<code>index</code>) 删除(<code>delete</code>) 更新(<code>update</code>)</p>
+<ul>
+<li>批量往索引中添加两个文档</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">POST /products/_doc/_bulk<br>&#123;&quot;index&quot;:&#123;&quot;_id&quot;:2&#125;&#125;<br>  &#123;&quot;id&quot;:2,&quot;title&quot;:&quot;小浣熊&quot;,&quot;price&quot;:10.5,&quot;created_at&quot;:&quot;2012-12-12&quot;,&quot;description&quot;:&quot;小浣熊挺好吃&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&quot;_id&quot;:3&#125;&#125;<br>  &#123;&quot;id&quot;:3,&quot;title&quot;:&quot;日本豆&quot;,&quot;price&quot;:30.5,&quot;created_at&quot;:&quot;2012-12-12&quot;,&quot;description&quot;:&quot;日本豆挺好吃&quot;&#125;<br></code></pre></td></tr></table></figure>
+<p>注意：批量操作时字段必须都在同一行！</p>
+<ul>
+<li>批量操作 添加 更新 删除</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">POST /products/_doc/_bulk<br>&#123;&quot;index&quot;:&#123;&quot;_id&quot;:4&#125;&#125;<br>  &#123;&quot;id&quot;:4,&quot;title&quot;:&quot;锅包肉&quot;,&quot;price&quot;:40,&quot;created_at&quot;:&quot;2012-12-12&quot;,&quot;description&quot;:&quot;锅包肉挺好吃&quot;&#125;<br>&#123;&quot;update&quot;:&#123;&quot;_id&quot;:3&#125;&#125;<br>  &#123;&quot;id&quot;:3,&quot;title&quot;:&quot;日本豆豆&quot;,&quot;price&quot;:30.5,&quot;created_at&quot;:&quot;2022-12-12&quot;,&quot;description&quot;:&quot;日本豆豆挺好吃&quot;&#125;<br>&#123;&quot;delete&quot;:&#123;&quot;_id&quot;:2&#125;&#125;  <br></code></pre></td></tr></table></figure>
+<p>注意：批量时不会因为一个失败而全部失败，而是继续执行后续操作，批量在返回时按照执行的状态开始返回</p>
+<h1 id="第3章-es高级查询索引库原理倒排索引dsl高级检索">第3章 ES高级查询、索引库原理、倒排索引、DSL高级检索</h1>
+<p>检索: 索: 对文档创建索引的过程; 检: 检索,根据查询条件查询文档</p>
+<h2 id="检索方式-_search">检索方式 _search</h2>
+<p>ES官方提供了两中检索方式:</p>
+<ul>
+<li><strong>一种是通过 URL 参数进行搜索</strong></li>
+<li><strong>另一种是通过 <code>Query DSL</code>(Domain Specified Language) 进行搜索</strong>。<strong>官方更推荐使用第二种方式第二种方式是基于传递JSON作为请求体(request body)格式与ES进行交互，这种方式更强大，更简洁</strong>。</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/dbc685c5788b40049499d4efc88518f9.png" /></p>
+<ul>
+<li><p>使用语法</p>
+<p><strong><code>URL查询: GET /索引/类型/_search?参数</code></strong></p>
+<p><strong><code>DSL查询: GET /索引/类型/_search &#123;json请求体数据&#125;</code></strong></p></li>
+</ul>
+<h2 id="query-dsl-语法">Query DSL 语法</h2>
+<h3 id="查询所有文档-match_all">查询所有文档 <code>match_all</code></h3>
+<p><code>match_all</code>：返回索引中的全部文档</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;match_all&quot;:&#123;&#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><code>GET /products/_search</code> 或者 <code>GET /products/_doc/_search</code></p>
+<h3 id="返回指定条数-size">返回指定条数 <code>size</code></h3>
+<p><strong>size 关键字</strong>: 指定查询结果中返回指定条数。 <strong>默认返回值10条</strong></p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;match_all&quot;:&#123;&#125;<br>  &#125;,<br>  &quot;size&quot;: 2<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="分页查询-from">分页查询 <code>from</code></h3>
+<p><strong>from 关键字</strong>: 用来指定起始返回位置，和<strong>size关键字连用可实现分页效果</strong></p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;match_all&quot;:&#123;&#125;<br>  &#125;,<br>  &quot;size&quot;: 2,<br>  &quot;from&quot;: 1<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="指定字段排序-sort">指定字段排序 <code>sort</code></h3>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;match_all&quot;:&#123;&#125;<br>  &#125;,<br>  &quot;sort&quot;: [<br>    &#123;<br>		&quot;price&quot;: &#123;<br>			&quot;order&quot;: &quot;desc&quot;<br>		&#125;<br>    &#125;<br>  ]<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="返回指定字段-_source">返回指定字段 <code>_source</code></h3>
+<p>**_source 关键字**: 是一个数组,在数组中用来指定展示那些字段</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;match_all&quot;:&#123;&#125;<br>  &#125;,<br>  &quot;_source&quot;: [&quot;id&quot;, &quot;title&quot;, &quot;description&quot;]<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="关键词查询-term">关键词查询 <code>term</code></h3>
+<p><code>term</code> 关键字：用来查询关键字。对于keyword类型，不分词，要使用全部内容搜索。</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;term&quot;:&#123;<br>    	&quot;price&quot;:&#123;<br>    		&quot;value&quot;<br>    	&#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820103256.png" /></p>
+<p><strong>对于text类型，默认ES标准分词器，中文单字分词，英文单词分词。</strong></p>
+<figure>
+<img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820104302.png" alt="image-20220820104301693" /><figcaption>image-20220820104301693</figcaption>
+</figure>
+<p>Note：</p>
+<ol type="1">
+<li><p>term 基于关键词查询中，<strong>在ES的Mapping Type 中 keyword , date ,integer, long , double , boolean or ip 这些类型不分词</strong>，<strong><code>只有text类型分词</code></strong></p></li>
+<li><p>ES中默认使用分词器为<strong>标准分词器(StandardAnalyzer)，</strong>标准分词器对于英文<strong>单词</strong>分词，对于中文<strong>单字</strong>分词</p></li>
+</ol>
+<h3 id="范围查询-range">范围查询 <code>range</code></h3>
+<p><code>range</code>：用来指定查询指定范围内的文档</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;range&quot;:&#123;<br>    	&quot;price&quot;:&#123;<br>    		&quot;gte&quot;: 0,<br>    		&quot;lte&quot;: 5<br>    	&#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820105150.png" /></p>
+<h3 id="前缀查询-prefix">前缀查询 <code>prefix</code></h3>
+<p><code>prefix</code> 关键词：用来检索含有指定前缀的关键词的相关文档</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;prefix&quot;:&#123;<br>    	&quot;title&quot;:&#123;<br>    		&quot;value&quot;: &quot;小&quot;<br>    	&#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820105535.png" /></p>
+<h3 id="通配符查询-wildcard">通配符查询 <code>wildcard</code></h3>
+<p><code>wildcard</code> 关键词：通配符查询</p>
+<ul>
+<li><code>?</code> 用来匹配一个任意字符</li>
+<li><code>*</code> 用来匹配多个任意字符</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;wildcard&quot;:&#123;<br>    	&quot;description&quot;:&#123;<br>    		&quot;value&quot;: &quot;goo?&quot;<br>    	&#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820110034.png" /></p>
+<figure>
+<img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820110011.png" alt="image-20220820110011270" /><figcaption>image-20220820110011270</figcaption>
+</figure>
+<h3 id="多id查询-ids">多id查询 <code>ids</code></h3>
+<p><code>ids</code> 关键字：值为数组类型，用来根据一组 id 获取多个对应的文档</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;ids&quot;:&#123;<br>    	&quot;values&quot;:[1,3,4]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure>
+<img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820110432.png" alt="image-20220820110432112" /><figcaption>image-20220820110432112</figcaption>
+</figure>
+<h3 id="模糊查询-fuzzy">模糊查询 <code>fuzzy</code></h3>
+<p><code>fuzzy</code> 关键字：用来模糊查询含有指定关键字的文档</p>
+<p><code>fuzzy</code> 模糊查询的最大模糊错误 必须在0-2之间</p>
+<ul>
+<li>搜索关键词长度为 2 不允许存在模糊</li>
+<li>搜索关键词长度为3-5 允许一次模糊 0 1</li>
+<li>搜索关键词长度大于5 允许最大2模糊</li>
+</ul>
+<blockquote>
+<p>模糊：错误❌</p>
+</blockquote>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;fuzzy&quot;:&#123;<br>    	&quot;title&quot;: &quot;小浣猫&quot;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820110559.png" /></p>
+<h3 id="布尔查询-bool">布尔查询 <code>bool</code></h3>
+<p><code>bool</code>: 用来组合多个条件实现复杂查询</p>
+<ul>
+<li><p><code>must</code>: 相当于&amp;&amp; 同时成立</p></li>
+<li><p><code>should</code>: 相当于|| 成立一个就行</p></li>
+<li><p><code>must_not</code>: 相当于! 不能满足任何一个</p></li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;:&#123;<br>    	&quot;must&quot;: [<br>    		&#123;<br>    			&quot;ids&quot;: &#123;<br>    				&quot;values&quot;: [1]<br>    			&#125;<br>    		&#125;,&#123;<br>    			&quot;term&quot;: &#123;<br>    				&quot;title&quot;: &#123;<br>    					&quot;value&quot;: &quot;小浣熊&quot;<br>    				&#125;<br>    			&#125;<br>    		&#125;<br>    	]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820111405.png" /></p>
+<h3 id="多字段查询-multi_match">多字段查询 <code>multi_match</code></h3>
+<ul>
+<li>如果搜索的字段分词，会对query进行 先分词 再搜索</li>
+<li>如果搜索的字段不分词，会直接使用query整体进行字段搜索</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;multi_match&quot;:&#123;<br>    	&quot;query&quot;: &quot;小浣熊&quot;,<br>    	&quot;fields&quot;: [&quot;title&quot;, &quot;description&quot;]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820152421.png" /></p>
+<h3 id="默认字段分词查询-query_string">默认字段分词查询 <code>query_string</code></h3>
+<p>查询字段分词，就将查询条件分词查询</p>
+<p>查询字段不分词，将查询条件不分词查询</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;query_string&quot;:&#123;<br>    	&quot;default_field&quot;: &quot;description&quot;,<br>    	&quot;query&quot;: &quot;熊熊真可爱&quot;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><code>“description”</code> 是 text 类型，分词，所以查询 熊 真 可 爱</p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820153209.png" /></p>
+<hr />
+<p>其他的查询语法</p>
+<h3 id="高亮查询-highlight">高亮查询 <code>highlight</code></h3>
+<p><code>highlight</code>: 可以让符合条件的文档中的关键词高亮</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /products/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;query_string&quot;:&#123;<br>    	&quot;default_field&quot;: &quot;description&quot;,<br>    	&quot;query&quot;: &quot;熊熊真可爱&quot;<br>    &#125;<br>  &#125;,<br>  &quot;highlight&quot;: &#123;<br>    &quot;fields&quot;: &#123;<br>      &quot;*&quot;: &#123;&#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820153723.png" /></p>
+<p><strong>自定义高亮html标签</strong>: 可以在highlight中使用<code>pre_tags</code>和<code>post_tags</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820154051.png" /></p>
+<p>多字段高亮 使用<code>require_field_match</code>开启多个字段高亮</p>
+<h3 id="倒排索引原理">倒排索引原理</h3>
+<p>https://www.bilibili.com/video/BV1SQ4y1m7Ds?p=23</p>
+<h1 id="第4章-es中的分词器ik分词器">第4章 ES中的分词器、IK分词器</h1>
+<h2 id="分词器">分词器</h2>
+<h3 id="analysis-和-analyzer">Analysis 和 Analyzer</h3>
+<p><code>Analysis</code>： 文本分析是把全文本转换一系列单词(term/token)的过程，也叫分词(Analyzer)。<strong>Analysis是通过Analyzer来实现的</strong>。</p>
+<p><code>分词就是将文档通过Analyzer分成一个一个的Term(关键词查询),每一个Term都指向包含这个Term的文档</code>。</p>
+<h3 id="analyzer-组成">Analyzer 组成</h3>
+<p>StandardAnalyzer 标准分词器 (ES默认分词器)</p>
+<ul>
+<li>中文进行单字分词, 英文按照单词分词</li>
+</ul>
+<blockquote>
+<p>eg : 我是中国人 this is good man</p>
+<p>标准分词后: 我 是 中 国 人 this is good man</p>
+</blockquote>
+<p>分析器（analyzer）都由三种构件组成的：<code>character filters</code> ， <code>tokenizers</code> ， <code>token filters</code>。</p>
+<ul>
+<li><code>character filter</code> 字符过滤器
+<ul>
+<li>在一段文本进行分词之前，先进行预处理，比如说最常见的就是，过滤html标签（hello --&gt; hello），&amp; --&gt; and（I&amp;you --&gt; I and you）</li>
+</ul></li>
+<li><code>tokenizers</code> 分词器
+<ul>
+<li>英文分词可以根据空格将单词分开，中文分词比较复杂，可以采用机器学习算法来分词。</li>
+</ul></li>
+<li><code>Token filters</code> Token过滤器
+<ul>
+<li><strong>将切分的单词进行加工</strong>。大小写转换（例将“Quick”转为小写），去掉停用词（例如停用词像“a”、“and”、“the”等等），加入同义词（例如同义词像“jump”和“leap”）。</li>
+</ul></li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>三者顺序: Character Filters—&gt;Tokenizer—&gt;Token Filter</li>
+<li>三者个数：Character Filters（0个或多个） + Tokenizer + Token Filters(0个或多个)</li>
+</ul>
+<h3 id="内置分词器">内置分词器</h3>
+<ul>
+<li><strong>Standard Analyzer</strong> - 默认分词器，英文按单词词切分，并小写处理; 对中文进行单字分词</li>
+<li>Simple Analyzer - 按照单词切分(符号被过滤), 小写处理</li>
+<li>Stop Analyzer - 小写处理，停用词过滤（the，a，is）</li>
+<li>WhiteSpace Analyzer - 按照空格切分，不转小写</li>
+<li>Keyword Analyzer - 不分词，直接将输入当作输出</li>
+</ul>
+<h3 id="内置分词器测试">内置分词器测试</h3>
+<ul>
+<li>标准分词器
+<ul>
+<li>特点：按照单词分词，英文统一转为小写，过滤标点符号；中文单字分词</li>
+</ul></li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">POST /_analyze<br>&#123;<br>  &quot;analyzer&quot;: &quot;standard&quot;,<br>  &quot;text&quot;: &quot;this is a , good Man 中华人民共和国&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820195527.png" /></p>
+<ul>
+<li>Simple 分词器
+<ul>
+<li>特点：英文按照单词分词，英文统一转为小写，去掉符号；中文按照空格进行分词</li>
+</ul></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820195717.png" /></p>
+<ul>
+<li>Whitespace 分词器
+<ul>
+<li>特点：中文 英文 按照空格分开，英文不会转为小写，不去掉标点符号</li>
+</ul></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220820195928.png" /></p>
+<h4 id="创建索引设置分词">创建索引设置分词</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">PUT /索引名<br>&#123;<br>  &quot;settings&quot;: &#123;&#125;,<br>  &quot;mappings&quot;: &#123;<br>    &quot;properties&quot;: &#123;<br>      &quot;title&quot;:&#123;<br>        &quot;type&quot;: &quot;text&quot;,<br>        &quot;analyzer&quot;: &quot;standard&quot; //显示指定分词器<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="中文分词器-ik分词器">中文分词器 (IK分词器)</h2>
+<p>在ES中支持中文分词器非常多 如 <strong>smartCN</strong>、<strong>IK</strong> 等，推荐的就是 <code>IK分词器</code>。</p>
+<h3 id="ik使用">IK使用</h3>
+<p>IK有两种颗粒度的拆分：</p>
+<ul>
+<li><code>ik_smart</code>: 会做最粗粒度的拆分</li>
+<li><code>ik_max_word</code>: 会将文本做最细粒度的拆分</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs HTTP">POST /_analyze<br>&#123;<br>  &quot;analyzer&quot;: &quot;ik_smart&quot;,<br>  &quot;text&quot;: &quot;中华人民共和国国歌&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/dfd956c0819e4a458c97e5dbe2a36abf.png" /></p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs HTTP">POST /_analyze<br>&#123;<br>  &quot;analyzer&quot;: &quot;ik_max_word&quot;,<br>  &quot;text&quot;: &quot;中华人民&quot;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/5203cd48ae694b788cdef6a0a534ecb8.png" /></p>
+<h3 id="扩展词停用词配置">扩展词、停用词配置</h3>
+<p>IK支持自定义<code>扩展词典</code>和<code>停用词典</code></p>
+<ul>
+<li><strong><code>扩展词典</code></strong> 就是有些词并不是关键词,但是也希望被ES用来作为检索的关键词,可以将这些词加入扩展词典。</li>
+<li><strong><code>停用词典</code></strong> 就是有些词是关键词,但是出于业务场景不想使用这些关键词被检索到，可以将这些词放入停用词典。</li>
+</ul>
+<p>定义扩展词典和停用词典可以修改IK分词器中<code>config</code>目录中<code>IKAnalyzer.cfg.xml</code>这个文件。</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> 修改vim IKAnalyzer.cfg.xml<br><br><span class="hljs-code">    &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="hljs-code">    &lt;!DOCTYPE properties SYSTEM &quot;http://java.sun.com/dtd/properties.dtd&quot;&gt;</span><br><span class="hljs-code">    &lt;properties&gt;</span><br><span class="hljs-code">        &lt;comment&gt;IK Analyzer 扩展配置&lt;/comment&gt;</span><br><span class="hljs-code">        &lt;!--用户可以在这里配置自己的扩展字典 --&gt;</span><br><span class="hljs-code">        &lt;entry key=&quot;ext_dict&quot;&gt;ext_dict.dic&lt;/entry&gt;</span><br><span class="hljs-code">         &lt;!--用户可以在这里配置自己的扩展停止词字典--&gt;</span><br><span class="hljs-code">        &lt;entry key=&quot;ext_stopwords&quot;&gt;ext_stopword.dic&lt;/entry&gt;</span><br><span class="hljs-code">    &lt;/properties&gt;</span><br><span class="hljs-code"></span><br><span class="hljs-code">2. 在ik分词器目录下config目录中创建ext_dict.dic文件   编码一定要为UTF-8才能生效</span><br><span class="hljs-code">	vim ext_dict.dic </span><br><span class="hljs-code">	加入扩展词即可，一行放一个词</span><br><span class="hljs-code"></span><br><span class="hljs-code">3. 在ik分词器目录下config目录中创建ext_stopword.dic文件 </span><br><span class="hljs-code">	vim ext_stopword.dic 加入停用词即可</span><br><span class="hljs-code"></span><br><span class="hljs-code">4. 重启es生效</span><br></code></pre></td></tr></table></figure>
+<p>注意：词典的编码必须为UTF-8，否则无法生效!</p>
+<h1 id="第5章-过滤查询聚合查询">第5章 过滤查询、聚合查询</h1>
+<h2 id="filter-query过滤查询">Filter Query(过滤查询)</h2>
+<h3 id="过滤查询">过滤查询</h3>
+<p>其实准确来说，ES中的查询操作分为2种: <code>查询(query)</code>和<code>过滤(filter)</code>。</p>
+<ul>
+<li>查询即是之前提到的query查询，它(查询)默认会<strong>计算每个返回文档的得分，然后根据得分排序</strong>。</li>
+<li>过滤(filter)只会<strong>筛选出符合的文档，并不计算得分</strong>，且它可以缓存文档 。所以，单从<strong>性能</strong>考虑，<strong>过滤比查询更快</strong>。</li>
+</ul>
+<p>换句话说，过滤适合在大范围筛选数据，而查询则适合精确匹配数据。一般应用时， <strong><code>应先使用过滤操作过滤数据， 然后使用查询匹配数据。</code></strong></p>
+<p><img src="https://img-blog.csdnimg.cn/407fdf90fc7140949b3172311caa36c0.png" /></p>
+<h3 id="过滤语法">过滤语法</h3>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">// 从所有文档中过滤age&gt;=10的文档<br>GET /ems/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;: &#123;<br>      &quot;must&quot;: [<br>        &#123;&quot;match_all&quot;: &#123;&#125;&#125;<br>      ],<br>      &quot;filter&quot;: &#123;<br>        &quot;range&quot;: &#123;<br>          &quot;age&quot;: &#123;<br>            &quot;gte&quot;: 10<br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<ul>
+<li><p>在执行filter和query时，<strong>先执行filter在执行query</strong></p></li>
+<li><p>Elasticsearch会自动缓存经常使用的过滤器，以加快性能。</p></li>
+</ul>
+<h3 id="常见的过滤器类型">常见的过滤器类型</h3>
+<h4 id="term-terms-filter">term 、terms Filter</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">// 先过滤出content字段关键词为spring的文档,再query出name为黑的文档<br>GET /ems/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;: &#123;<br>      &quot;must&quot;: [<br>        &#123;<br>          &quot;term&quot;: &#123;<br>            &quot;name&quot;: &#123;<br>              &quot;value&quot;: &quot;黑&quot;<br>            &#125;<br>          &#125;<br>        &#125;<br>      ],<br>      &quot;filter&quot;: &#123;<br>        &quot;term&quot;: &#123;<br>          &quot;content&quot;:&quot;spring&quot;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">// 找到content中过滤不包含 科技,声音的文档, 然后在进行term关键词查询name为中国的文档<br>GET /dangdang/_search  #使用terms过滤<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;: &#123;<br>      &quot;must&quot;: [<br>        &#123;&quot;term&quot;: &#123;<br>          &quot;name&quot;: &#123;<br>            &quot;value&quot;: &quot;中国&quot;<br>          &#125;<br>        &#125;&#125;<br>      ],<br>      &quot;filter&quot;: &#123;<br>        &quot;terms&quot;: &#123;<br>          &quot;content&quot;:[<br>              &quot;科技&quot;,<br>              &quot;声音&quot;<br>            ]<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="ranage-filter">ranage filter</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /ems/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;: &#123;<br>      &quot;must&quot;: [<br>        &#123;&quot;term&quot;: &#123;<br>          &quot;name&quot;: &#123;<br>            &quot;value&quot;: &quot;中国&quot;<br>          &#125;<br>        &#125;&#125;<br>      ],<br>      &quot;filter&quot;: &#123;<br>        &quot;range&quot;: &#123;<br>          &quot;age&quot;: &#123;<br>            &quot;gte&quot;: 7,<br>            &quot;lte&quot;: 20<br>          &#125;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="exists-filter">exists filter</h4>
+<p><strong>过滤出存在指定字段的文档</strong></p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">// 首先过滤出存在name字段的文档,并且进行term关键词查询,name字段中包含中国的文档<br>GET /ems/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;: &#123;<br>      &quot;must&quot;: [<br>        &#123;&quot;term&quot;: &#123;<br>          &quot;name&quot;: &#123;<br>            &quot;value&quot;: &quot;中国&quot;<br>          &#125;<br>        &#125;&#125;<br>      ],<br>      &quot;filter&quot;: &#123;<br>        &quot;exists&quot;: &#123;<br>          &quot;field&quot;:&quot;name&quot;<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="ids-filter">ids filter</h4>
+<p><strong>过滤含有指定字段的索引记录</strong></p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">GET /ems/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;bool&quot;: &#123;<br>      &quot;must&quot;: [<br>        &#123;&quot;term&quot;: &#123;<br>          &quot;name&quot;: &#123;<br>            &quot;value&quot;: &quot;中国&quot;<br>          &#125;<br>        &#125;&#125;<br>      ],<br>      &quot;filter&quot;: &#123;<br>        &quot;ids&quot;: &#123;<br>          &quot;values&quot;: [&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]<br>        &#125;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="聚合查询">聚合查询</h2>
+<h3 id="简介">简介</h3>
+<p>聚合：<strong>英文为Aggregation，是es除搜索功能外提供的针对es数据做统计分析的功能</strong>。聚合有助于根据搜索查询提供聚合数据。</p>
+<p>聚合查询是数据库中重要的功能特性，ES作为搜索引擎兼数据库，同样提供了强大的聚合分析能力。它基于查询条件来对数据进行分桶、计算的方法。有点类似于 SQL 中的 group by 再加一些函数方法的操作。</p>
+<ul>
+<li>注意：text类型是不支持聚合的。</li>
+</ul>
+<h3 id="测试数据">测试数据</h3>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">// 创建索引 index 和映射 mapping<br>PUT /fruit<br>&#123;<br>  &quot;mappings&quot;: &#123;<br>    &quot;properties&quot;: &#123;<br>      &quot;title&quot;:&#123;<br>        &quot;type&quot;: &quot;keyword&quot;<br>      &#125;,<br>      &quot;price&quot;:&#123;<br>        &quot;type&quot;:&quot;double&quot;<br>      &#125;,<br>      &quot;description&quot;:&#123;<br>        &quot;type&quot;: &quot;text&quot;,<br>        &quot;analyzer&quot;: &quot;ik_max_word&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br>// 放入测试数据<br>PUT /fruit/_bulk<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;面包&quot;,&quot;price&quot; : 19.9,&quot;description&quot; : &quot;小面包非常好吃&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;旺仔牛奶&quot;,&quot;price&quot; : 29.9,&quot;description&quot; : &quot;非常好喝&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;日本豆&quot;,&quot;price&quot; : 19.9,&quot;description&quot; : &quot;日本豆非常好吃&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;小馒头&quot;,&quot;price&quot; : 19.9,&quot;description&quot; : &quot;小馒头非常好吃&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;大辣片&quot;,&quot;price&quot; : 39.9,&quot;description&quot; : &quot;大辣片非常好吃&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;透心凉&quot;,&quot;price&quot; : 9.9,&quot;description&quot; : &quot;透心凉非常好喝&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;小浣熊&quot;,&quot;price&quot; : 19.9,&quot;description&quot; : &quot;童年的味道&quot;&#125;<br>&#123;&quot;index&quot;:&#123;&#125;&#125;<br>  &#123;&quot;title&quot; : &quot;海苔&quot;,&quot;price&quot; : 19.9,&quot;description&quot; : &quot;海的味道&quot;&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="使用">使用</h3>
+<h4 id="根据某个字段分组">根据某个字段分组</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">// 根据检索条件查询出来的文档, 进行分组;根据price进行分组,分组叫price_group<br>GET /fruit/_search<br>&#123;<br>  &quot;query&quot;: &#123;<br>    &quot;term&quot;: &#123;<br>      &quot;description&quot;: &#123;<br>        &quot;value&quot;: &quot;吃&quot;<br>      &#125;<br>    &#125;<br>  &#125;, <br>  &quot;aggs&quot;: &#123;<br>    &quot;price_group&quot;: &#123;<br>      &quot;terms&quot;: &#123;<br>        &quot;field&quot;: &quot;price&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>结果</p>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http">&#123;<br>  &quot;took&quot; : 3,<br>  &quot;timed_out&quot; : false,<br>  &quot;_shards&quot; : &#123;<br>    &quot;total&quot; : 1,<br>    &quot;successful&quot; : 1,<br>    &quot;skipped&quot; : 0,<br>    &quot;failed&quot; : 0<br>  &#125;,<br>  &quot;hits&quot; : &#123;<br>    &quot;total&quot; : &#123;<br>      &quot;value&quot; : 4,<br>      &quot;relation&quot; : &quot;eq&quot;<br>    &#125;,<br>    &quot;max_score&quot; : 0.6489038,<br>    &quot;hits&quot; : [<br>      &#123;<br>        &quot;_index&quot; : &quot;fruit&quot;,<br>        &quot;_type&quot; : &quot;_doc&quot;,<br>        &quot;_id&quot; : &quot;xbUHXYIBkJ4IdFBIeDXc&quot;,<br>        &quot;_score&quot; : 0.6489038,<br>        &quot;_source&quot; : &#123;<br>          &quot;title&quot; : &quot;面包&quot;,<br>          &quot;price&quot; : 19.9,<br>          &quot;description&quot; : &quot;小面包非常好吃&quot;<br>        &#125;<br>      &#125;,<br>      &#123;<br>        &quot;_index&quot; : &quot;fruit&quot;,<br>        &quot;_type&quot; : &quot;_doc&quot;,<br>        &quot;_id&quot; : &quot;x7UHXYIBkJ4IdFBIeDXc&quot;,<br>        &quot;_score&quot; : 0.6489038,<br>        &quot;_source&quot; : &#123;<br>          &quot;title&quot; : &quot;日本豆&quot;,<br>          &quot;price&quot; : 19.9,<br>          &quot;description&quot; : &quot;日本豆非常好吃&quot;<br>        &#125;<br>      &#125;,<br>      &#123;<br>        &quot;_index&quot; : &quot;fruit&quot;,<br>        &quot;_type&quot; : &quot;_doc&quot;,<br>        &quot;_id&quot; : &quot;yLUHXYIBkJ4IdFBIeDXc&quot;,<br>        &quot;_score&quot; : 0.6489038,<br>        &quot;_source&quot; : &#123;<br>          &quot;title&quot; : &quot;小馒头&quot;,<br>          &quot;price&quot; : 19.9,<br>          &quot;description&quot; : &quot;小馒头非常好吃&quot;<br>        &#125;<br>      &#125;,<br>      &#123;<br>        &quot;_index&quot; : &quot;fruit&quot;,<br>        &quot;_type&quot; : &quot;_doc&quot;,<br>        &quot;_id&quot; : &quot;ybUHXYIBkJ4IdFBIeDXc&quot;,<br>        &quot;_score&quot; : 0.6489038,<br>        &quot;_source&quot; : &#123;<br>          &quot;title&quot; : &quot;大辣片&quot;,<br>          &quot;price&quot; : 39.9,<br>          &quot;description&quot; : &quot;大辣片非常好吃&quot;<br>        &#125;<br>      &#125;<br>    ]<br>  &#125;,<br>  &quot;aggregations&quot; : &#123;<br>    &quot;price_group&quot; : &#123;<br>      &quot;doc_count_error_upper_bound&quot; : 0,<br>      &quot;sum_other_doc_count&quot; : 0,<br>      &quot;buckets&quot; : [<br>        &#123;<br>          &quot;key&quot; : 19.9,<br>          &quot;doc_count&quot; : 3<br>        &#125;,<br>        &#123;<br>          &quot;key&quot; : 39.9,<br>          &quot;doc_count&quot; : 1<br>        &#125;<br>      ]<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h4 id="求最大值">求最大值</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http"># 求最大值 <br>GET /fruit/_search<br>&#123;<br>  &quot;aggs&quot;: &#123;<br>    &quot;price_max&quot;: &#123;<br>      &quot;max&quot;: &#123;<br>        &quot;field&quot;: &quot;price&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/c4ed529ba46d44a8a18758bcd50bead8.png" /></p>
+<h4 id="求最小值">求最小值</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http"># 求最小值<br>GET /fruit/_search<br>&#123;<br>  &quot;aggs&quot;: &#123;<br>    &quot;price_min&quot;: &#123;<br>      &quot;min&quot;: &#123;<br>        &quot;field&quot;: &quot;price&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/5cc7d85eb6ca418f843f6c845c4fce47.png" /></p>
+<h4 id="求平均值">求平均值</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http"># 求平均值<br>GET /fruit/_search<br>&#123;<br>  &quot;aggs&quot;: &#123;<br>    &quot;price_agv&quot;: &#123;<br>      &quot;avg&quot;: &#123;<br>        &quot;field&quot;: &quot;price&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/d6dfb27001944fee9c6c87cbf0686281.png" /></p>
+<h4 id="求和">求和</h4>
+<figure class="highlight"><table><tr><td class="code"><pre><code class="hljs http"># 求和<br>GET /fruit/_search<br>&#123;<br>  &quot;aggs&quot;: &#123;<br>    &quot;price_sum&quot;: &#123;<br>      &quot;sum&quot;: &#123;<br>        &quot;field&quot;: &quot;price&quot;<br>      &#125;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/d0289d731f1d48318012f6e7fd6187fa.png" /></p>
+<h1 id="第6章-springboot整合">第6章 SpringBoot整合</h1>
+<h2 id="客户端对象">客户端对象</h2>
+<ul>
+<li>ElasticsearchOperations</li>
+<li>RestHighLevelClient <strong>推荐</strong></li>
+</ul>
+<h2 id="elasticsearchoperations">ElasticsearchOperations</h2>
+<ul>
+<li>特点：始终使用面向对象方式操作 ES
+<ul>
+<li>索引：用来存放详细文档集合</li>
+<li>映射：用来决定放入文档的每个字段以什么样的方式录入到 ES 中 字段类型 分词器</li>
+<li>文档：可以被索引的最小单元 json数据格式</li>
+</ul></li>
+</ul>
+<h3 id="相关注解">相关注解</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Document(indexName = &quot;products&quot;, createIndex = true)</span><br><span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Product</span> </span>&#123;<br><br>    <span class="hljs-meta">@Id</span> <span class="hljs-comment">// 用来将放入的id值，作为文档_id进行映射</span><br>    <span class="hljs-keyword">private</span> Integer id;<br>    <span class="hljs-meta">@Field(type = FieldType.Keyword)</span><br>    <span class="hljs-keyword">private</span> String title;<br>    <span class="hljs-meta">@Field(type = FieldType.Double)</span><br>    <span class="hljs-keyword">private</span> Double price;<br>    <span class="hljs-meta">@Field(type = FieldType.Text)</span><br>    <span class="hljs-keyword">private</span> String description;<br>    <br>    <span class="hljs-comment">// get set...</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<ol type="1">
+<li><code>@Document(indexName = &quot;products&quot;, createIndex = true)</code> 用在类上，作用：代表一个对象文档
+<ul>
+<li>indexName 属性：创建索引的名称</li>
+<li>createIndex 属性：是否创建索引</li>
+</ul></li>
+<li><code>@Id</code> 用在属性上，作用：将对象id字段与 ES 中文档的 _id 对应</li>
+<li><code>@Field(type = FieldType.Keyword)</code> 用在属性上，作用：用来描述属性在ES中存储类型以及分词情况
+<ul>
+<li><code>type</code> ：用来指定字段类型</li>
+</ul></li>
+</ol>
+<h3 id="索引文档">索引文档</h3>
+<p><code>save</code> 方法：创建一条文档，也可以更新一条文档。当文档id 不存在时添加文档，当文档id存在时更新文档</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">     * save 索引一条文档，也可以更新一条文档</span><br><span class="hljs-comment">     *      save 方法当文档id 不存在时添加文档，当文档id存在时更新文档</span><br><span class="hljs-comment">     */</span><br><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testIndex</span><span class="hljs-params">()</span> </span>&#123;<br>    Product product = <span class="hljs-keyword">new</span> Product();<br>    product.setId(<span class="hljs-number">2</span>);<br>    product.setTitle(<span class="hljs-string">&quot;锅包肉&quot;</span>);<br>    product.setPrice(<span class="hljs-number">38.0</span>);<br>    product.setDescription(<span class="hljs-string">&quot;锅包肉真好吃，直到现在都很爱吃！&quot;</span>);<br>    elasticsearchOperations.save(product);  <br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="删除一条文档">删除一条文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testDelete</span><span class="hljs-params">()</span> </span>&#123;<br>    Product product = <span class="hljs-keyword">new</span> Product();<br>    product.setId(<span class="hljs-number">1</span>);<br>    elasticsearchOperations.delete(product);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="删除所有文档">删除所有文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testDeleteAll</span><span class="hljs-params">()</span> </span>&#123;<br>    elasticsearchOperations.delete(Query.findAll(), Product.class);<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="查询一条文档">查询一条文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"> <span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testSearch</span><span class="hljs-params">()</span> </span>&#123;<br>    Product product = elasticsearchOperations.get(<span class="hljs-string">&quot;1&quot;</span>, Product.class);<br>    System.out.println(product.getId() + product.getTitle() + product.getPrice() + product.getDescription());<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="查询所有文档">查询所有文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testFindAll</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> JsonProcessingException </span>&#123;<br>    SearchHits&lt;Product&gt; productSearchHits = elasticsearchOperations.search(Query.findAll(), Product.class);<br>    System.out.println(<span class="hljs-string">&quot;总分数&quot;</span> + productSearchHits.getMaxScore());<br>    System.out.println(<span class="hljs-string">&quot;符合条件的总条数&quot;</span> + productSearchHits.getTotalHits());<br>    <span class="hljs-keyword">for</span> (SearchHit&lt;Product&gt; productSearchHit : productSearchHits) &#123;<br>        System.out.println(<span class="hljs-keyword">new</span> ObjectMapper().writeValueAsString(productSearchHit.getContent()));  <span class="hljs-comment">// 将传入的对象序列化为json，返回给调用者</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220822124702.png" /></p>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220822124958.png" /></p>
+<h2 id="resthighlevelclient-重点">RestHighLevelClient (重点)</h2>
+<p>JavaREST客户端有两种模式：</p>
+<ul>
+<li>Java Low Level REST Client：ES官方的低级客户端。低级别的客户端通过http与Elasticearch集群通信。</li>
+<li><strong>Java High Level REST Client</strong>：ES官方的高级客户端。基于上面的低级客户端，也是通过HTTP与ES集群进行通信。它提供了更多的接口。</li>
+</ul>
+<h3 id="创建索引">创建索引</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testIndexAndMapping</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    <span class="hljs-comment">// 参数1：创建索引请求对象  参数2：请求配置对象</span><br>    CreateIndexRequest createIndexRequest = <span class="hljs-keyword">new</span> CreateIndexRequest(<span class="hljs-string">&quot;products&quot;</span>);<br>    createIndexRequest.mapping(<span class="hljs-string">&quot;&#123;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;                \&quot;properties\&quot;: &#123;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            \&quot;title\&quot;: &#123;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;                \&quot;type\&quot;: \&quot;keyword\&quot;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            &#125;,\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            \&quot;price\&quot;: &#123;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;                \&quot;type\&quot;: \&quot;double\&quot;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            &#125;,\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            \&quot;created_at\&quot;: &#123;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;                \&quot;type\&quot;: \&quot;date\&quot;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            &#125;,\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            \&quot;description\&quot;: &#123;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;                \&quot;type\&quot;: \&quot;text\&quot;,\n&quot;</span> +<br>                               <span class="hljs-string">&quot;                        \&quot;analyzer\&quot;: \&quot;ik_max_word\&quot;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;            &#125;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;        &#125;\n&quot;</span> +<br>                               <span class="hljs-string">&quot;  &#125;&quot;</span>,XContentType.JSON); <span class="hljs-comment">// 指定映射  参数1：指定映射 json 结构  参数2：指定数据类型</span><br>    CreateIndexResponse createIndexResponse = restHighLevelClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);<br>    System.out.println(<span class="hljs-string">&quot;创建状态：&quot;</span>+ createIndexResponse.isAcknowledged());<br>    restHighLevelClient.close();  <span class="hljs-comment">// 关闭资源</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="创建文档">创建文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testCreate</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    <span class="hljs-comment">// 参数1：索引请求对象  参数2：请求配置对象</span><br>    IndexRequest indexRequest = <span class="hljs-keyword">new</span> IndexRequest(<span class="hljs-string">&quot;products&quot;</span>);<br>    indexRequest.id(<span class="hljs-string">&quot;2&quot;</span>)  <span class="hljs-comment">// 手动指定文档id</span><br>        .source(<span class="hljs-string">&quot;&#123;\n&quot;</span> +<br>                <span class="hljs-string">&quot;  \&quot;title\&quot;: \&quot;日本豆\&quot;,\n&quot;</span> +<br>                <span class="hljs-string">&quot;  \&quot;price\&quot;: 2.0,\n&quot;</span> +<br>                <span class="hljs-string">&quot;  \&quot;created_at\&quot;: \&quot;2022-08-22\&quot;,\n&quot;</span> +<br>                <span class="hljs-string">&quot;  \&quot;description\&quot;: \&quot;日本豆没吃过！\&quot;\n&quot;</span> +<br>                <span class="hljs-string">&quot;&#125;&quot;</span>, XContentType.JSON);<br>    IndexResponse indexResponse = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);<br>    System.out.println(indexResponse.status());<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="更新文档-1">更新文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testUpdate</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    <span class="hljs-comment">// 参数1：去哪个索引中更新  参数2：更新文档 id</span><br>    UpdateRequest updateRequest = <span class="hljs-keyword">new</span> UpdateRequest(<span class="hljs-string">&quot;products&quot;</span>, <span class="hljs-string">&quot;2&quot;</span>);<br>    updateRequest.doc(<span class="hljs-string">&quot;&#123;\n&quot;</span> +<br>                      <span class="hljs-string">&quot;    \&quot;title\&quot;: \&quot;日本豆腐\&quot;\n&quot;</span> +<br>                      <span class="hljs-string">&quot;  &#125;&quot;</span>, XContentType.JSON);<br>    <span class="hljs-comment">// 参数1：更新请求对象  参数2：请求配置对象</span><br>    UpdateResponse updateResponse = restHighLevelClient.update(updateRequest, RequestOptions.DEFAULT);<br>    System.out.println(updateResponse.status());<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="删除文档-1">删除文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testDelete</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    <span class="hljs-comment">// 参数1：删除请求对象  参数2：请求配置对象</span><br>    DeleteRequest deleteRequest = <span class="hljs-keyword">new</span> DeleteRequest(<span class="hljs-string">&quot;products&quot;</span>, <span class="hljs-string">&quot;1&quot;</span>);<br>    DeleteResponse deleteResponse = restHighLevelClient.delete(deleteRequest, RequestOptions.DEFAULT);<br>    System.out.println(deleteResponse.status());<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="基于id查询文档">基于id查询文档</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testQueryById</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    GetRequest getRequest = <span class="hljs-keyword">new</span> GetRequest(<span class="hljs-string">&quot;products&quot;</span>, <span class="hljs-string">&quot;1&quot;</span>);<br>    <span class="hljs-comment">// 参数1：查询请求对象  参数2：请求配置对象   返回值：查询响应对象</span><br>    GetResponse getResponse = restHighLevelClient.get(getRequest, RequestOptions.DEFAULT);<br>    System.out.println(<span class="hljs-string">&quot;id:&quot;</span>+getResponse.getId());<br>    System.out.println(<span class="hljs-string">&quot;source:&quot;</span>+getResponse.getSourceAsString());<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220824202304.png" /></p>
+<h3 id="查询所有-matchallquery">查询所有 matchAllQuery()</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testSearch</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">&quot;products&quot;</span>);  <span class="hljs-comment">// 指定搜索索引</span><br>    SearchSourceBuilder sourceBuilder = <span class="hljs-keyword">new</span> SearchSourceBuilder();  <span class="hljs-comment">// 指定条件对象</span><br>    sourceBuilder.query(QueryBuilders.matchAllQuery());  <span class="hljs-comment">// 查询所有</span><br>    searchRequest.source(sourceBuilder);  <span class="hljs-comment">// 指定查询条件</span><br><br>    SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);<span class="hljs-comment">// 参数1：搜索请求对象 参数2：请求配置对象 返回</span><br><br>    System.out.println(<span class="hljs-string">&quot;总条数:&quot;</span> + searchResponse.getHits().getTotalHits().value);<br>    System.out.println(<span class="hljs-string">&quot;最大得分:&quot;</span> + searchResponse.getHits().getMaxScore());<br><br>    SearchHit[] hits = searchResponse.getHits().getHits();<br>    <span class="hljs-keyword">for</span> (SearchHit hit : hits) &#123;<br>        String id = hit.getId();<br>        System.out.println(<span class="hljs-string">&quot;id:&quot;</span> + id + <span class="hljs-string">&quot;source:&quot;</span> + hit.getSourceAsString());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/stuxiaozhang/blogimage/img/20220824204749.png" /></p>
+<p><strong>把固定的查询流程抽取出来</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">query</span><span class="hljs-params">(QueryBuilder queryBuilder)</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">&quot;products&quot;</span>);<br><br>    <span class="hljs-comment">// 定义查询条件</span><br>    SearchSourceBuilder sourceBuilder = <span class="hljs-keyword">new</span> SearchSourceBuilder();<br>    sourceBuilder.query(queryBuilder);  <span class="hljs-comment">// 指定查询条件</span><br>    searchRequest.source(sourceBuilder);<br><br>    SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);<br><br>    System.out.println(<span class="hljs-string">&quot;总条数:&quot;</span> + searchResponse.getHits().getTotalHits().value);<br>    System.out.println(<span class="hljs-string">&quot;获取文档最大得分:&quot;</span> + searchResponse.getHits().getMaxScore());<br><br>    SearchHit[] hits = searchResponse.getHits().getHits();<br>    <span class="hljs-keyword">for</span> (SearchHit hit : hits) &#123;<br>        String id = hit.getId();<br>        System.out.println(<span class="hljs-string">&quot;id:&quot;</span> + id + <span class="hljs-string">&quot;source:&quot;</span> + hit.getSourceAsString());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="term-查询">term 查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">query(QueryBuilders.termQuery(<span class="hljs-string">&quot;description&quot;</span>, <span class="hljs-string">&quot;日本豆&quot;</span>));<br></code></pre></td></tr></table></figure>
+<h3 id="range-查询">range 查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">query(QueryBuilders.rangeQuery(<span class="hljs-string">&quot;price&quot;</span>).gt(<span class="hljs-number">0</span>).lte(<span class="hljs-number">2.0</span>));<br></code></pre></td></tr></table></figure>
+<h3 id="prefix-查询">prefix 查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">query(QueryBuilders.prefixQuery(<span class="hljs-string">&quot;title&quot;</span>, <span class="hljs-string">&quot;锅&quot;</span>));<br></code></pre></td></tr></table></figure>
+<h3 id="wildcard-查询通配符查询-一个字符-任意多个字符">wildcard 查询通配符查询 ？一个字符 *任意多个字符</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">query(QueryBuilders.wildcardQuery(<span class="hljs-string">&quot;title&quot;</span>, <span class="hljs-string">&quot;锅*&quot;</span>));<br></code></pre></td></tr></table></figure>
+<h3 id="ids-多个指定">ids 多个指定</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">query(QueryBuilders.idsQuery().addIds(<span class="hljs-string">&quot;1&quot;</span>).addIds(<span class="hljs-string">&quot;2&quot;</span>));<br></code></pre></td></tr></table></figure>
+<h3 id="multi_match-多字段查询">multi_match 多字段查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java">query(QueryBuilders.multiMatchQuery(<span class="hljs-string">&quot;日本豆&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>, <span class="hljs-string">&quot;description&quot;</span>));<br></code></pre></td></tr></table></figure>
+<h3 id="分页查询">分页查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 分页查询 form 起始位置 size 每页展示记录数</span><br><span class="hljs-comment">     * 排序： sort</span><br><span class="hljs-comment">     * 返回指定的字段 _source 用来指定查询文档返回那些字段</span><br><span class="hljs-comment">     * 高亮结果 highlighter</span><br><span class="hljs-comment">     */</span><br><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testSearchForm</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest();<br>    SearchSourceBuilder sourceBuilder = <span class="hljs-keyword">new</span> SearchSourceBuilder();<br><br>    <span class="hljs-comment">//创建高亮器</span><br>    HighlightBuilder highlightBuilder = <span class="hljs-keyword">new</span> HighlightBuilder();<br>    highlightBuilder.requireFieldMatch(<span class="hljs-keyword">false</span>).field(<span class="hljs-string">&quot;description&quot;</span>).field(<span class="hljs-string">&quot;title&quot;</span>).preTags(<span class="hljs-string">&quot;&lt;span style=&#x27;color:red;&#x27;&gt;&quot;</span>).postTags(<span class="hljs-string">&quot;&lt;/span&gt;&quot;</span>);<br><br>    sourceBuilder.query(QueryBuilders.termQuery(<span class="hljs-string">&quot;description&quot;</span>, <span class="hljs-string">&quot;好吃&quot;</span>))<br>        .from(<span class="hljs-number">0</span>)  <span class="hljs-comment">// 起始位置 start = (page - 1) * size</span><br>        .size(<span class="hljs-number">1</span>) <span class="hljs-comment">// 每页显示条数 默认返回十条</span><br>        .sort(<span class="hljs-string">&quot;price&quot;</span>, SortOrder.DESC)   <span class="hljs-comment">// 指定排序条件</span><br>        .fetchSource(<span class="hljs-keyword">new</span> String[]&#123;&#125;, <span class="hljs-keyword">new</span> String[]&#123;<span class="hljs-string">&quot;created_at&quot;</span>&#125;)  <span class="hljs-comment">// 参数1: 包含字段数组  参数2：排除字段数组</span><br>        .highlighter(highlightBuilder);  <span class="hljs-comment">// 高亮</span><br>    searchRequest.source(sourceBuilder);<br>    SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);<br><br>    System.out.println(<span class="hljs-string">&quot;总条数:&quot;</span> + searchResponse.getHits().getTotalHits().value);<br>    System.out.println(<span class="hljs-string">&quot;获取文档最大得分:&quot;</span> + searchResponse.getHits().getMaxScore());<br><br>    SearchHit[] hits = searchResponse.getHits().getHits();<br>    <span class="hljs-keyword">for</span> (SearchHit hit : hits) &#123;<br>        System.out.println(<span class="hljs-string">&quot;id:&quot;</span> + hit.getId() + <span class="hljs-string">&quot;source:&quot;</span> + hit.getSourceAsString());<br><br>        Map&lt;String, HighlightField&gt; highlightFields = hit.getHighlightFields();<br>        <span class="hljs-keyword">if</span>(highlightFields.containsKey(<span class="hljs-string">&quot;description&quot;</span>)) &#123;<br>            System.out.println(<span class="hljs-string">&quot;description高亮结果：&quot;</span> + highlightFields.get(<span class="hljs-string">&quot;description&quot;</span>).fragments()[<span class="hljs-number">0</span>]);<br>        &#125;<br>        <span class="hljs-keyword">if</span>(highlightFields.containsKey(<span class="hljs-string">&quot;title&quot;</span>)) &#123;<br>            System.out.println(<span class="hljs-string">&quot;title高亮结果：&quot;</span> + highlightFields.get(<span class="hljs-string">&quot;title&quot;</span>).fragments()[<span class="hljs-number">0</span>]);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="过滤查询-1">过滤查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">     * query         ：查询 精确查询  查询计算文档得分 并根据文档得分进行返回</span><br><span class="hljs-comment">     * filter query  ：过滤查询 用来在大量数据中筛选出本地查询相关数据  不会计算文档得分</span><br><span class="hljs-comment">     * 注意：一旦 使用 query 和 filterQuery  es优先执行 filter Query 然后再执行 query</span><br><span class="hljs-comment">     */</span><br><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testFilterQuery</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br>    SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">&quot;products&quot;</span>);  <span class="hljs-comment">// 指定搜索索引</span><br><br>    SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);<span class="hljs-comment">// 参数1：搜索请求对象 参数2：请求配置对象 返回</span><br><br>    System.out.println(<span class="hljs-string">&quot;总条数:&quot;</span> + searchResponse.getHits().getTotalHits().value);<br>    System.out.println(<span class="hljs-string">&quot;最大得分:&quot;</span> + searchResponse.getHits().getMaxScore());<br><br>    SearchHit[] hits = searchResponse.getHits().getHits();<br>    <span class="hljs-keyword">for</span> (SearchHit hit : hits) &#123;<br>        String id = hit.getId();<br>        System.out.println(<span class="hljs-string">&quot;id:&quot;</span> + id + <span class="hljs-string">&quot;source:&quot;</span> + hit.getSourceAsString());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h3 id="聚合查询-1">聚合查询</h3>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 基于 term 进行聚合文档</span><br><span class="hljs-comment">     */</span><br><span class="hljs-meta">@Test</span><br><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">testQAggs</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException </span>&#123;<br><br>    <span class="hljs-comment">// 参数1：查询请求对象  参数2：请求配置对象   返回值：查询响应对象</span><br>    SearchRequest searchRequest = <span class="hljs-keyword">new</span> SearchRequest(<span class="hljs-string">&quot;products&quot;</span>);<br>    SearchSourceBuilder sourceBuilder = <span class="hljs-keyword">new</span> SearchSourceBuilder();<br>    sourceBuilder<br>        .query(QueryBuilders.matchAllQuery())<br>        .aggregation(AggregationBuilders.terms(<span class="hljs-string">&quot;price_group&quot;</span>).field(<span class="hljs-string">&quot;price&quot;</span>))<br>        .size(<span class="hljs-number">0</span>);<br><br>    searchRequest.source(sourceBuilder);<br>    SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);<br><br>    <span class="hljs-comment">// 处理聚合的结果</span><br>    Aggregations aggregations = searchResponse.getAggregations();<br>    ParsedDoubleTerms parsedDoubleTerms = aggregations.get(<span class="hljs-string">&quot;price_group&quot;</span>);  <span class="hljs-comment">// 后面是什么类型，前面就写ParsedXXXTerms</span><br><br>    ParsedSum parsedSum = aggregations.get(<span class="hljs-string">&quot;price_group&quot;</span>);<br><br>    List&lt;? extends Terms.Bucket&gt; buckets = parsedDoubleTerms.getBuckets();<br>    <span class="hljs-keyword">for</span> (Terms.Bucket bucket : buckets) &#123;<br>        System.out.println(bucket.getKey() + <span class="hljs-string">&quot; &quot;</span> + bucket.getDocCount());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<h1 id="第7章-es集群">第7章 ES集群</h1>
+<h2 id="集群-cluster">集群 cluster</h2>
+<blockquote>
+<p>由多个ES节点构成 集群提供负载均衡,以及es搜索吞吐量等功能,避免单节点故障</p>
+</blockquote>
+<p>一个集群就是由一个或多个节点组织在一起，它们共同持有你整个的数据，并一起提供索引和搜索功能。一个集群 由一个唯一的名字标识，这个名字默认就是 <code>elasticsearch</code>。这个名字是重要的，因为一个节点只能通过指定某个集群的名字，来加入这个集群。</p>
+<h2 id="节点-node">节点 node</h2>
+<p>https://blog.csdn.net/m0_37989980/article/details/126195146</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>ElasticSearch7</tag>
+      </tags>
+  </entry>
 </search>
